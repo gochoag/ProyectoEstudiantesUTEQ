@@ -1,0 +1,47 @@
+# Carpetas a ignorar
+backend/
+FacturaGo/
+
+# Binarios
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Archivos de test
+*.test
+
+# Archivos de cobertura
+*.out
+
+# Archivos de configuración sensibles
+config.env
+.env
+
+# Archivos de dependencias
+vendor/
+
+# Archivos de IDE
+.vscode/
+.idea/
+.qodo/
+*.swp
+*.swo
+*~
+
+# Archivos de configuración de ejemplo
+env.example
+config.env
+CONFIGURACION.md
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+tmp/
+temp/
