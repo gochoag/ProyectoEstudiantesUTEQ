@@ -26,3 +26,7 @@ dist-ssr
 # API folder
 ApiEscuela/
 apiescuela/
+
+
+# Environment variables
+.env
