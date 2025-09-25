@@ -197,7 +197,7 @@ const AutoridadesManager = ({ onBack }) => {
       errors.push('La cédula debe tener exactamente 10 dígitos');
     }
     
-    if (formData.correo && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.correo)) {
+    if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
       errors.push('El formato del correo no es válido');
     }
     

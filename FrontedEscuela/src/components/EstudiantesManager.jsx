@@ -209,8 +209,8 @@ const EstudiantesManager = ({ onBack }) => {
   };
 
   const validateEmail = (email) => {
-    // Regex para validar correos electrónicos comunes
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|msn|icloud|aol|protonmail|zoho|yandex|mail|correo)\.com$/i;
+    // Validación simple y común de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
