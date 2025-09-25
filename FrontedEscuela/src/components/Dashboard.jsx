@@ -548,7 +548,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                           <img 
                             src={news.mediaUrl} 
                             alt={news.title}
-                            className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-lg"
+                            className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             loading="lazy"
                             onError={(e) => {
                               e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop';
@@ -558,7 +558,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                         
                         {news.mediaType === 'video' && news.mediaUrl && (
                           <video 
-                            className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-lg"
+                            className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             muted
                             loop
                             onError={(e) => {
@@ -574,7 +574,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                           <img 
                             src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop" 
                             alt={news.title}
-                            className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-lg"
+                            className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             loading="lazy"
                           />
                         )}
