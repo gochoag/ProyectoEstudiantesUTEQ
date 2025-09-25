@@ -37,6 +37,9 @@ const EstudiantesManager = ({ onBack }) => {
   const [actioningStudentId, setActioningStudentId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Estados para errores de validación
+  const [validationErrors, setValidationErrors] = useState({});
+
   const [formData, setFormData] = useState({
     // Datos de la persona
     nombre: '',
@@ -50,9 +53,6 @@ const EstudiantesManager = ({ onBack }) => {
     provincia_id: '',
     especialidad: ''
   });
-
-  // Estados para errores de validación
-  const [validationErrors, setValidationErrors] = useState({});
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -195,26 +195,33 @@ const EstudiantesManager = ({ onBack }) => {
     }
   };
 
-  // Funciones de validación
-  const validateCedula = (cedula) => {
-    // Solo números y máximo 10 dígitos
-    const cedulaRegex = /^\d{1,10}$/;
-    return cedulaRegex.test(cedula);
+
+  const validateForm = () => {
+    const errors = [];
+    
+    // Validaciones obligatorias
+    if (!formData.nombre.trim()) errors.push('El nombre es requerido');
+    if (!formData.cedula.trim()) errors.push('La cédula es requerida');
+    if (!formData.institucion_id) errors.push('Debe seleccionar una institución');
+    if (!formData.provincia_id) errors.push('Debe seleccionar una provincia');
+    if (!formData.ciudad_id) errors.push('Debe seleccionar una ciudad');
+    if (!formData.especialidad.trim()) errors.push('La especialidad es requerida');
+    
+    // Validaciones de formato
+    if (formData.cedula && !/^\d{10}$/.test(formData.cedula)) {
+      errors.push('La cédula debe tener exactamente 10 dígitos numéricos');
+    }
+    
+    if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
+      errors.push('El formato del correo no es válido');
+    }
+    
+    if (formData.telefono && !/^\d{10}$/.test(formData.telefono)) {
+      errors.push('El teléfono debe tener exactamente 10 dígitos numéricos');
+    }
+
+    return errors;
   };
-
-  const validateTelefono = (telefono) => {
-    // Solo números y máximo 10 dígitos
-    const telefonoRegex = /^\d{1,10}$/;
-    return telefonoRegex.test(telefono);
-  };
-
-  const validateEmail = (email) => {
-    // Validación simple y común de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-
 
   // Función para obtener el ID del tipo de usuario "Estudiante"
   const getEstudianteTipoUsuarioId = () => {
@@ -227,49 +234,7 @@ const EstudiantesManager = ({ onBack }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Limpiar errores de validación cuando el usuario empiece a escribir
-    if (validationErrors[name]) {
-      setValidationErrors({
-        ...validationErrors,
-        [name]: ''
-      });
-    }
-
-    // Validaciones en tiempo real
-    let newErrors = { ...validationErrors };
-
-    if (name === 'cedula') {
-      // Permitir solo números y limitar a 10 dígitos
-      const numericValue = value.replace(/\D/g, '').slice(0, 10);
-      setFormData({
-        ...formData,
-        [name]: numericValue
-      });
-      
-      if (numericValue && !validateCedula(numericValue)) {
-        newErrors.cedula = 'La cédula debe contener solo números y máximo 10 dígitos';
-      }
-    } else if (name === 'telefono') {
-      // Permitir solo números y limitar a 10 dígitos
-      const numericValue = value.replace(/\D/g, '').slice(0, 10);
-      setFormData({
-        ...formData,
-        [name]: numericValue
-      });
-      
-      if (numericValue && !validateTelefono(numericValue)) {
-        newErrors.telefono = 'El teléfono debe contener solo números y máximo 10 dígitos';
-      }
-    } else if (name === 'correo') {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-      
-      if (value && !validateEmail(value)) {
-        newErrors.correo = 'Ingrese un correo válido (ej: usuario@gmail.com, usuario@hotmail.com, etc.)';
-      }
-    } else if (name === 'provincia_id') {
+    if (name === 'provincia_id') {
       // Cuando se selecciona una provincia, filtrar las ciudades y limpiar la ciudad seleccionada
       setFormData({
         ...formData,
@@ -285,61 +250,20 @@ const EstudiantesManager = ({ onBack }) => {
         [name]: value
       });
     }
-
-    setValidationErrors(newErrors);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setError('Errores en el formulario: ' + errors.join(', '));
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
-
-    // Validar campos antes de enviar
-    let errors = {};
-    
-    // Validaciones obligatorias
-    if (!formData.nombre || formData.nombre.trim() === '') {
-      errors.nombre = 'El nombre es obligatorio';
-    }
-    
-    if (!formData.cedula || formData.cedula.trim() === '') {
-      errors.cedula = 'La cédula es obligatoria';
-    } else if (!validateCedula(formData.cedula)) {
-      errors.cedula = 'La cédula debe contener solo números y máximo 10 dígitos';
-    }
-    
-    if (!formData.institucion_id || formData.institucion_id === '') {
-      errors.institucion_id = 'Debe seleccionar una institución';
-    }
-    
-    if (!formData.provincia_id || formData.provincia_id === '') {
-      errors.provincia_id = 'Debe seleccionar una provincia';
-    }
-    
-    if (!formData.ciudad_id || formData.ciudad_id === '') {
-      errors.ciudad_id = 'Debe seleccionar una ciudad';
-    }
-    
-    if (!formData.especialidad || formData.especialidad.trim() === '') {
-      errors.especialidad = 'La especialidad es obligatoria';
-    }
-    
-    // Validaciones opcionales
-    if (formData.telefono && formData.telefono.trim() !== '' && !validateTelefono(formData.telefono)) {
-      errors.telefono = 'El teléfono debe contener solo números y máximo 10 dígitos';
-    }
-    
-    if (formData.correo && formData.correo.trim() !== '' && !validateEmail(formData.correo)) {
-      errors.correo = 'Ingrese un correo válido (ej: usuario@gmail.com, usuario@hotmail.com, etc.)';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      setError('Por favor corrija los errores en el formulario antes de continuar');
-      setLoading(false);
-      return;
-    }
 
     try {
       console.log('=== DEBUGGING VALIDATION ERROR ===');
@@ -864,28 +788,16 @@ const EstudiantesManager = ({ onBack }) => {
                       </div>
                     </div>
 
-                    <div>
+                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                       <input
                         type="email"
                         name="correo"
                         value={formData.correo}
                         onChange={handleInputChange}
+                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200"
                         placeholder="ejemplo@correo.com"
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${
-                          validationErrors.correo 
-                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                            : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                        }`}
                       />
-                      {validationErrors.correo && (
-                        <p className="mt-1 text-xs text-red-600 flex items-center">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                          {validationErrors.correo}
-                        </p>
-                      )}
                     </div>
 
                     <div>
@@ -897,20 +809,8 @@ const EstudiantesManager = ({ onBack }) => {
                         onChange={handleInputChange}
                         maxLength="10"
                         placeholder="10 dígitos"
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${
-                          validationErrors.telefono 
-                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                            : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200"
                       />
-                      {validationErrors.telefono && (
-                        <p className="mt-1 text-xs text-red-600 flex items-center">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                          {validationErrors.telefono}
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -991,7 +891,7 @@ const EstudiantesManager = ({ onBack }) => {
                         value={formData.especialidad}
                         onChange={handleInputChange}
                         className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200"
-                        placeholder="Ingrese la especialidad (opcional)"
+                        placeholder="Ingrese la especialidad"
                       />
                     </div>
                   </div>

@@ -194,7 +194,7 @@ const AutoridadesManager = ({ onBack }) => {
     }
     
     if (formData.cedula && !/^\d{10}$/.test(formData.cedula)) {
-      errors.push('La cédula debe tener exactamente 10 dígitos');
+      errors.push('La cédula debe tener exactamente 10 dígitos numéricos');
     }
     
     if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
@@ -202,7 +202,7 @@ const AutoridadesManager = ({ onBack }) => {
     }
     
     if (formData.telefono && !/^\d{10}$/.test(formData.telefono)) {
-      errors.push('El teléfono debe tener exactamente 10 dígitos');
+      errors.push('El teléfono debe tener exactamente 10 dígitos numéricos');
     }
 
     return errors;
