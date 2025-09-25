@@ -76,7 +76,16 @@ func (h *UploadHandler) UploadFile(c *fiber.Ctx) error {
 	}
 
 	// Generar URL pública
-	baseURL := c.BaseURL()
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		// Fallback: construir la URL desde el request
+		baseURL = c.BaseURL()
+		// Si detectamos que estamos en el servidor de producción, agregar el puerto
+		if strings.Contains(c.Get("Host"), ":9602") {
+			baseURL = strings.Replace(baseURL, "aplicaciones.uteq.edu.ec", "aplicaciones.uteq.edu.ec:9602", 1)
+		}
+	}
+	
 	urlArchivo := fmt.Sprintf("%s/api/files/%s/%s", baseURL, carpetaDestino, nombreArchivo)
 
 	return c.JSON(fiber.Map{

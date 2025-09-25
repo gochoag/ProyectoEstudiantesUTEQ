@@ -10,6 +10,9 @@ RUN npm install
 
 COPY ./FrontedEscuela ./
 
+EXPOSE 3000
+EXPOSE 8080
+
 # Instalar dependencias de producción y construir
 RUN npm i
 # Instalar rollup para linux x64
@@ -22,7 +25,6 @@ ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
-EXPOSE 5173
 
 # CMD ["npm", "start"]
 
@@ -45,6 +47,5 @@ RUN go mod download && go mod verify
 RUN go build -v -o /bin/app ./*.go
 
 EXPOSE 3000
-
 
 # CMD ["go", "run", "main.go"]
