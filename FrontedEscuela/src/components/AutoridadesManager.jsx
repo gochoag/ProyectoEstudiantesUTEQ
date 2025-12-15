@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 import api from '../api/client';
 import { Datepicker } from 'flowbite';
+import { validarCedulaEcuatoriana } from '../utils/validaciones';
 
 const AutoridadesManager = ({ onBack }) => {
   const [autoridades, setAutoridades] = useState([]);
@@ -193,8 +194,12 @@ const AutoridadesManager = ({ onBack }) => {
       errors.push('Debe especificar el cargo personalizado');
     }
     
-    if (formData.cedula && !/^\d{10}$/.test(formData.cedula)) {
-      errors.push('La cédula debe tener exactamente 10 dígitos numéricos');
+    // Validación de cédula ecuatoriana
+    if (formData.cedula) {
+      const validacionCedula = validarCedulaEcuatoriana(formData.cedula);
+      if (!validacionCedula.esValida) {
+        errors.push(validacionCedula.mensaje);
+      }
     }
     
     if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {

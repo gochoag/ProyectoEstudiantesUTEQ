@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
 import { Datepicker } from 'flowbite';
+import { validarCedulaEcuatoriana } from '../utils/validaciones';
 
 // Cliente API centralizado con token
 
@@ -233,8 +234,11 @@ const ProgramasVisitaManager = ({ onBack }) => {
       setQuickStudentError('Nombre, cédula, semestre, teléfono, correo y fecha de nacimiento son obligatorios');
       return;
     }
-    if (cedula.length > 10) {
-      setQuickStudentError('La cédula debe contener solo números (máximo 10 dígitos)');
+    
+    // Validación de cédula ecuatoriana
+    const validacionCedula = validarCedulaEcuatoriana(cedula.toString());
+    if (!validacionCedula.esValida) {
+      setQuickStudentError(validacionCedula.mensaje);
       return;
     }
     if (telefono.length > 10) {
