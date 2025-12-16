@@ -314,7 +314,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <h3 id="recuperar-title" className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-            recuperar contraseña
+            Recuperar contraseña
           </h3>
           <button
             type="button"
