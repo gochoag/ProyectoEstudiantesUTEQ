@@ -20,8 +20,8 @@ pipeline {
                     docker compose down --remove-orphans || true
                     docker system prune -af || true
                     docker builder prune -af || true
-                    docker rmi golang:1.24-alpine || true
-                    docker compose up -d --build --no-cache
+                    docker compose build --no-cache
+                    docker compose up -d
                 '''
                 }
             }
