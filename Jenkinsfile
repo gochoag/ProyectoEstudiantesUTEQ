@@ -18,10 +18,7 @@ pipeline {
                 sh '''
                     cp "$ENV_FILE" .env
                     docker compose down --remove-orphans || true
-                    docker system prune -af || true
-                    docker builder prune -af || true
-                    docker compose build --no-cache
-                    docker compose up -d
+                    docker compose up -d --build
                 '''
                 }
             }
