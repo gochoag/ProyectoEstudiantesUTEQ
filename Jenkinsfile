@@ -10,10 +10,13 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh '''
-                    docker compose down --remove-orphans || true
-                    docker compose up -d --build
-                '''
+                withCredentials([file(credentialsId: 'escuela-env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        cp $ENV_FILE .env
+                        docker compose down --remove-orphans || true
+                        docker compose up -d --build
+                    '''
+                }
             }
         }
     }
