@@ -6,10 +6,9 @@ services:
       dockerfile: Dockerfile
       target: backend
     image: apiescuela-backend-image
-    command: go run main.go
+    command: /bin/app
     restart: always
     volumes:
-      - ./ApiEscuela:/home/app
       - ./ApiEscuela/assets/images:/home/app/assets/images
     ports:
       - "3250:3000"
