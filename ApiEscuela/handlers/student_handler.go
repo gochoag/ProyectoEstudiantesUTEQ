@@ -3,6 +3,7 @@ package handlers
 import (
 	"ApiEscuela/models"
 	"ApiEscuela/repositories"
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -46,6 +47,12 @@ func (h *EstudianteHandler) CreateEstudiante(c *fiber.Ctx) error {
 
 	// Limpiar datos
 	estudiante.Especialidad = strings.TrimSpace(estudiante.Especialidad)
+	// Validar que redsocial sea JSON válido si se proporciona
+	if len(estudiante.RedSocial) > 0 {
+		if !isValidJSON(estudiante.RedSocial) {
+			return SendError(c, 400, "redsocial_invalido", "El campo redsocial debe ser un JSON válido", "Verifique el formato JSON del campo redsocial")
+		}
+	}
 
 	// Verificar que los IDs sean válidos
 	if estudiante.PersonaID == 0 {
@@ -178,6 +185,29 @@ func (h *EstudianteHandler) UpdateEstudiante(c *fiber.Ctx) error {
 	existingEstudiante.InstitucionID = updateData.InstitucionID
 	existingEstudiante.CiudadID = updateData.CiudadID
 	existingEstudiante.Especialidad = strings.TrimSpace(updateData.Especialidad)
+	
+	// Actualizar redsocial si se proporciona (validar JSON)
+	// Verificar si el campo redsocial está presente en el JSON del body
+	bodyBytes := c.Body()
+	if len(bodyBytes) > 0 {
+		var bodyMap map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &bodyMap); err == nil {
+			if _, exists := bodyMap["redsocial"]; exists {
+				// El campo está presente en el JSON
+				if len(updateData.RedSocial) > 0 {
+					// Validar que sea JSON válido
+					if !isValidJSON(updateData.RedSocial) {
+						return SendError(c, 400, "redsocial_invalido", "El campo redsocial debe ser un JSON válido", "Verifique el formato JSON del campo redsocial")
+					}
+					existingEstudiante.RedSocial = updateData.RedSocial
+				} else {
+					// Se envió null o vacío explícitamente, limpiar el campo
+					existingEstudiante.RedSocial = nil
+				}
+			}
+			// Si no existe en el bodyMap, no actualizar el campo (mantener el valor existente)
+		}
+	}
 
 	// Guardar cambios
 	if err := h.estudianteRepo.UpdateEstudiante(existingEstudiante); err != nil {
@@ -438,4 +468,13 @@ func (h *EstudianteHandler) ciudadExists(ciudadID uint) bool {
 	var count int64
 	err := h.ciudadRepo.GetDB().Model(&models.Ciudad{}).Where("id = ?", ciudadID).Count(&count).Error
 	return err == nil && count > 0
+}
+
+// isValidJSON verifica si un slice de bytes contiene JSON válido
+func isValidJSON(data []byte) bool {
+	if len(data) == 0 {
+		return true // JSON vacío es válido (null)
+	}
+	var js interface{}
+	return json.Unmarshal(data, &js) == nil
 }

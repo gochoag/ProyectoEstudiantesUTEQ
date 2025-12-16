@@ -1,15 +1,19 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
+)
 
 // Estudiante representa un estudiante del sistema
 type Estudiante struct {
 	gorm.Model
-	PersonaID     uint        `json:"persona_id" gorm:"not null"`
-	InstitucionID uint        `json:"institucion_id" gorm:"not null"`
-	CiudadID      uint        `json:"ciudad_id" gorm:"not null"`
-	Especialidad  string      `json:"especialidad"`
-	
+	PersonaID     uint           `json:"persona_id" gorm:"not null"`
+	InstitucionID uint           `json:"institucion_id" gorm:"not null"`
+	CiudadID      uint           `json:"ciudad_id" gorm:"not null"`
+	Especialidad  string         `json:"especialidad"`
+	RedSocial     datatypes.JSON `json:"redsocial,omitempty" gorm:"type:jsonb"`
+
 	// Relaciones
 	Persona     Persona     `json:"persona,omitempty" gorm:"foreignKey:PersonaID"`
 	Institucion Institucion `json:"institucion,omitempty" gorm:"foreignKey:InstitucionID"`
