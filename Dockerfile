@@ -29,20 +29,14 @@ EXPOSE 5173
 #**************** BACKEND ********************
 FROM golang:1.24-alpine as backend
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git && mkdir -p /home/app
 
-RUN mkdir -p /home/app
 WORKDIR /home/app
 
-# Backend
-COPY ./ApiEscuela /home/app
-COPY ./ApiEscuela/assets/images /home/app/assets/images
-COPY ./ApiEscuela/main.go /home/app
-COPY ./ApiEscuela/go.mod /home/app
-COPY ./ApiEscuela/go.sum /home/app
+# Backend - Copiar solo los archivos necesarios
+COPY ./ApiEscuela ./
 
-RUN go mod download && go mod verify
-RUN go build -v -o /bin/app ./*.go
+RUN go mod download && go mod verify && go build -v -o /bin/app ./*.go
 
 EXPOSE 3000
 

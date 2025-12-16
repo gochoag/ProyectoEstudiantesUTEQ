@@ -14,7 +14,8 @@ pipeline {
                 sh '''
                     cp "$ENV_FILE" .env
                     docker compose down --remove-orphans || true
-                    docker rmi golang:1.24-alpine || true
+                    docker system prune -af || true
+                    docker builder prune -af || true
                     docker compose up -d --build
                 '''
                 }
