@@ -5,7 +5,7 @@ import { Datepicker } from 'flowbite';
 
 const EstudiantesManager = ({ onBack }) => {
   // Cliente API centralizado con token
-  
+
   const [estudiantes, setEstudiantes] = useState([]);
   const [ciudades, setCiudades] = useState([]);
   const [ciudadesFiltered, setCiudadesFiltered] = useState([]);
@@ -17,7 +17,7 @@ const EstudiantesManager = ({ onBack }) => {
   const [editingEstudiante, setEditingEstudiante] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Estados para el modal de confirmación
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [estudianteToToggle, setEstudianteToToggle] = useState(null);
@@ -26,10 +26,10 @@ const EstudiantesManager = ({ onBack }) => {
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+
   // Estado para búsqueda
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Estado para filtro de estudiantes (habilitados/deshabilitados/todos)
   const [statusFilter, setStatusFilter] = useState('todos'); // 'habilitados', 'deshabilitados', 'todos'
 
@@ -54,6 +54,22 @@ const EstudiantesManager = ({ onBack }) => {
     especialidad: ''
   });
 
+  // Estados para Redes Sociales
+  const [socialNetworks, setSocialNetworks] = useState([]);
+  const [showSocialModal, setShowSocialModal] = useState(false);
+  const [viewingStudentSocials, setViewingStudentSocials] = useState(null);
+  const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
+
+  const socialPlatforms = [
+    { name: 'Facebook', icon: 'fa-brands fa-facebook', color: '#1877F2' },
+    { name: 'X (Twitter)', icon: 'fa-brands fa-square-x-twitter', color: '#000000' },
+    { name: 'Instagram', icon: 'fa-brands fa-instagram', color: '#E4405F' },
+    { name: 'TikTok', icon: 'fa-brands fa-tiktok', color: '#000000' },
+    { name: 'LinkedIn', icon: 'fa-brands fa-linkedin', color: '#0A66C2' },
+    { name: 'YouTube', icon: 'fa-brands fa-youtube', color: '#FF0000' },
+    { name: 'Otro', icon: 'fa-solid fa-globe', color: '#6B7280' }
+  ];
+
   // Cargar datos iniciales
   useEffect(() => {
     loadInitialData();
@@ -69,7 +85,7 @@ const EstudiantesManager = ({ onBack }) => {
           try {
             // Marcar como inicializado para evitar múltiples inicializaciones
             datepickerElement.setAttribute('data-datepicker-initialized', 'true');
-            
+
             // Inicializar el datepicker de Flowbite
             const datepicker = new Datepicker(datepickerElement, {
               format: 'yyyy-mm-dd',
@@ -95,7 +111,7 @@ const EstudiantesManager = ({ onBack }) => {
 
             // Limpiar el evento cuando el componente se desmonte
             return () => {
-              datepickerElement.removeEventListener('changeDate', () => {});
+              datepickerElement.removeEventListener('changeDate', () => { });
               datepickerElement.removeAttribute('data-datepicker-initialized');
             };
           } catch (error) {
@@ -139,7 +155,7 @@ const EstudiantesManager = ({ onBack }) => {
       setTiposUsuario(normalizeApiResponse(tiposUsuarioRes.data));
     } catch (err) {
       console.error('Error al cargar los datos:', err);
-      
+
       let errorMessage = 'Error al cargar los datos: ';
       if (err.response?.data?.error) {
         errorMessage += err.response.data.error;
@@ -173,7 +189,7 @@ const EstudiantesManager = ({ onBack }) => {
       setCiudadesFiltered(response.data);
     } catch (err) {
       console.error('Error al cargar ciudades por provincia:', err);
-      
+
       let errorMessage = 'Error al cargar las ciudades: ';
       if (err.response?.data?.error) {
         errorMessage += err.response.data.error;
@@ -188,7 +204,7 @@ const EstudiantesManager = ({ onBack }) => {
       } else {
         errorMessage += err.message;
       }
-      
+
       // En caso de error, limpiar las ciudades filtradas
       setCiudadesFiltered([]);
       setError(errorMessage);
@@ -223,7 +239,7 @@ const EstudiantesManager = ({ onBack }) => {
     // Algoritmo de validación
     const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
     const verificador = parseInt(cedula.charAt(9), 10);
-    
+
     let suma = 0;
     for (let i = 0; i < coeficientes.length; i++) {
       let valor = parseInt(cedula.charAt(i), 10) * coeficientes[i];
@@ -232,7 +248,7 @@ const EstudiantesManager = ({ onBack }) => {
     }
 
     const digitoVerificador = (suma % 10 === 0) ? 0 : 10 - (suma % 10);
-    
+
     if (digitoVerificador !== verificador) {
       return { isValid: false, message: 'La cédula no es válida' };
     }
@@ -242,7 +258,7 @@ const EstudiantesManager = ({ onBack }) => {
 
   const validateForm = () => {
     const errors = [];
-    
+
     // Validaciones obligatorias
     if (!formData.nombre.trim()) errors.push('El nombre es requerido');
     if (!formData.cedula.trim()) errors.push('La cédula es requerida');
@@ -250,7 +266,7 @@ const EstudiantesManager = ({ onBack }) => {
     if (!formData.provincia_id) errors.push('Debe seleccionar una provincia');
     if (!formData.ciudad_id) errors.push('Debe seleccionar una ciudad');
     if (!formData.especialidad.trim()) errors.push('La especialidad es requerida');
-    
+
     // Validación de cédula ecuatoriana
     if (formData.cedula) {
       const validacionCedula = validarCedulaEcuatoriana(formData.cedula);
@@ -258,11 +274,11 @@ const EstudiantesManager = ({ onBack }) => {
         errors.push(validacionCedula.message);
       }
     }
-    
+
     if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
       errors.push('El formato del correo no es válido');
     }
-    
+
     if (formData.telefono && !/^\d{10}$/.test(formData.telefono)) {
       errors.push('El teléfono debe tener exactamente 10 dígitos numéricos');
     }
@@ -272,7 +288,7 @@ const EstudiantesManager = ({ onBack }) => {
 
   // Función para obtener el ID del tipo de usuario "Estudiante"
   const getEstudianteTipoUsuarioId = () => {
-    const estudianteTipo = tiposUsuario.find(tipo => 
+    const estudianteTipo = tiposUsuario.find(tipo =>
       tipo.nombre.toLowerCase() === 'estudiante'
     );
     return estudianteTipo ? estudianteTipo.ID : null;
@@ -280,7 +296,7 @@ const EstudiantesManager = ({ onBack }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'provincia_id') {
       // Cuando se selecciona una provincia, filtrar las ciudades y limpiar la ciudad seleccionada
       setFormData({
@@ -288,7 +304,7 @@ const EstudiantesManager = ({ onBack }) => {
         [name]: value,
         ciudad_id: '' // Limpiar la ciudad seleccionada cuando cambie la provincia
       });
-      
+
       // Cargar ciudades filtradas por provincia
       loadCiudadesByProvincia(value);
     } else {
@@ -297,11 +313,47 @@ const EstudiantesManager = ({ onBack }) => {
         [name]: value
       });
     }
+  }
+
+
+  // Manejo de Redes Sociales en el Formulario
+  const handleAddSocialNetwork = () => {
+    setSocialNetworks([...socialNetworks, { platform: '', icon: '', url: '' }]);
+  };
+
+  const handleRemoveSocialNetwork = (index) => {
+    setSocialNetworks(socialNetworks.filter((_, i) => i !== index));
+  };
+
+  const handleSocialNetworkChange = (index, field, value) => {
+    const newNetworks = [...socialNetworks];
+    if (field === 'platform') {
+      const platformObj = socialPlatforms.find(p => p.name === value);
+      newNetworks[index].platform = value;
+      newNetworks[index].icon = platformObj ? platformObj.icon : '';
+    } else {
+      newNetworks[index][field] = value;
+    }
+    setSocialNetworks(newNetworks);
+  };
+
+  const handleViewSocialNetworks = (estudiante) => {
+    let networks = [];
+    try {
+      const rawSocial = estudiante.RedSocial || estudiante.redsocial;
+      if (rawSocial) {
+        networks = typeof rawSocial === 'string' ? JSON.parse(rawSocial) : rawSocial;
+      }
+    } catch (e) {
+      console.error('Error parsing social networks:', e);
+    }
+    setViewingStudentSocials({ ...estudiante, parsedNetworks: Array.isArray(networks) ? networks : [] });
+    setShowSocialModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const errors = validateForm();
     if (errors.length > 0) {
       setError('Errores en el formulario: ' + errors.join(', '));
@@ -330,11 +382,11 @@ const EstudiantesManager = ({ onBack }) => {
 
         // Obtener el persona_id del estudiante
         const personaIdToUpdate = editingEstudiante.persona_id || editingEstudiante.persona?.ID;
-        
+
         if (!personaIdToUpdate) {
           throw new Error('No se pudo obtener el ID de la persona para actualizar');
         }
-        
+
         // Actualizar la persona existente
         await api.put(`/api/personas/${personaIdToUpdate}`, personaData);
         personaId = personaIdToUpdate;
@@ -351,15 +403,15 @@ const EstudiantesManager = ({ onBack }) => {
         console.log('Enviando datos de persona al backend:', personaData);
         const personaResponse = await api.post(`/api/personas`, personaData);
         console.log('Respuesta del backend para persona:', personaResponse.data);
-        
+
         // Manejar diferentes estructuras de respuesta del backend
         const personaCreada = personaResponse.data.success ? personaResponse.data.data : personaResponse.data;
         console.log('Persona creada procesada:', personaCreada);
-        
+
         if (!personaCreada || !personaCreada.ID) {
           throw new Error('No se pudo obtener el ID de la persona creada');
         }
-        
+
         personaId = personaCreada.ID;
 
         // Crear usuario automáticamente solo para estudiantes nuevos
@@ -380,7 +432,7 @@ const EstudiantesManager = ({ onBack }) => {
           console.log('Enviando datos de usuario al backend:', usuarioData);
           const usuarioResponse = await api.post(`/api/usuarios`, usuarioData);
           console.log('Respuesta del backend para usuario:', usuarioResponse.data);
-          
+
           // Manejar diferentes estructuras de respuesta del backend
           usuarioCreado = usuarioResponse.data.success ? usuarioResponse.data.data : usuarioResponse.data;
           console.log('Usuario creado procesado:', usuarioCreado);
@@ -396,7 +448,7 @@ const EstudiantesManager = ({ onBack }) => {
           }
           throw e;
         }
-        
+
         // Mostrar mensaje con las credenciales generadas
         setSuccess(`Estudiante registrado exitosamente. Usuario: ${formData.cedula} Contraseña: ${formData.cedula}`);
       }
@@ -406,8 +458,10 @@ const EstudiantesManager = ({ onBack }) => {
         persona_id: personaId,
         institucion_id: parseInt(formData.institucion_id),
         ciudad_id: parseInt(formData.ciudad_id),
-        especialidad: formData.especialidad
+        especialidad: formData.especialidad,
+        redsocial: JSON.stringify(socialNetworks)
       };
+
 
       try {
         console.log('Enviando datos de estudiante al backend:', estudianteData);
@@ -440,7 +494,7 @@ const EstudiantesManager = ({ onBack }) => {
 
       // Recargar la lista
       await loadInitialData();
-      
+
       // Resetear formulario y ocultar primero
       setFormData({
         nombre: '',
@@ -453,6 +507,7 @@ const EstudiantesManager = ({ onBack }) => {
         provincia_id: '',
         especialidad: ''
       });
+      setSocialNetworks([]);
       setShowForm(false);
       setEditingEstudiante(null);
 
@@ -468,7 +523,7 @@ const EstudiantesManager = ({ onBack }) => {
       console.log('Error completo:', err);
       console.log('Error response:', err.response);
       console.log('Error response data:', err.response?.data);
-      
+
       let errorMessage = 'Error al guardar el estudiante: ';
       if (err.response?.data?.error) {
         const backendError = err.response.data.error;
@@ -513,11 +568,11 @@ const EstudiantesManager = ({ onBack }) => {
 
   const handleEdit = (estudiante) => {
     setEditingEstudiante(estudiante);
-    
+
     // Buscar la ciudad del estudiante para obtener la provincia
     const ciudadEstudiante = ciudades.find(c => c.ID === estudiante.ciudad_id);
     const provinciaId = ciudadEstudiante ? ciudadEstudiante.provincia_id : '';
-    
+
     setFormData({
       nombre: estudiante.persona?.nombre || '',
       fecha_nacimiento: estudiante.persona?.fecha_nacimiento ? estudiante.persona.fecha_nacimiento.split('T')[0] : '',
@@ -529,12 +584,24 @@ const EstudiantesManager = ({ onBack }) => {
       provincia_id: provinciaId?.toString() || '',
       especialidad: estudiante.especialidad || ''
     });
-    
+
+    // Cargar redes sociales
+    let networks = [];
+    try {
+      const rawSocial = estudiante.RedSocial || estudiante.redsocial;
+      if (rawSocial) {
+        networks = typeof rawSocial === 'string' ? JSON.parse(rawSocial) : rawSocial;
+      }
+    } catch (e) {
+      console.error('Error parsing social networks:', e);
+    }
+    setSocialNetworks(Array.isArray(networks) ? networks : []);
+
     // Cargar las ciudades filtradas por la provincia del estudiante
     if (provinciaId) {
       loadCiudadesByProvincia(provinciaId);
     }
-    
+
     setShowForm(true);
   };
 
@@ -558,15 +625,15 @@ const EstudiantesManager = ({ onBack }) => {
           await api.put(`/api/estudiantes/${estudianteToToggle.ID}/restore`);
           setSuccess('Estudiante habilitado exitosamente');
         }
-        
+
         // Recargar los datos para obtener el estado actualizado desde la API
         await loadInitialData();
       } catch (err) {
         console.error('Error al cambiar estado del estudiante:', err);
-        
+
         const action = actionType === 'disable' ? 'deshabilitar' : 'habilitar';
         let errorMessage = `Error al ${action} el estudiante: `;
-        
+
         if (err.response?.data?.error) {
           const backendError = err.response.data.error;
           if (backendError === 'student_not_found') {
@@ -589,7 +656,7 @@ const EstudiantesManager = ({ onBack }) => {
         } else {
           errorMessage += err.message;
         }
-        
+
         setError(errorMessage);
       } finally {
         setDeleting(false);
@@ -619,17 +686,17 @@ const EstudiantesManager = ({ onBack }) => {
 
   // Filtrar estudiantes basado en el término de búsqueda y estado
   const filteredEstudiantes = Array.isArray(estudiantes) ? estudiantes.filter(estudiante => {
-    const matchesSearch = 
+    const matchesSearch =
       (estudiante.persona?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (estudiante.persona?.cedula || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       getInstitucionNombre(estudiante.institucion_id).toLowerCase().includes(searchTerm.toLowerCase()) ||
       getCiudadNombre(estudiante.ciudad_id).toLowerCase().includes(searchTerm.toLowerCase()) ||
       (estudiante.especialidad || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Verificar si el estudiante está habilitado o deshabilitado
     // Solo está habilitado si DeletedAt es null o undefined
     const isEnabled = estudiante.DeletedAt === null || estudiante.DeletedAt === undefined;
-    
+
     let matchesStatus = true;
     if (statusFilter === 'habilitados') {
       matchesStatus = isEnabled;
@@ -637,7 +704,7 @@ const EstudiantesManager = ({ onBack }) => {
       matchesStatus = !isEnabled;
     }
     // Si statusFilter === 'todos', matchesStatus siempre es true
-    
+
     return matchesSearch && matchesStatus;
   }) : [];
 
@@ -675,7 +742,7 @@ const EstudiantesManager = ({ onBack }) => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center mb-4 sm:mb-6`}>
           {!showForm && (
-            <button 
+            <button
               onClick={onBack}
               className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
               title="Volver al Dashboard"
@@ -700,15 +767,16 @@ const EstudiantesManager = ({ onBack }) => {
                 institucion_id: '',
                 ciudad_id: '',
                 provincia_id: '',
+                provincia_id: '',
                 especialidad: ''
               });
+              setSocialNetworks([]);
               setCiudadesFiltered([]);
             }}
-            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${
-              showForm 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : 'bg-green-800 hover:bg-green-900'
-            }`}
+            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-green-800 hover:bg-green-900'
+              }`}
             style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
           >
             {showForm ? (
@@ -797,11 +865,10 @@ const EstudiantesManager = ({ onBack }) => {
                         required
                         maxLength="10"
                         placeholder="10 dígitos"
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${
-                          validationErrors.cedula 
-                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                            : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${validationErrors.cedula
+                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                          : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                          }`}
                       />
                       {validationErrors.cedula && (
                         <p className="mt-1 text-xs text-red-600 flex items-center">
@@ -818,16 +885,16 @@ const EstudiantesManager = ({ onBack }) => {
                       <div className="relative w-full">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                           </svg>
                         </div>
-                        <input 
-                          id="fecha-nacimiento-datepicker" 
-                          type="text" 
+                        <input
+                          id="fecha-nacimiento-datepicker"
+                          type="text"
                           name="fecha_nacimiento"
                           value={formData.fecha_nacimiento}
                           onChange={handleInputChange}
-                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 bg-white" 
+                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 bg-white"
                           placeholder="Seleccionar fecha (YYYY-MM-DD)"
                           readOnly
                           required
@@ -835,7 +902,7 @@ const EstudiantesManager = ({ onBack }) => {
                       </div>
                     </div>
 
-                     <div>
+                    <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                       <input
                         type="email"
@@ -915,9 +982,8 @@ const EstudiantesManager = ({ onBack }) => {
                         onChange={handleInputChange}
                         required
                         disabled={!formData.provincia_id}
-                        className={`block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 ${
-                          !formData.provincia_id ? 'bg-gray-100 cursor-not-allowed' : ''
-                        }`}
+                        className={`block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 ${!formData.provincia_id ? 'bg-gray-100 cursor-not-allowed' : ''
+                          }`}
                       >
                         <option value="">
                           {formData.provincia_id ? 'Seleccione una ciudad' : 'Primero seleccione una provincia'}
@@ -941,6 +1007,104 @@ const EstudiantesManager = ({ onBack }) => {
                         placeholder="Ingrese la especialidad"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Redes Sociales */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#025a27' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    Redes Sociales
+                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={handleAddSocialNetwork}
+                    className="mb-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Agregar Red Social
+                  </button>
+
+                  <div className="space-y-3">
+                    {socialNetworks.map((network, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div className="w-full sm:w-1/3 relative">
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
+                              className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                            >
+                              <span className="flex items-center truncate">
+                                {network.platform ? (
+                                  <>
+                                    <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} mr-2`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
+                                    {network.platform}
+                                  </>
+                                ) : (
+                                  <span className="text-gray-500">Seleccione plataforma</span>
+                                )}
+                              </span>
+                              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              </span>
+                            </button>
+
+                            {openDropdownIndex === index && (
+                              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                {socialPlatforms.map((platform) => (
+                                  <div
+                                    key={platform.name}
+                                    className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${network.platform === platform.name ? 'bg-green-100' : ''}`}
+                                    onClick={() => {
+                                      handleSocialNetworkChange(index, 'platform', platform.name);
+                                      setOpenDropdownIndex(null);
+                                    }}
+                                  >
+                                    <div className="flex items-center">
+                                      <i className={`${platform.icon} mr-2 w-5 text-center`} style={{ color: platform.color }}></i>
+                                      <span className={`block truncate ${network.platform === platform.name ? 'font-semibold' : 'font-normal'}`}>
+                                        {platform.name}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="w-full sm:w-1/2">
+                          <input
+                            type="text"
+                            value={network.url}
+                            onChange={(e) => handleSocialNetworkChange(index, 'url', e.target.value)}
+                            placeholder="Usuario o URL del perfil"
+                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSocialNetwork(index)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                    {socialNetworks.length === 0 && (
+                      <p className="text-gray-500 text-sm italic">No hay redes sociales registradas.</p>
+                    )}
                   </div>
                 </div>
 
@@ -1040,6 +1204,8 @@ const EstudiantesManager = ({ onBack }) => {
                   </div>
                 </div>
               </div>
+
+
               {estudiantes.length === 0 ? (
                 <div className="text-center py-8 sm:py-12">
                   <svg className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1069,6 +1235,9 @@ const EstudiantesManager = ({ onBack }) => {
                             Ciudad
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
+                            Contacto
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
                             Especialidad
                           </th>
                           <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
@@ -1081,11 +1250,10 @@ const EstudiantesManager = ({ onBack }) => {
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {currentEstudiantes.map((estudiante, index) => (
-                          <tr 
-                            key={estudiante.ID} 
-                            className={`hover:bg-gray-50 transition-colors duration-200 ${
-                              index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                            }`}
+                          <tr
+                            key={estudiante.ID}
+                            className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                              }`}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
@@ -1117,6 +1285,22 @@ const EstudiantesManager = ({ onBack }) => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col">
+                                <span className="text-sm text-gray-900 flex items-center">
+                                  <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                  {estudiante.persona?.correo || 'N/A'}
+                                </span>
+                                <span className="text-sm text-gray-500 flex items-center mt-1">
+                                  <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                  </svg>
+                                  {estudiante.persona?.telefono || 'N/A'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100" style={{ color: '#025a27' }}>
                                 {estudiante.especialidad || 'Sin especialidad'}
                               </span>
@@ -1135,13 +1319,21 @@ const EstudiantesManager = ({ onBack }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                               <div className="flex justify-center space-x-2">
                                 <button
+                                  onClick={() => handleViewSocialNetworks(estudiante)}
+                                  className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 transition-all duration-200 hover:shadow-md"
+                                  title="Ver Redes Sociales"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                  </svg>
+                                </button>
+                                <button
                                   onClick={() => handleEdit(estudiante)}
                                   disabled={actioningStudentId === estudiante.ID || deleting || (estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)}
-                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    (estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)
-                                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                      : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
-                                  }`}
+                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${(estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)
+                                    ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                    : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
+                                    }`}
                                 >
                                   {actioningStudentId === estudiante.ID ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -1206,8 +1398,8 @@ const EstudiantesManager = ({ onBack }) => {
                   {/* Vista de tarjetas para móvil y tablet */}
                   <div className="lg:hidden space-y-4">
                     {currentEstudiantes.map((estudiante, index) => (
-                      <div 
-                        key={estudiante.ID} 
+                      <div
+                        key={estudiante.ID}
                         className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -1227,7 +1419,7 @@ const EstudiantesManager = ({ onBack }) => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <div>
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Institución</p>
@@ -1267,11 +1459,10 @@ const EstudiantesManager = ({ onBack }) => {
                           <button
                             onClick={() => handleEdit(estudiante)}
                             disabled={actioningStudentId === estudiante.ID || deleting || (estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)}
-                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              (estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)
-                                ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
-                            }`}
+                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${(estudiante.DeletedAt !== null && estudiante.DeletedAt !== undefined)
+                              ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                              : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
+                              }`}
                           >
                             {actioningStudentId === estudiante.ID ? (
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -1349,17 +1540,16 @@ const EstudiantesManager = ({ onBack }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
-                        
+
                         <div className="flex space-x-1">
                           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <button
                               key={page}
                               onClick={() => paginate(page)}
-                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                                currentPage === page
-                                  ? 'text-white'
-                                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
+                                ? 'text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                }`}
                               style={{
                                 backgroundColor: currentPage === page ? '#025a27' : undefined,
                                 borderColor: currentPage === page ? '#025a27' : undefined
@@ -1369,7 +1559,7 @@ const EstudiantesManager = ({ onBack }) => {
                             </button>
                           ))}
                         </div>
-                        
+
                         <button
                           onClick={nextPage}
                           disabled={currentPage === totalPages}
@@ -1396,20 +1586,83 @@ const EstudiantesManager = ({ onBack }) => {
         onConfirm={handleConfirmToggleStatus}
         title={actionType === 'disable' ? 'Confirmar Deshabilitación' : 'Confirmar Habilitación'}
         message={
-          actionType === 'disable' 
+          actionType === 'disable'
             ? `¿Está seguro de que desea deshabilitar al estudiante "${estudianteToToggle?.persona?.nombre || 'este estudiante'}"? El estudiante no podrá acceder al sistema pero sus datos se conservarán.`
             : `¿Está seguro de que desea habilitar al estudiante "${estudianteToToggle?.persona?.nombre || 'este estudiante'}"? El estudiante podrá acceder nuevamente al sistema.`
         }
-        confirmText={deleting 
-          ? (actionType === 'disable' ? 'Deshabilitando...' : 'Habilitando...') 
+        confirmText={deleting
+          ? (actionType === 'disable' ? 'Deshabilitando...' : 'Habilitando...')
           : (actionType === 'disable' ? 'Deshabilitar' : 'Habilitar')
         }
         cancelText="Cancelar"
         loading={deleting}
         type={actionType === 'disable' ? 'danger' : 'success'}
       />
+      {/* Modal de Redes Sociales */}
+      {showSocialModal && viewingStudentSocials && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center" style={{ backgroundColor: '#025a27' }}>
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Redes Sociales
+              </h3>
+              <button
+                onClick={() => setShowSocialModal(false)}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Estudiante</h4>
+                <p className="text-lg font-semibold text-gray-900">{viewingStudentSocials.persona?.nombre}</p>
+              </div>
+
+              <div className="space-y-3">
+                {viewingStudentSocials.parsedNetworks && viewingStudentSocials.parsedNetworks.length > 0 ? (
+                  viewingStudentSocials.parsedNetworks.map((network, index) => (
+                    <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 mr-3">
+                        <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} text-lg`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {network.platform}
+                        </p>
+                        <a
+                          href={network.url.startsWith('http') ? network.url : '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-gray-500 truncate hover:text-green-600 hover:underline block"
+                        >
+                          {network.url}
+                        </a>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <p className="mt-2 text-sm text-gray-500">No tiene redes sociales registradas</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default EstudiantesManager;

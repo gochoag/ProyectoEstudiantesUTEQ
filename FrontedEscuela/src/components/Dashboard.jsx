@@ -12,6 +12,7 @@ import ProgramasVisitaManager from './ProgramasVisitaManager';
 import AutoridadesManager from './AutoridadesManager';
 import BancoDudas from './BancoDudas';
 import NoticiasManager from './NoticiasManager';
+import Profile from './Profile';
 
 // Importar imágenes QR
 import qrComunikids from '../assets/qr_apps_uteq/qr_comunikids.png';
@@ -50,11 +51,11 @@ const Dashboard = ({ usuario, onLogout }) => {
       setNewsLoading(true);
       const response = await api.get('/api/noticias');
       const noticias = (response.data.success ? response.data.data : response.data) || [];
-      
+
       // Transformar las noticias para el formato esperado por el carrusel
       const transformedNews = noticias.map(noticia => {
         const mediaUrl = noticia.url_noticia ? buildMediaUrl(noticia.url_noticia) : null;
-        
+
         return {
           id: noticia.id,
           title: noticia.titulo,
@@ -64,9 +65,9 @@ const Dashboard = ({ usuario, onLogout }) => {
           mediaType: noticia.url_noticia ? getMediaType(noticia.url_noticia) : 'none'
         };
       });
-      
+
       setNewsData(transformedNews);
-      
+
       // Si hay noticias, mostrar la primera (más reciente)
       if (transformedNews.length > 0) {
         setCurrentNewsIndex(0);
@@ -83,17 +84,17 @@ const Dashboard = ({ usuario, onLogout }) => {
   // Función para construir la URL completa del media
   const buildMediaUrl = (url) => {
     if (!url) return null;
-    
+
     // Si ya es una URL completa, devolverla tal como está
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    
+
     // Si empieza con /, agregar la base URL
     if (url.startsWith('/')) {
       return `https://apiescuela.onrender.com${url}`;
     }
-    
+
     // Si es una ruta relativa, construir la URL completa
     return `https://apiescuela.onrender.com/${url}`;
   };
@@ -101,10 +102,10 @@ const Dashboard = ({ usuario, onLogout }) => {
   // Función para determinar el tipo de archivo multimedia
   const getMediaType = (url) => {
     if (!url) return 'none';
-    
+
     const imageExtensions = /\.(jpg|jpeg|png|gif|webp)$/i;
     const videoExtensions = /\.(mp4|avi|mov|wmv|webm)$/i;
-    
+
     if (imageExtensions.test(url)) return 'image';
     if (videoExtensions.test(url)) return 'video';
     return 'none';
@@ -113,87 +114,87 @@ const Dashboard = ({ usuario, onLogout }) => {
   // Función para verificar permisos basados en el tipo de usuario
   const hasPermission = (menuId) => {
     const userType = usuario?.tipo_usuario?.nombre?.toLowerCase();
-    
+
     // Administrador: Acceso total
     if (userType === 'administrador') {
       return true;
     }
-    
+
     // CoAdministrador: Acceso a todo menos Usuarios
     if (userType === 'coadministrador') {
       return menuId !== 'usuarios';
     }
-    
-    // Estudiante: Solo Home y Dudas
+
+    // Estudiante: Solo Home, Dudas y Perfil
     if (userType === 'estudiante') {
-      return ['home', 'dudas'].includes(menuId);
+      return ['home', 'dudas', 'profile'].includes(menuId);
     }
-    
+
     // Por defecto, no hay acceso
     return false;
   };
 
   // Datos para los carruseles
   const appsData = [
-    { 
-      id: 1, 
-      name: 'ComuniKids', 
-      image: qrComunikids, 
+    {
+      id: 1,
+      name: 'ComuniKids',
+      image: qrComunikids,
       description: 'Aplicación educativa para comunicación infantil',
       url: 'https://play.google.com/store/apps/details?id=com.appvinculacion'
     },
-    { 
-      id: 2, 
-      name: 'MoneyGame', 
-      image: qrMoneyGame, 
+    {
+      id: 2,
+      name: 'MoneyGame',
+      image: qrMoneyGame,
       description: 'Juego educativo sobre manejo financiero',
       url: 'https://play.google.com/store/apps/details?id=com.DefaultCompany.MoneyGame&pli=1'
     },
-    { 
-      id: 3, 
-      name: 'PetFriend', 
-      image: qrPetFriend, 
+    {
+      id: 3,
+      name: 'PetFriend',
+      image: qrPetFriend,
       description: 'Aplicación para el cuidado de mascotas virtuales',
       url: 'https://play.google.com/store/apps/details?id=com.UTEQ.PetFriend21'
     }
   ];
 
   const softwData = [
-    { 
-      id: 1, 
-      name: 'Ingeniería en Software', 
-      image: qrInfoSoftw, 
+    {
+      id: 1,
+      name: 'Ingeniería en Software',
+      image: qrInfoSoftw,
       description: 'Información sobre desarrollo de software en UTEQ',
       url: 'https://www.uteq.edu.ec/es/grado/carrera/software'
     }
   ];
 
   const socialData = [
-    { 
-      id: 1, 
-      name: 'Facebook UTEQ', 
-      image: qrFacebook, 
+    {
+      id: 1,
+      name: 'Facebook UTEQ',
+      image: qrFacebook,
       description: 'Síguenos en Facebook',
       url: 'https://m.facebook.com/@fccdduteq/?locale=es_LA&wtsid=rdr_0j1cw9R4SYPr9JCY3&hr=1'
     },
-    { 
-      id: 2, 
-      name: 'Instagram UTEQ', 
-      image: qrInstagram, 
+    {
+      id: 2,
+      name: 'Instagram UTEQ',
+      image: qrInstagram,
       description: 'Síguenos en Instagram',
       url: 'https://www.instagram.com/fccdd_uteq?igsh=dGhpcG53aWZmb2xx'
     },
-    { 
-      id: 3, 
-      name: 'TikTok UTEQ', 
-      image: qrTiktok, 
+    {
+      id: 3,
+      name: 'TikTok UTEQ',
+      image: qrTiktok,
       description: 'Síguenos en TikTok',
       url: 'https://www.tiktok.com/@carrerasoftwareuteq?_t=ZM-8zatsbwYIv0&_r=1'
     },
-    { 
-      id: 4, 
-      name: 'YouTube UTEQ', 
-      image: qrYoutube, 
+    {
+      id: 4,
+      name: 'YouTube UTEQ',
+      image: qrYoutube,
       description: 'Suscríbete a nuestro canal',
       url: 'https://youtube.com/@orlandoerazo?si=AAaU4GGqjBE9QQgz'
     }
@@ -230,7 +231,7 @@ const Dashboard = ({ usuario, onLogout }) => {
 
     // Escuchar cambios en el localStorage
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Recargar noticias cuando se regrese al dashboard
     if (currentView === 'dashboard') {
       loadNews();
@@ -294,7 +295,7 @@ const Dashboard = ({ usuario, onLogout }) => {
 
   // Funciones para manejar carruseles
   const nextSlide = (type) => {
-    switch(type) {
+    switch (type) {
       case 'apps':
         setCurrentAppsIndex((prev) => (prev + 1) % appsData.length);
         break;
@@ -308,7 +309,7 @@ const Dashboard = ({ usuario, onLogout }) => {
   };
 
   const prevSlide = (type) => {
-    switch(type) {
+    switch (type) {
       case 'apps':
         setCurrentAppsIndex((prev) => (prev - 1 + appsData.length) % appsData.length);
         break;
@@ -322,7 +323,7 @@ const Dashboard = ({ usuario, onLogout }) => {
   };
 
   const goToSlide = (type, index) => {
-    switch(type) {
+    switch (type) {
       case 'apps':
         setCurrentAppsIndex(index);
         break;
@@ -352,14 +353,14 @@ const Dashboard = ({ usuario, onLogout }) => {
       console.warn(`Usuario ${usuario?.usuario} intentó acceder a ${view} sin permisos`);
       return; // No permitir la navegación
     }
-    
+
     setCurrentView(view);
-    
+
     // Si se navega al dashboard, recargar noticias
     if (view === 'dashboard') {
       loadNews();
     }
-    
+
     // En móvil, cerrar sidebar después de navegar
     if (isMobile) {
       setSidebarOpen(false);
@@ -408,7 +409,7 @@ const Dashboard = ({ usuario, onLogout }) => {
 
   const handleTouchEnd = (e, startX, type) => {
     if (!startX) return;
-    
+
     const endX = e.changedTouches[0].clientX;
     const diffX = startX - endX;
     const minSwipeDistance = 50;
@@ -439,7 +440,7 @@ const Dashboard = ({ usuario, onLogout }) => {
             </h3>
             <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
           </div>
-          
+
           <div className="relative h-[920px] flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -459,7 +460,7 @@ const Dashboard = ({ usuario, onLogout }) => {
             </h3>
             <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
           </div>
-          
+
           <div className="relative h-[920px] flex items-center justify-center">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -482,30 +483,30 @@ const Dashboard = ({ usuario, onLogout }) => {
           </h3>
           <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
         </div>
-        
+
         <div className="relative h-[600px] sm:h-[1100px]">
           {/* Contenedor del carrusel vertical */}
           <div className="overflow-hidden rounded-lg h-full">
-            <div 
+            <div
               className="flex flex-col transition-transform duration-500 ease-out h-full"
-              style={{ 
-                transform: `translateY(-${currentNewsIndex * 100}%)` 
+              style={{
+                transform: `translateY(-${currentNewsIndex * 100}%)`
               }}
             >
               {newsData.map((news, index) => (
                 <div key={news.id} className="w-full h-full flex-shrink-0 px-1 py-1 sm:px-2 sm:py-2">
                   <div className="bg-white rounded-lg border-2 transition-all duration-300 cursor-pointer h-full flex flex-col shadow-lg hover:shadow-xl p-1 sm:p-2"
-                       style={{ borderColor: 'rgba(2, 90, 39, 0.3)' }}
-                       onMouseEnter={(e) => e.target.style.borderColor = 'rgba(2, 90, 39, 0.5)'}
-                       onMouseLeave={(e) => e.target.style.borderColor = 'rgba(2, 90, 39, 0.3)'}
-                       onClick={() => openNewsModal(news)}>
+                    style={{ borderColor: 'rgba(2, 90, 39, 0.3)' }}
+                    onMouseEnter={(e) => e.target.style.borderColor = 'rgba(2, 90, 39, 0.5)'}
+                    onMouseLeave={(e) => e.target.style.borderColor = 'rgba(2, 90, 39, 0.3)'}
+                    onClick={() => openNewsModal(news)}>
                     {/* Media de la noticia con título superpuesto */}
                     <div className="w-full h-full overflow-hidden flex-shrink-0 relative group rounded-lg">
                       {/* Fondo transparente con imagen/video */}
                       {news.mediaType === 'image' && news.mediaUrl && (
                         <div className="absolute inset-0 w-full h-full">
-                          <img 
-                            src={news.mediaUrl} 
+                          <img
+                            src={news.mediaUrl}
                             alt={news.title}
                             className="w-full h-full object-cover opacity-60 blur-sm"
                             loading="lazy"
@@ -515,10 +516,10 @@ const Dashboard = ({ usuario, onLogout }) => {
                           />
                         </div>
                       )}
-                      
+
                       {news.mediaType === 'video' && news.mediaUrl && (
                         <div className="absolute inset-0 w-full h-full">
-                          <video 
+                          <video
                             className="w-full h-full object-cover opacity-60 blur-sm"
                             muted
                             loop
@@ -530,11 +531,11 @@ const Dashboard = ({ usuario, onLogout }) => {
                           </video>
                         </div>
                       )}
-                      
+
                       {news.mediaType === 'none' && (
                         <div className="absolute inset-0 w-full h-full">
-                          <img 
-                            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop" 
+                          <img
+                            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop"
                             alt={news.title}
                             className="w-full h-full object-cover opacity-60 blur-sm"
                             loading="lazy"
@@ -545,8 +546,8 @@ const Dashboard = ({ usuario, onLogout }) => {
                       {/* Imagen/video principal centrada */}
                       <div className="relative w-full h-full flex items-center justify-center bg-white/20 p-2 sm:p-4">
                         {news.mediaType === 'image' && news.mediaUrl && (
-                          <img 
-                            src={news.mediaUrl} 
+                          <img
+                            src={news.mediaUrl}
                             alt={news.title}
                             className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             loading="lazy"
@@ -555,9 +556,9 @@ const Dashboard = ({ usuario, onLogout }) => {
                             }}
                           />
                         )}
-                        
+
                         {news.mediaType === 'video' && news.mediaUrl && (
-                          <video 
+                          <video
                             className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             muted
                             loop
@@ -569,29 +570,29 @@ const Dashboard = ({ usuario, onLogout }) => {
                             Tu navegador no soporta la reproducción de video.
                           </video>
                         )}
-                        
+
                         {news.mediaType === 'none' && (
-                          <img 
-                            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop" 
+                          <img
+                            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop"
                             alt={news.title}
                             className="w-3/4 h-[60%] object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
                             loading="lazy"
                           />
                         )}
                       </div>
-                      
+
                       {/* Título superpuesto sobre el media */}
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 sm:p-6">
                         <h4 className="font-bold text-white text-lg sm:text-2xl mb-12 sm:mb-10 line-clamp-3 drop-shadow-lg">
                           {news.title}
                         </h4>
                       </div>
-                      
+
                       {/* Indicador de video */}
                       {news.mediaType === 'video' && (
                         <div className="absolute top-4 right-4 bg-black/60 rounded-full p-2">
                           <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
+                            <path d="M8 5v14l11-7z" />
                           </svg>
                         </div>
                       )}
@@ -612,7 +613,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
                             </svg>
                           </button>
-                          
+
                           {/* Botón siguiente - parte inferior */}
                           <button
                             onClick={(e) => {
@@ -654,32 +655,32 @@ const Dashboard = ({ usuario, onLogout }) => {
           </h3>
           <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
         </div>
-        
+
         <div className="relative">
           {/* Contenedor del carrusel */}
-          <div 
+          <div
             className="overflow-hidden rounded-lg touch-pan-y"
             onTouchStart={(e) => handleTouchStart(e, setTouchStartX)}
             onTouchEnd={(e) => handleTouchEnd(e, touchStartX, type)}
             style={{ touchAction: 'pan-y pinch-zoom' }}
           >
-            <div 
+            <div
               className="flex transition-transform duration-500 ease-out"
-              style={{ 
-                transform: `translateX(-${currentIndex * 100}%)` 
+              style={{
+                transform: `translateX(-${currentIndex * 100}%)`
               }}
             >
               {data.map((item, index) => (
                 <div key={item.id} className="w-full flex-shrink-0">
                   <div className="flex flex-col items-center p-3">
-                    <div 
+                    <div
                       className="w-36 h-36 sm:w-40 sm:h-40 mb-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center overflow-hidden group relative shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                       onClick={() => handleRedirect(item.url)}
                       title={`Ir a ${item.name}`}
                     >
                       {/* Imagen con animaciones */}
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
                         className="max-w-full max-h-full object-contain transition-all duration-300"
                         draggable="false"
@@ -716,7 +717,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
+
               <button
                 onClick={() => nextSlide(type)}
                 className="absolute right-2 top-1/3 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-10 hover:scale-110 hover:translate-x-1"
@@ -736,11 +737,10 @@ const Dashboard = ({ usuario, onLogout }) => {
                 <button
                   key={index}
                   onClick={() => goToSlide(type, index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 transform hover:scale-125 ${
-                    index === currentIndex
-                      ? 'bg-green-600 shadow-lg scale-110'
-                      : 'bg-gray-300 hover:bg-gray-400 shadow-md'
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 transform hover:scale-125 ${index === currentIndex
+                    ? 'bg-green-600 shadow-lg scale-110'
+                    : 'bg-gray-300 hover:bg-gray-400 shadow-md'
+                    }`}
                   aria-label={`Ir a slide ${index + 1}`}
                 />
               ))}
@@ -759,6 +759,15 @@ const Dashboard = ({ usuario, onLogout }) => {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      )
+    },
+    {
+      id: 'profile',
+      name: 'Mi Perfil',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       )
     },
@@ -897,6 +906,8 @@ const Dashboard = ({ usuario, onLogout }) => {
         return hasPermission('programas-visita') ? <ProgramasVisitaManager onBack={() => handleNavigate('home')} /> : null;
       case 'noticias':
         return hasPermission('noticias') ? <NoticiasManager onBack={() => handleNavigate('home')} usuario={usuario} /> : null;
+      case 'profile':
+        return <Profile usuario={usuario} onBack={() => handleNavigate('home')} />;
       case 'config':
         return <SystemConfig onBack={() => handleNavigate('home')} />;
       case 'home':
@@ -931,7 +942,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                 <div className="space-y-4 sm:space-y-6">
                   {/* Sección 1: Apps UTEQ */}
                   <div>
-                    <Carousel 
+                    <Carousel
                       data={appsData}
                       currentIndex={currentAppsIndex}
                       type="apps"
@@ -941,7 +952,7 @@ const Dashboard = ({ usuario, onLogout }) => {
 
                   {/* Sección 2: Información de Software */}
                   <div>
-                    <Carousel 
+                    <Carousel
                       data={softwData}
                       currentIndex={currentSoftwIndex}
                       type="softw"
@@ -951,7 +962,7 @@ const Dashboard = ({ usuario, onLogout }) => {
 
                   {/* Sección 3: Redes Sociales UTEQ */}
                   <div>
-                    <Carousel 
+                    <Carousel
                       data={socialData}
                       currentIndex={currentSocialIndex}
                       type="social"
@@ -975,7 +986,7 @@ const Dashboard = ({ usuario, onLogout }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Overlay para móvil cuando el sidebar está abierto */}
       {isMobile && sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -983,14 +994,14 @@ const Dashboard = ({ usuario, onLogout }) => {
 
       <div className="flex min-h-screen">
         {/* Sidebar */}
-        <div 
+        <div
           className={`
-            ${isMobile 
+            ${isMobile
               ? `fixed inset-y-0 left-0 z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} w-64`
               : `${sidebarOpen ? 'w-56' : 'w-16'} fixed inset-y-0 left-0 z-40`
             } 
             shadow-lg transition-all duration-300 ease-in-out
-          `} 
+          `}
           style={{ backgroundColor: '#025a27' }}
         >
           <div className={`${isMobile ? 'p-4' : 'p-3'} h-full overflow-y-auto`}>
@@ -1014,7 +1025,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                 </button>
               )}
             </div>
-            
+
             <nav className="space-y-1">
               {menuItems.map((item) => (
                 <button
@@ -1022,10 +1033,10 @@ const Dashboard = ({ usuario, onLogout }) => {
                   onClick={() => handleNavigate(item.id)}
                   className={`
                     w-full flex items-center text-left rounded-lg transition-all duration-200
-                    ${isMobile 
-                      ? 'px-4 py-3' 
-                      : sidebarOpen 
-                        ? 'px-3 py-2' 
+                    ${isMobile
+                      ? 'px-4 py-3'
+                      : sidebarOpen
+                        ? 'px-3 py-2'
                         : 'px-2 py-2 justify-center'
                     }
                     ${currentView === item.id
@@ -1051,10 +1062,9 @@ const Dashboard = ({ usuario, onLogout }) => {
         </div>
 
         {/* Main Content */}
-        <div 
-          className={`flex-1 flex flex-col min-w-0 ${
-            !isMobile ? (sidebarOpen ? 'ml-56' : 'ml-16') : ''
-          }`}
+        <div
+          className={`flex-1 flex flex-col min-w-0 ${!isMobile ? (sidebarOpen ? 'ml-56' : 'ml-16') : ''
+            }`}
         >
           {/* Header */}
           <header className="bg-white shadow-sm border-b sticky top-0 z-30">
@@ -1075,7 +1085,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                     {currentView === 'config' ? 'Configuración' : (allMenuItems.find(item => item.id === currentView)?.name || 'Dashboard')}
                   </h2>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
                   {/* Dropdown del Usuario */}
                   <div className="relative user-dropdown">
@@ -1094,10 +1104,10 @@ const Dashboard = ({ usuario, onLogout }) => {
                         {usuario.persona?.nombre || 'Usuario'}
                       </span>
                       {/* Icono de flecha */}
-                      <svg 
-                        className={`w-4 h-4 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1112,37 +1122,50 @@ const Dashboard = ({ usuario, onLogout }) => {
                           <p className="text-sm font-medium text-gray-900">{usuario.persona?.nombre || 'Usuario'}</p>
                           <p className="text-xs text-gray-500">{usuario.tipo_usuario?.nombre || 'Usuario'}</p>
                           <div className="mt-1">
-                            <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                              usuario.tipo_usuario?.nombre?.toLowerCase() === 'administrador' 
-                                ? 'bg-green-100 text-green-800'
-                                : usuario.tipo_usuario?.nombre?.toLowerCase() === 'coadministrador'
+                            <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${usuario.tipo_usuario?.nombre?.toLowerCase() === 'administrador'
+                              ? 'bg-green-100 text-green-800'
+                              : usuario.tipo_usuario?.nombre?.toLowerCase() === 'coadministrador'
                                 ? 'bg-blue-100 text-blue-800'
                                 : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {usuario.tipo_usuario?.nombre?.toLowerCase() === 'administrador' ? 'Acceso Completo' 
-                               : usuario.tipo_usuario?.nombre?.toLowerCase() === 'coadministrador' ? 'Acceso Limitado'
-                               : 'Solo Lectura'}
+                              }`}>
+                              {usuario.tipo_usuario?.nombre?.toLowerCase() === 'administrador' ? 'Acceso Completo'
+                                : usuario.tipo_usuario?.nombre?.toLowerCase() === 'coadministrador' ? 'Acceso Limitado'
+                                  : 'Solo Lectura'}
                             </span>
                           </div>
                         </div>
-                        
+
                         {/* Opciones del dropdown */}
+                        {usuario.tipo_usuario?.nombre?.toLowerCase() === 'administrador' && (
+                          <button
+                            onClick={() => {
+                              handleNavigate('config');
+                              setDropdownOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                              />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Configuración</span>
+                          </button>
+                        )}
                         <button
                           onClick={() => {
-                            handleNavigate('config');
+                            handleNavigate('profile');
                             setDropdownOpen(false);
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
-                            />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span>Configuración</span>
+                          <span>Mi Perfil</span>
                         </button>
-                        
+
                         <button
                           onClick={() => {
                             handleLogout();
@@ -1255,7 +1278,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                       </video>
                       <div className="absolute top-4 right-4 bg-black bg-opacity-60 rounded-full p-2">
                         <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
+                          <path d="M8 5v14l11-7z" />
                         </svg>
                       </div>
                     </div>
@@ -1285,7 +1308,7 @@ const Dashboard = ({ usuario, onLogout }) => {
                         <p className="text-xs text-gray-500">Sistema de Gestión Escolar</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => {
