@@ -11,19 +11,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 withCredentials([file(credentialsId: 'escuela-env', variable: 'ENV_FILE')]) {
-                    sh '''
-                        cp $ENV_FILE .env
-                        
-                        # Detener y eliminar contenedores existentes
-                        docker stop apiescuela-backend frontedescuela-frontend || true
-                        docker rm -f apiescuela-backend frontedescuela-frontend || true
-                        
-                        # Limpiar con docker compose
-                        docker compose down --remove-orphans --volumes || true
-                        
-                        # Construir y levantar
-                        docker compose up -d --build
-                    '''
+                sh '''
+                    cp "$ENV_FILE" .env
+                    docker compose down --remove-orphans || true
+                    docker rm -f apiescuela-backend || true
+                    docker compose up -d --build
+                '''
                 }
             }
         }
