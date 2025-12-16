@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_API_VERSION = '1.41'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -16,7 +20,8 @@ pipeline {
                     docker compose down --remove-orphans || true
                     docker system prune -af || true
                     docker builder prune -af || true
-                    docker compose up -d --build
+                    docker rmi golang:1.24-alpine || true
+                    docker compose up -d --build --no-cache
                 '''
                 }
             }
