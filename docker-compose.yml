@@ -41,16 +41,56 @@ services:
       - "9611:443"
       - "9612:444"
     volumes:
-      - ./nginx/config/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/ssl/
-      - ./nginx/html/:/var/www/html
-      - ./nginx/logs:/etc/nginx/logs
+      - nginxfiles:/home/app/nginx
+    command: >
+      bash -c "
+        mkdir -p /var/www/html /etc/nginx/logs /ssl &&
+        cp -r /home/app/nginx/html/. /var/www/html/ 2>/dev/null || true &&
+        cp -r /home/app/nginx/logs/. /etc/nginx/logs/ 2>/dev/null || true &&
+        cp -r /home/app/nginx/ssl/. /ssl/ &&
+        echo 'events { worker_connections 1024; }
+        http {
+          include /etc/nginx/mime.types;
+          default_type application/octet-stream;
+          sendfile on;
+          keepalive_timeout 65;
+          server {
+            listen 443 ssl;
+            ssl_certificate /ssl/__uteq_edu_ec2025ABRIL_cert_out.pem;
+            ssl_certificate_key /ssl/__uteq_edu_ec.key;
+            server_name localhost aplicaciones.uteq.edu.ec;
+            location / {
+              proxy_pass http://frontedescuela-frontend-uteq:5173;
+              proxy_http_version 1.1;
+              proxy_set_header Host \$$host;
+              proxy_set_header X-Real-IP \$$remote_addr;
+            }
+          }
+          server {
+            listen 444 ssl;
+            ssl_certificate /ssl/__uteq_edu_ec2025ABRIL_cert_out.pem;
+            ssl_certificate_key /ssl/__uteq_edu_ec.key;
+            server_name localhost aplicaciones.uteq.edu.ec;
+            location / {
+              proxy_pass http://apiescuela-backend-uteq:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Host \$$host;
+              proxy_set_header X-Real-IP \$$remote_addr;
+            }
+          }
+        }' > /etc/nginx/nginx.conf &&
+        nginx -g 'daemon off;'
+      "
     restart: always
     depends_on:
       - frontedescuela-frontend
       - apiescuela-backend
     networks:
       - escuela_network
+
+volumes:
+  nginxfiles:
+    external: true
 
 networks:
   escuela_network:
