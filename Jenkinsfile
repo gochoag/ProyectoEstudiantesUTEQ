@@ -15,6 +15,8 @@ pipeline {
                     cp "$ENV_FILE" .env
                     docker compose down --remove-orphans || true
                     docker rm -f apiescuela-backend || true
+                    docker rm -f frontedescuela-frontend || true
+                    docker rm -f nginxescuelauteq || true
                     docker compose up -d --build
                 '''
                 }
