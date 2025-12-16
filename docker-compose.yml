@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: backend
-    image: golang:1.24-alpine
+    image: apiescuela-backend-image
     command: go run main.go
     restart: always
     volumes:
