@@ -188,7 +188,7 @@ const Login = ({ onLogin }) => {
           {/* Título Iniciar Sesión */}
           <div className="text-center mb-1">
             <h2 className="text-2xl font-bold text-gray-800">
-              Iniciar Sesión
+              Iniciar Sesión Pruebas
             </h2>
           </div>
 
