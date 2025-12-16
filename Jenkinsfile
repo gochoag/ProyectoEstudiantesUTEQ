@@ -18,7 +18,7 @@ pipeline {
                 sh '''
                     cp "$ENV_FILE" .env
                     docker compose down --remove-orphans || true
-                    docker compose up -d --build
+                    docker compose up --build -d
                 '''
                 }
             }
