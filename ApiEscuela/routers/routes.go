@@ -21,6 +21,8 @@ func SetupAllRoutes(app *fiber.App, handlers *AllHandlers) {
 
 	// ==================== SERVIR ARCHIVOS ESTÁTICOS (PÚBLICO) ====================
 	app.Get("/api/files/:tipo/:nombre", handlers.UploadHandler.GetFile)
+	// Ruta para archivos con subcarpeta (comunicados_files/{fecha}/{archivo})
+	app.Get("/api/files/:tipo/:subcarpeta/:nombre", handlers.UploadHandler.GetFile)
 
 	// ==================== RUTAS PROTEGIDAS (CON AUTENTICACIÓN JWT) ====================
 	// Aplicar middleware JWT a todas las rutas protegidas
@@ -253,6 +255,14 @@ func SetupAllRoutes(app *fiber.App, handlers *AllHandlers) {
 	codigos.Put("/:id/verificar", handlers.CodigoHandler.MarcarComoVerificado)
 	codigos.Put("/:id/expirado", handlers.CodigoHandler.MarcarComoExpirado)
 
+	// ==================== COMUNICADOS ====================
+	comunicados := protected.Group("/comunicados")
+	comunicados.Post("/", handlers.ComunicadoHandler.CreateComunicado)
+	comunicados.Get("/", handlers.ComunicadoHandler.GetAllComunicados)
+	comunicados.Get("/:id", handlers.ComunicadoHandler.GetComunicado)
+	comunicados.Delete("/:id", handlers.ComunicadoHandler.DeleteComunicado)
+	comunicados.Get("/buscar/:termino", handlers.ComunicadoHandler.SearchComunicados)
+
 }
 
 // AllHandlers contiene todos los handlers de la aplicación
@@ -277,6 +287,7 @@ type AllHandlers struct {
 	UploadHandler                                 *handlers.UploadHandler
 	AuthHandler                                   *handlers.AuthHandler
 	CodigoHandler                                 *handlers.CodigoHandler
+	ComunicadoHandler                             *handlers.ComunicadoHandler
 }
 
 // NewAllHandlers crea una instancia con todos los handlers
@@ -301,6 +312,7 @@ func NewAllHandlers(
 	uploadHandler *handlers.UploadHandler,
 	authHandler *handlers.AuthHandler,
 	codigoHandler *handlers.CodigoHandler,
+	comunicadoHandler *handlers.ComunicadoHandler,
 ) *AllHandlers {
 	return &AllHandlers{
 		EstudianteHandler:                     estudianteHandler,
@@ -319,9 +331,10 @@ func NewAllHandlers(
 		VisitaDetalleHandler:                  visitaDetalleHandler,
 		DudasHandler:                          dudasHandler,
 		VisitaDetalleEstudiantesUniversitariosHandler: visitaDetalleEstudiantesUniversitariosHandler,
-		NoticiaHandler: noticiaHandler,
-		UploadHandler:  uploadHandler,
-		AuthHandler:    authHandler,
-		CodigoHandler:  codigoHandler,
+		NoticiaHandler:    noticiaHandler,
+		UploadHandler:     uploadHandler,
+		AuthHandler:       authHandler,
+		CodigoHandler:     codigoHandler,
+		ComunicadoHandler: comunicadoHandler,
 	}
 }

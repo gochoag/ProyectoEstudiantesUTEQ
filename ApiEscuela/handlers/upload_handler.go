@@ -85,7 +85,7 @@ func (h *UploadHandler) UploadFile(c *fiber.Ctx) error {
 			baseURL = strings.Replace(baseURL, "aplicaciones.uteq.edu.ec", "aplicaciones.uteq.edu.ec:9602", 1)
 		}
 	}
-	
+
 	urlArchivo := fmt.Sprintf("%s/api/files/%s/%s", baseURL, carpetaDestino, nombreArchivo)
 
 	return c.JSON(fiber.Map{
@@ -101,6 +101,8 @@ func (h *UploadHandler) GetFile(c *fiber.Ctx) error {
 	// Obtener la ruta del archivo desde los parámetros
 	tipo := c.Params("tipo")
 	nombre := c.Params("nombre")
+	// Obtener parámetro adicional para subcarpeta (para comunicados_files/{fecha}/{archivo})
+	subcarpeta := c.Params("subcarpeta")
 
 	if tipo == "" || nombre == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -109,7 +111,14 @@ func (h *UploadHandler) GetFile(c *fiber.Ctx) error {
 	}
 
 	// Construir la ruta completa del archivo
-	rutaCompleta := filepath.Join("assets", tipo, nombre)
+	var rutaCompleta string
+	if subcarpeta != "" {
+		// Para rutas con subcarpeta: assets/{tipo}/{subcarpeta}/{nombre}
+		rutaCompleta = filepath.Join("assets", tipo, subcarpeta, nombre)
+	} else {
+		// Para rutas simples: assets/{tipo}/{nombre}
+		rutaCompleta = filepath.Join("assets", tipo, nombre)
+	}
 
 	// Verificar que el archivo existe físicamente
 	if _, err := os.Stat(rutaCompleta); os.IsNotExist(err) {

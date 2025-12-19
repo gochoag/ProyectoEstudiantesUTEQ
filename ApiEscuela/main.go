@@ -112,6 +112,7 @@ func main() {
 		&models.VisitaDetalleEstudiantesUniversitarios{},
 		&models.CodigoUsuario{},
 		&models.Noticia{},
+		&models.Comunicado{},
 	); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
@@ -143,6 +144,7 @@ func main() {
 	}
 
 	noticiaRepo := repositories.NewNoticiaRepository(db)
+	comunicadoRepo := repositories.NewComunicadoRepository(db)
 
 	// Inicializar handlers
 	estudianteHandler := handlers.NewEstudianteHandler(estudianteRepo, personaRepo, institucionRepo, ciudadRepo)
@@ -167,9 +169,11 @@ func main() {
 
 	// Inicializar servicios
 	authService := services.NewAuthService(usuarioRepo, personaRepo, codigoUsuarioRepo)
+	comunicadoService := services.NewComunicadoService(comunicadoRepo, estudianteRepo, institucionRepo)
 
-	// Inicializar handler de autenticación
+	// Inicializar handlers que dependen de servicios
 	authHandler := handlers.NewAuthHandler(authService)
+	comunicadoHandler := handlers.NewComunicadoHandler(comunicadoService)
 
 	// Crear contenedor de todos los handlers
 	allHandlers := routers.NewAllHandlers(
@@ -193,6 +197,7 @@ func main() {
 		uploadHandler,
 		authHandler,
 		codigoHandler,
+		comunicadoHandler,
 	)
 
 	// Configurar todas las rutas

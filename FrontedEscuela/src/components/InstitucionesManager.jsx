@@ -25,6 +25,7 @@ const InstitucionesManager = ({ onBack }) => {
     nombre: '',
     autoridad: '',
     contacto: '',
+    correo: '',
     direccion: ''
   });
 
@@ -141,6 +142,7 @@ const InstitucionesManager = ({ onBack }) => {
         nombre: '',
         autoridad: '',
         contacto: '',
+        correo: '',
         direccion: ''
       });
       setShowForm(false);
@@ -171,6 +173,7 @@ const InstitucionesManager = ({ onBack }) => {
       nombre: institucion.nombre || '',
       autoridad: institucion.autoridad || '',
       contacto: institucion.contacto || '',
+      correo: institucion.correo || '',
       direccion: institucion.direccion || ''
     });
     setShowForm(true);
@@ -258,6 +261,7 @@ const InstitucionesManager = ({ onBack }) => {
                 nombre: '',
                 autoridad: '',
                 contacto: '',
+                correo: '',
                 direccion: ''
               });
             }}
@@ -380,6 +384,18 @@ const InstitucionesManager = ({ onBack }) => {
                       )}
                     </div>
 
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                      <input
+                        type="email"
+                        name="correo"
+                        value={formData.correo}
+                        onChange={handleInputChange}
+                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200"
+                        placeholder="correo@institucion.edu.ec"
+                      />
+                    </div>
+
                     <div className="md:col-span-2">
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Dirección</label>
                       <textarea
@@ -468,6 +484,9 @@ const InstitucionesManager = ({ onBack }) => {
                             Contacto
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
+                            Correo
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
                             Dirección
                           </th>
                           <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
@@ -505,6 +524,11 @@ const InstitucionesManager = ({ onBack }) => {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
                                 {institucion.contacto || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {institucion.correo || 'N/A'}
                               </div>
                             </td>
                             <td className="px-6 py-4">
@@ -573,6 +597,12 @@ const InstitucionesManager = ({ onBack }) => {
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Contacto</p>
                             <p className="text-sm text-gray-900 mt-1">
                               {institucion.contacto || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Correo</p>
+                            <p className="text-sm text-gray-900 mt-1">
+                              {institucion.correo || 'N/A'}
                             </p>
                           </div>
                         </div>

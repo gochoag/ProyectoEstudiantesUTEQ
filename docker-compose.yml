@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
       target: frontend
       args:
-        - VITE_API_URL=https://aplicaciones.uteq.edu.ec:9612
+        - VITE_API_URL=https://aplicaciones.uteq.edu.ec:9611
     command: npx serve -s dist -l 5173
     restart: always
     ports:

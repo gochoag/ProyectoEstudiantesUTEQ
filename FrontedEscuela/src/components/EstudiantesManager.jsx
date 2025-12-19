@@ -70,6 +70,26 @@ const EstudiantesManager = ({ onBack }) => {
     { name: 'Otro', icon: 'fa-solid fa-globe', color: '#6B7280' }
   ];
 
+  // Función para generar la URL de la red social basándose en el username
+  const getSocialUrl = (platform, username) => {
+    if (!username) return null;
+    
+    // Limpiar el username: remover @ al inicio si existe
+    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
+    
+    const urlPatterns = {
+      'Facebook': `https://www.facebook.com/${cleanUsername}`,
+      'X (Twitter)': `https://www.x.com/${cleanUsername}`,
+      'Instagram': `https://www.instagram.com/${cleanUsername}`,
+      'TikTok': `https://www.tiktok.com/@${cleanUsername}`,
+      'LinkedIn': `https://www.linkedin.com/in/${cleanUsername}`,
+      'YouTube': `https://www.youtube.com/@${cleanUsername}`,
+      'Otro': null // Para "Otro" no generamos URL automática
+    };
+    
+    return urlPatterns[platform] || null;
+  };
+
   // Cargar datos iniciales
   useEffect(() => {
     loadInitialData();
@@ -1323,9 +1343,10 @@ const EstudiantesManager = ({ onBack }) => {
                                   className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 transition-all duration-200 hover:shadow-md"
                                   title="Ver Redes Sociales"
                                 >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                   </svg>
+                                  Red social
                                 </button>
                                 <button
                                   onClick={() => handleEdit(estudiante)}
@@ -1627,26 +1648,38 @@ const EstudiantesManager = ({ onBack }) => {
 
               <div className="space-y-3">
                 {viewingStudentSocials.parsedNetworks && viewingStudentSocials.parsedNetworks.length > 0 ? (
-                  viewingStudentSocials.parsedNetworks.map((network, index) => (
-                    <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 mr-3">
-                        <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} text-lg`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {network.platform}
-                        </p>
-                        <a
-                          href={network.url.startsWith('http') ? network.url : '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-gray-500 truncate hover:text-green-600 hover:underline block"
-                        >
-                          {network.url}
-                        </a>
-                      </div>
-                    </div>
-                  ))
+                  viewingStudentSocials.parsedNetworks.map((network, index) => {
+                    const socialUrl = getSocialUrl(network.platform, network.url);
+                    const displayUrl = socialUrl || (network.url?.startsWith('http') ? network.url : null);
+                    
+                    return (
+                      <a
+                        key={index}
+                        href={displayUrl || '#'}
+                        target={displayUrl ? '_blank' : undefined}
+                        rel={displayUrl ? 'noopener noreferrer' : undefined}
+                        className={`flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200 transition-all duration-200 ${displayUrl ? 'hover:bg-gray-100 hover:border-green-300 hover:shadow-md cursor-pointer group' : 'cursor-default'}`}
+                        onClick={(e) => !displayUrl && e.preventDefault()}
+                      >
+                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-white border-2 border-gray-200 mr-4 group-hover:border-green-400 transition-colors duration-200" style={{ borderColor: socialPlatforms.find(p => p.name === network.platform)?.color }}>
+                          <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} text-xl`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-lg font-bold text-gray-900 truncate group-hover:text-green-700 transition-colors duration-200">
+                            {network.url?.startsWith('@') ? network.url : `@${network.url}`}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate flex items-center">
+                            <span>{network.platform}</span>
+                            {displayUrl && (
+                              <svg className="w-4 h-4 ml-2 text-gray-400 group-hover:text-green-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            )}
+                          </p>
+                        </div>
+                      </a>
+                    );
+                  })
                 ) : (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
