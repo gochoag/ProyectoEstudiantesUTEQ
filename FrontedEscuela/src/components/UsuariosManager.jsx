@@ -45,7 +45,7 @@ const UsuariosManager = ({ onBack }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       const [usuariosRes, personasRes, tiposRes] = await Promise.all([
         api.get(`/api/usuarios/all-including-deleted`),
         api.get(`/api/personas`),
@@ -96,7 +96,7 @@ const UsuariosManager = ({ onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validaciones básicas
     if (editingUsuario) {
       // Solo validar campos de usuario en modo edición (no se pueden modificar datos de persona)
@@ -110,13 +110,13 @@ const UsuariosManager = ({ onBack }) => {
         setError('Por favor, complete todos los campos obligatorios (marcados con *)');
         return;
       }
-      
+
       // Validar cédula ecuatoriana (10 dígitos) solo para usuarios nuevos
       if (!/^\d{10}$/.test(formData.cedula)) {
         setError('La cédula debe tener exactamente 10 dígitos');
         return;
       }
-      
+
       // Validar email si se proporciona (solo para usuarios nuevos)
       if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
         setError('El formato del correo electrónico no es válido');
@@ -155,7 +155,7 @@ const UsuariosManager = ({ onBack }) => {
     try {
       setSubmitting(true);
       setError(''); // Limpiar errores anteriores
-      
+
       if (editingUsuario) {
         // Preparar datos para actualización - solo los campos permitidos
         const submitData = {
@@ -174,8 +174,8 @@ const UsuariosManager = ({ onBack }) => {
         try {
           const usuarioActualizadoResponse = await api.get(`/api/usuarios/${editingUsuario.ID}`);
           const usuarioActualizado = usuarioActualizadoResponse.data;
-          setUsuarios(prevUsuarios => 
-            prevUsuarios.map(u => 
+          setUsuarios(prevUsuarios =>
+            prevUsuarios.map(u =>
               u.ID === editingUsuario.ID ? usuarioActualizado : u
             )
           );
@@ -244,7 +244,7 @@ const UsuariosManager = ({ onBack }) => {
       confirmar_contraseña: '',
       // Datos de la persona
       nombre: usuario.persona?.nombre || '',
-      fecha_nacimiento: usuario.persona?.fecha_nacimiento ? 
+      fecha_nacimiento: usuario.persona?.fecha_nacimiento ?
         new Date(usuario.persona.fecha_nacimiento).toISOString().split('T')[0] : '',
       correo: usuario.persona?.correo || '',
       telefono: usuario.persona?.telefono || '',
@@ -258,8 +258,8 @@ const UsuariosManager = ({ onBack }) => {
   const handleDeleteClick = (usuario) => {
     setActioningUserId(usuario.ID);
     const isDisabled = usuario.deleted_at || usuario.DeletedAt;
-    setConfirmDialog({ 
-      show: true, 
+    setConfirmDialog({
+      show: true,
       usuario,
       action: isDisabled ? 'habilitar' : 'deshabilitar'
     });
@@ -269,7 +269,7 @@ const UsuariosManager = ({ onBack }) => {
     try {
       setDeleting(true);
       const isDisabled = confirmDialog.usuario.deleted_at || confirmDialog.usuario.DeletedAt;
-      
+
       if (isDisabled) {
         await api.put(`/api/usuarios/${confirmDialog.usuario.ID}/restore`);
       } else {
@@ -290,9 +290,9 @@ const UsuariosManager = ({ onBack }) => {
     const matchesSearch = usuario.usuario.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (usuario.persona?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (usuario.tipo_usuario?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const isDisabled = usuario.deleted_at || usuario.DeletedAt;
-    
+
     let matchesStatus = true;
     if (statusFilter === 'habilitados') {
       matchesStatus = !isDisabled;
@@ -300,12 +300,12 @@ const UsuariosManager = ({ onBack }) => {
       matchesStatus = isDisabled;
     }
     // Si es 'todos', no filtramos por estado
-    
+
     let matchesUserType = true;
     if (userTypeFilter !== 'todos') {
       matchesUserType = usuario.tipo_usuario_id === parseInt(userTypeFilter);
     }
-    
+
     return matchesSearch && matchesStatus && matchesUserType;
   });
 
@@ -351,7 +351,7 @@ const UsuariosManager = ({ onBack }) => {
       {/* Barra de botones */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="flex justify-start items-center mb-4 sm:mb-6">
-          <button 
+          <button
             onClick={showForm ? resetForm : onBack}
             className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
             title={showForm ? "Cancelar" : "Volver al Dashboard"}
@@ -359,23 +359,21 @@ const UsuariosManager = ({ onBack }) => {
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="sm:hidden">{showForm ? "Cancelar" : "Volver"}</span>
+            <span className="">{showForm ? "Cancelar" : "Volver"}</span>
           </button>
         </div>
-      </div>
 
-      {/* Mensajes */}
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+
+        {/* Mensajes */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
-        </div>
-      )}
+        )}
 
         {/* Formulario */}
-      {showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {showForm && (
+
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header del formulario */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -479,11 +477,10 @@ const UsuariosManager = ({ onBack }) => {
                         onChange={handleInputChange}
                         required={!editingUsuario}
                         disabled={editingUsuario}
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${
-                          editingUsuario 
-                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                            : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${editingUsuario
+                          ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                          : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                          }`}
                         placeholder={editingUsuario ? "" : "Ingrese el nombre completo"}
                       />
                     </div>
@@ -498,11 +495,10 @@ const UsuariosManager = ({ onBack }) => {
                         required={!editingUsuario}
                         disabled={editingUsuario}
                         maxLength="10"
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${
-                          editingUsuario 
-                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                            : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${editingUsuario
+                          ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                          : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                          }`}
                         placeholder={editingUsuario ? "" : "Ingrese la cédula (10 dígitos)"}
                       />
                     </div>
@@ -515,11 +511,10 @@ const UsuariosManager = ({ onBack }) => {
                         value={formData.correo}
                         onChange={handleInputChange}
                         disabled={editingUsuario}
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${
-                          editingUsuario 
-                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                            : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${editingUsuario
+                          ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                          : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                          }`}
                         placeholder={editingUsuario ? "" : "ejemplo@correo.com"}
                       />
                     </div>
@@ -532,11 +527,10 @@ const UsuariosManager = ({ onBack }) => {
                         value={formData.telefono}
                         onChange={handleInputChange}
                         disabled={editingUsuario}
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${
-                          editingUsuario 
-                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                            : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${editingUsuario
+                          ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                          : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                          }`}
                         placeholder={editingUsuario ? "" : "Ingrese el teléfono"}
                       />
                     </div>
@@ -549,11 +543,10 @@ const UsuariosManager = ({ onBack }) => {
                         value={formData.fecha_nacimiento}
                         onChange={handleInputChange}
                         disabled={editingUsuario}
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${
-                          editingUsuario 
-                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                            : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 text-sm sm:text-base transition-colors duration-200 ${editingUsuario
+                          ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                          : 'border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                          }`}
                       />
                     </div>
                   </div>
@@ -590,12 +583,12 @@ const UsuariosManager = ({ onBack }) => {
               </form>
             </div>
           </div>
-        </div>
-      )}
+
+        )}
 
         {/* Lista de usuarios */}
-      {!showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {!showForm && (
+
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header de la tabla */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -606,7 +599,7 @@ const UsuariosManager = ({ onBack }) => {
                 Lista de Usuarios del Sistema
               </h3>
             </div>
-            
+
             <div className="px-3 sm:px-6 py-4 sm:py-6">
               {/* Barra de búsqueda y filtros */}
               <div className="mb-6 space-y-4">
@@ -704,18 +697,16 @@ const UsuariosManager = ({ onBack }) => {
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {currentUsuarios.map((usuario, index) => (
-                          <tr 
-                            key={usuario.ID} 
-                            className={`hover:bg-gray-50 transition-colors duration-200 ${
-                              index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                            } ${usuario.deleted_at || usuario.DeletedAt ? 'opacity-60' : ''}`}
+                          <tr
+                            key={usuario.ID}
+                            className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                              } ${usuario.deleted_at || usuario.DeletedAt ? 'opacity-60' : ''}`}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-8 w-8">
-                                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-xs ${
-                                    usuario.deleted_at || usuario.DeletedAt ? 'bg-red-400' : 'bg-green-400'
-                                  }`}>
+                                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-xs ${usuario.deleted_at || usuario.DeletedAt ? 'bg-red-400' : 'bg-green-400'
+                                    }`}>
                                     {(usuario.usuario || 'U').charAt(0).toUpperCase()}
                                   </div>
                                 </div>
@@ -735,20 +726,18 @@ const UsuariosManager = ({ onBack }) => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                usuario.deleted_at || usuario.DeletedAt 
-                                  ? 'bg-gray-100 text-gray-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${usuario.deleted_at || usuario.DeletedAt
+                                ? 'bg-gray-100 text-gray-800'
+                                : 'bg-blue-100 text-blue-800'
+                                }`}>
                                 {usuario.tipo_usuario ? usuario.tipo_usuario.nombre : getTipoUsuarioName(usuario.tipo_usuario_id)}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                usuario.deleted_at || usuario.DeletedAt 
-                                  ? 'bg-red-100 text-red-800' 
-                                  : 'bg-green-100 text-green-800'
-                              }`}>
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${usuario.deleted_at || usuario.DeletedAt
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-green-100 text-green-800'
+                                }`}>
                                 {(usuario.deleted_at || usuario.DeletedAt) ? 'Deshabilitado' : 'Habilitado'}
                               </span>
                             </td>
@@ -757,11 +746,10 @@ const UsuariosManager = ({ onBack }) => {
                                 <button
                                   onClick={() => handleEdit(usuario)}
                                   disabled={actioningUserId === usuario.ID || submitting || deleting || (usuario.deleted_at || usuario.DeletedAt)}
-                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    (usuario.deleted_at || usuario.DeletedAt)
-                                      ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                      : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
-                                  }`}
+                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${(usuario.deleted_at || usuario.DeletedAt)
+                                    ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                    : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
+                                    }`}
                                 >
                                   {actioningUserId === usuario.ID ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -777,16 +765,14 @@ const UsuariosManager = ({ onBack }) => {
                                 <button
                                   onClick={() => handleDeleteClick(usuario)}
                                   disabled={actioningUserId === usuario.ID || submitting || deleting}
-                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    usuario.deleted_at || usuario.DeletedAt 
-                                      ? 'text-green-700 bg-green-100 hover:bg-green-200' 
-                                      : 'text-red-700 bg-red-100 hover:bg-red-200'
-                                  }`}
+                                  className={`inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${usuario.deleted_at || usuario.DeletedAt
+                                    ? 'text-green-700 bg-green-100 hover:bg-green-200'
+                                    : 'text-red-700 bg-red-100 hover:bg-red-200'
+                                    }`}
                                 >
                                   {actioningUserId === usuario.ID && deleting ? (
-                                    <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
-                                      usuario.deleted_at || usuario.DeletedAt ? 'border-green-600' : 'border-red-600'
-                                    }`}></div>
+                                    <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${usuario.deleted_at || usuario.DeletedAt ? 'border-green-600' : 'border-red-600'
+                                      }`}></div>
                                   ) : (
                                     <>
                                       {usuario.deleted_at || usuario.DeletedAt ? (
@@ -818,18 +804,16 @@ const UsuariosManager = ({ onBack }) => {
                   {/* Vista de tarjetas para móvil y tablet */}
                   <div className="lg:hidden space-y-4">
                     {currentUsuarios.map((usuario, index) => (
-                      <div 
-                        key={usuario.ID} 
-                        className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200 ${
-                          usuario.deleted_at || usuario.DeletedAt ? 'opacity-60' : ''
-                        }`}
+                      <div
+                        key={usuario.ID}
+                        className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200 ${usuario.deleted_at || usuario.DeletedAt ? 'opacity-60' : ''
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12">
-                              <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                                usuario.deleted_at || usuario.DeletedAt ? 'bg-red-400' : 'bg-green-400'
-                              }`}>
+                              <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${usuario.deleted_at || usuario.DeletedAt ? 'bg-red-400' : 'bg-green-400'
+                                }`}>
                                 {(usuario.usuario || 'U').charAt(0).toUpperCase()}
                               </div>
                             </div>
@@ -842,15 +826,14 @@ const UsuariosManager = ({ onBack }) => {
                               </p>
                             </div>
                           </div>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            usuario.deleted_at || usuario.DeletedAt 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${usuario.deleted_at || usuario.DeletedAt
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-green-100 text-green-800'
+                            }`}>
                             {(usuario.deleted_at || usuario.DeletedAt) ? 'Deshabilitado' : 'Habilitado'}
                           </span>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <div>
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cédula</p>
@@ -877,11 +860,10 @@ const UsuariosManager = ({ onBack }) => {
                           <button
                             onClick={() => handleEdit(usuario)}
                             disabled={actioningUserId === usuario.ID || submitting || deleting || (usuario.deleted_at || usuario.DeletedAt)}
-                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              (usuario.deleted_at || usuario.DeletedAt)
-                                ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
-                            }`}
+                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${(usuario.deleted_at || usuario.DeletedAt)
+                              ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                              : 'text-gray-700 bg-yellow-100 hover:bg-yellow-200'
+                              }`}
                           >
                             {actioningUserId === usuario.ID ? (
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -897,16 +879,14 @@ const UsuariosManager = ({ onBack }) => {
                           <button
                             onClick={() => handleDeleteClick(usuario)}
                             disabled={actioningUserId === usuario.ID || submitting || deleting}
-                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              usuario.deleted_at || usuario.DeletedAt 
-                                ? 'text-green-700 bg-green-100 hover:bg-green-200' 
-                                : 'text-red-700 bg-red-100 hover:bg-red-200'
-                            }`}
+                            className={`flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${usuario.deleted_at || usuario.DeletedAt
+                              ? 'text-green-700 bg-green-100 hover:bg-green-200'
+                              : 'text-red-700 bg-red-100 hover:bg-red-200'
+                              }`}
                           >
                             {actioningUserId === usuario.ID && deleting ? (
-                              <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${
-                                usuario.deleted_at || usuario.DeletedAt ? 'border-green-600' : 'border-red-600'
-                              }`}></div>
+                              <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${usuario.deleted_at || usuario.DeletedAt ? 'border-green-600' : 'border-red-600'
+                                }`}></div>
                             ) : (
                               <>
                                 {usuario.deleted_at || usuario.DeletedAt ? (
@@ -957,11 +937,10 @@ const UsuariosManager = ({ onBack }) => {
                             <button
                               key={page}
                               onClick={() => paginate(page)}
-                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                                currentPage === page
-                                  ? 'text-white'
-                                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
+                                ? 'text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                }`}
                               style={{
                                 backgroundColor: currentPage === page ? '#025a27' : undefined,
                                 borderColor: currentPage === page ? '#025a27' : undefined
@@ -988,8 +967,10 @@ const UsuariosManager = ({ onBack }) => {
               )}
             </div>
           </div>
-        </div>
-      )}
+
+        )}
+
+      </div>
 
       {/* Diálogo de confirmación */}
       <ConfirmDialog
@@ -997,12 +978,12 @@ const UsuariosManager = ({ onBack }) => {
         onClose={() => !deleting && setConfirmDialog({ show: false, usuario: null, action: '' })}
         onConfirm={handleDeleteConfirm}
         title={confirmDialog.action === 'habilitar' ? "Habilitar Usuario" : "Deshabilitar Usuario"}
-        message={confirmDialog.action === 'habilitar' 
+        message={confirmDialog.action === 'habilitar'
           ? `¿Está seguro que desea habilitar el usuario "${confirmDialog.usuario?.usuario}"? El usuario podrá acceder al sistema nuevamente.`
           : `¿Está seguro que desea deshabilitar el usuario "${confirmDialog.usuario?.usuario}"? El usuario no podrá acceder al sistema.`
         }
-        confirmText={deleting 
-          ? (confirmDialog.action === 'habilitar' ? "Habilitando..." : "Deshabilitando...") 
+        confirmText={deleting
+          ? (confirmDialog.action === 'habilitar' ? "Habilitando..." : "Deshabilitando...")
           : (confirmDialog.action === 'habilitar' ? "Habilitar" : "Deshabilitar")
         }
         cancelText="Cancelar"

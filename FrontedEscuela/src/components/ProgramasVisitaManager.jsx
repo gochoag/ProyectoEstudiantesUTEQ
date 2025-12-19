@@ -99,7 +99,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
         if (dateRangePickerElement && !dateRangePickerElement.hasAttribute('data-datepicker-initialized')) {
           try {
             dateRangePickerElement.setAttribute('data-datepicker-initialized', 'true');
-            
+
             // Inicializar el date range picker de Flowbite
             const dateRangePicker = new Datepicker(dateRangePickerElement, {
               format: 'yyyy-mm-dd',
@@ -163,7 +163,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
           try {
             // Marcar como inicializado para evitar múltiples inicializaciones
             datepickerElement.setAttribute('data-datepicker-initialized', 'true');
-            
+
             // Inicializar el datepicker de Flowbite
             const datepicker = new Datepicker(datepickerElement, {
               format: 'yyyy-mm-dd',
@@ -189,7 +189,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
 
             // Limpiar el evento cuando el componente se desmonte
             return () => {
-              datepickerElement.removeEventListener('changeDate', () => {});
+              datepickerElement.removeEventListener('changeDate', () => { });
               datepickerElement.removeAttribute('data-datepicker-initialized');
             };
           } catch (error) {
@@ -206,53 +206,53 @@ const ProgramasVisitaManager = ({ onBack }) => {
     setLoading(true);
     setError('');
     if (false) {
-    // Validaciones requeridas y de formato
-    const nombre = (quickStudent.nombre || '').trim();
-    const cedulaRaw = (quickStudent.cedula || '').toString();
-    const telefonoRaw = (quickStudent.telefono || '').toString();
-    const correo = (quickStudent.correo || '').trim();
-    const semestreStr = (quickStudent.semestre || '').toString().trim();
-    const fechaNac = quickStudent.fecha_nacimiento || '';
+      // Validaciones requeridas y de formato
+      const nombre = (quickStudent.nombre || '').trim();
+      const cedulaRaw = (quickStudent.cedula || '').toString();
+      const telefonoRaw = (quickStudent.telefono || '').toString();
+      const correo = (quickStudent.correo || '').trim();
+      const semestreStr = (quickStudent.semestre || '').toString().trim();
+      const fechaNac = quickStudent.fecha_nacimiento || '';
 
-    const onlyDigits = (s) => s.replace(/\D/g, '');
-    const cedula = onlyDigits(cedulaRaw).slice(0, 10);
-    const telefono = onlyDigits(telefonoRaw).slice(0, 10);
-    const semestreNum = Number(onlyDigits(semestreStr));
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const onlyDigits = (s) => s.replace(/\D/g, '');
+      const cedula = onlyDigits(cedulaRaw).slice(0, 10);
+      const telefono = onlyDigits(telefonoRaw).slice(0, 10);
+      const semestreNum = Number(onlyDigits(semestreStr));
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Actualizar estado con valores saneados (para reflejar en UI)
-    if (cedula !== quickStudent.cedula || telefono !== quickStudent.telefono || String(semestreNum || '') !== quickStudent.semestre) {
-      setQuickStudent((p) => ({
-        ...p,
-        cedula,
-        telefono,
-        semestre: semestreNum ? String(semestreNum) : '',
-      }));
-    }
+      // Actualizar estado con valores saneados (para reflejar en UI)
+      if (cedula !== quickStudent.cedula || telefono !== quickStudent.telefono || String(semestreNum || '') !== quickStudent.semestre) {
+        setQuickStudent((p) => ({
+          ...p,
+          cedula,
+          telefono,
+          semestre: semestreNum ? String(semestreNum) : '',
+        }));
+      }
 
-    if (!nombre || !cedula || !semestreNum || !telefono || !correo || !fechaNac) {
-      setQuickStudentError('Nombre, cédula, semestre, teléfono, correo y fecha de nacimiento son obligatorios');
-      return;
-    }
-    
-    // Validación de cédula ecuatoriana
-    const validacionCedula = validarCedulaEcuatoriana(cedula.toString());
-    if (!validacionCedula.esValida) {
-      setQuickStudentError(validacionCedula.mensaje);
-      return;
-    }
-    if (telefono.length > 10) {
-      setQuickStudentError('El teléfono debe contener solo números (máximo 10 dígitos)');
-      return;
-    }
-    if (!emailRegex.test(correo)) {
-      setQuickStudentError('Ingrese un correo electrónico válido');
-      return;
-    }
-    if (!Number.isFinite(semestreNum) || semestreNum < 1) {
-      setQuickStudentError('El semestre debe ser un número válido mayor o igual a 1');
-      return;
-    }
+      if (!nombre || !cedula || !semestreNum || !telefono || !correo || !fechaNac) {
+        setQuickStudentError('Nombre, cédula, semestre, teléfono, correo y fecha de nacimiento son obligatorios');
+        return;
+      }
+
+      // Validación de cédula ecuatoriana
+      const validacionCedula = validarCedulaEcuatoriana(cedula.toString());
+      if (!validacionCedula.esValida) {
+        setQuickStudentError(validacionCedula.mensaje);
+        return;
+      }
+      if (telefono.length > 10) {
+        setQuickStudentError('El teléfono debe contener solo números (máximo 10 dígitos)');
+        return;
+      }
+      if (!emailRegex.test(correo)) {
+        setQuickStudentError('Ingrese un correo electrónico válido');
+        return;
+      }
+      if (!Number.isFinite(semestreNum) || semestreNum < 1) {
+        setQuickStudentError('El semestre debe ser un número válido mayor o igual a 1');
+        return;
+      }
     }
     try {
       const [programasRes, institucionesRes, autoridadesRes, estudiantesRes, actividadesRes] = await Promise.all([
@@ -280,7 +280,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
       setAutoridades(normalizeApiResponse(autoridadesRes.data));
       setEstudiantesUniv(normalizeApiResponse(estudiantesRes.data));
       setActividades(normalizeApiResponse(actividadesRes.data));
-      
+
     } catch (err) {
       setError('Error al cargar datos: ' + (err.response?.data?.error || err.message));
     } finally {
@@ -582,7 +582,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
 
   const openEditStudent = async (student) => {
     let fullStudent = student;
-    
+
     // Si no tenemos la información completa de la persona, intentar obtenerla
     if (!student.persona) {
       try {
@@ -593,11 +593,11 @@ const ProgramasVisitaManager = ({ onBack }) => {
         console.warn('No se pudo obtener información completa del estudiante:', err);
       }
     }
-    
+
     // El API devuelve 'persona' (minúscula) según el JSON tag en Go
     const persona = fullStudent.persona || {};
     const fechaNac = persona.fecha_nacimiento ? persona.fecha_nacimiento.split('T')[0] : '';
-    
+
     setEditingStudent(fullStudent);
     setQuickStudent({
       nombre: persona.nombre || '',
@@ -642,12 +642,12 @@ const ProgramasVisitaManager = ({ onBack }) => {
         const studentId = editingStudent.ID || editingStudent.id;
         // El API devuelve 'persona' (minúscula) según el JSON tag
         const personaId = editingStudent.persona?.ID || editingStudent.persona?.id;
-        
+
         if (!personaId) {
           setQuickStudentError('Error: No se pudo obtener el ID de la persona');
           return;
         }
-        
+
         // Actualizar persona
         await api.put(`/api/personas/${personaId}`, {
           nombre,
@@ -656,13 +656,13 @@ const ProgramasVisitaManager = ({ onBack }) => {
           telefono,
           fecha_nacimiento: fechaISO,
         });
-        
+
         // Actualizar estudiante universitario
         await api.put(`/api/estudiantes-universitarios/${studentId}`, {
           persona_id: personaId,
           semestre: semestreNum || 1,
         });
-        
+
         // Obtener el registro actualizado
         let updatedStudent;
         try {
@@ -683,69 +683,69 @@ const ProgramasVisitaManager = ({ onBack }) => {
             },
           };
         }
-        
+
         // Actualizar la lista local
-        setEstudiantesUniv((prev) => prev.map((s) => 
+        setEstudiantesUniv((prev) => prev.map((s) =>
           (s.ID || s.id) === studentId ? updatedStudent : s
         ));
-        
+
         setSuccess('Estudiante universitario actualizado exitosamente');
       } else {
         // Modo creación
         // 1) Create Persona
-      const personaRes = await api.post(`/api/personas`, {
-        nombre,
-        cedula,
-        correo,
-        telefono,
-        fecha_nacimiento: fechaISO,
-      });
-      
-      // Manejar diferentes estructuras de respuesta del backend
-      const personaCreada = personaRes.data.success ? personaRes.data.data : personaRes.data;
-      const personaId = personaCreada?.ID || personaCreada?.id;
-      
-      if (!personaId) {
-        throw new Error('No se pudo obtener el ID de la persona creada');
-      }
-      // 2) Create Estudiante Universitario linked to persona
-      const estRes = await api.post(`/api/estudiantes-universitarios`, {
-        persona_id: personaId,
-        semestre: semestreNum || 1,
-      });
-      
-      // Manejar diferentes estructuras de respuesta del backend
-      const created = estRes.data.success ? estRes.data.data : estRes.data;
-      const newEstId = created?.ID || created?.id;
-      
-      if (!newEstId) {
-        throw new Error('No se pudo obtener el ID del estudiante universitario creado');
-      }
-      // Obtener el registro enriquecido con Persona preloaded
-      let est = created;
-      try {
-        const fullRes = await api.get(`/api/estudiantes-universitarios/${newEstId}`);
-        est = fullRes.data.success ? fullRes.data.data : fullRes.data;
-      } catch (_) {}
+        const personaRes = await api.post(`/api/personas`, {
+          nombre,
+          cedula,
+          correo,
+          telefono,
+          fecha_nacimiento: fechaISO,
+        });
+
+        // Manejar diferentes estructuras de respuesta del backend
+        const personaCreada = personaRes.data.success ? personaRes.data.data : personaRes.data;
+        const personaId = personaCreada?.ID || personaCreada?.id;
+
+        if (!personaId) {
+          throw new Error('No se pudo obtener el ID de la persona creada');
+        }
+        // 2) Create Estudiante Universitario linked to persona
+        const estRes = await api.post(`/api/estudiantes-universitarios`, {
+          persona_id: personaId,
+          semestre: semestreNum || 1,
+        });
+
+        // Manejar diferentes estructuras de respuesta del backend
+        const created = estRes.data.success ? estRes.data.data : estRes.data;
+        const newEstId = created?.ID || created?.id;
+
+        if (!newEstId) {
+          throw new Error('No se pudo obtener el ID del estudiante universitario creado');
+        }
+        // Obtener el registro enriquecido con Persona preloaded
+        let est = created;
+        try {
+          const fullRes = await api.get(`/api/estudiantes-universitarios/${newEstId}`);
+          est = fullRes.data.success ? fullRes.data.data : fullRes.data;
+        } catch (_) { }
         // Fallback: si no viene persona, componerla desde lo ingresado
         if (!est?.persona) {
-        est = {
-          ...est,
+          est = {
+            ...est,
             persona: {
-            nombre,
-            cedula,
-            correo: correo || '',
-            telefono: telefono || '',
-            fecha_nacimiento: fechaISO || '',
-          },
-        };
-      }
-      // Update local list y seleccionar
-      setEstudiantesUniv((prev) => [est, ...prev]);
-      addEstudiante(newEstId);
+              nombre,
+              cedula,
+              correo: correo || '',
+              telefono: telefono || '',
+              fecha_nacimiento: fechaISO || '',
+            },
+          };
+        }
+        // Update local list y seleccionar
+        setEstudiantesUniv((prev) => [est, ...prev]);
+        addEstudiante(newEstId);
         setSuccess('Estudiante universitario creado y agregado');
       }
-      
+
       // Reset and close
       setQuickStudent({ nombre: '', cedula: '', correo: '', telefono: '', fecha_nacimiento: '', semestre: '' });
       setEditingStudent(null);
@@ -768,21 +768,21 @@ const ProgramasVisitaManager = ({ onBack }) => {
       setSaving(false);
       return;
     }
-    
+
     // Validar que tanto fechas como hora estén seleccionadas
     if (!form.fecha_inicio || !form.fecha_fin || !form.hora) {
       setError('Debe seleccionar fecha de inicio, fecha de fin y hora de la visita');
       setSaving(false);
       return;
     }
-    
+
     // Validar que fecha fin no sea anterior a fecha inicio
     if (new Date(form.fecha_fin) < new Date(form.fecha_inicio)) {
       setError('La fecha de fin no puede ser anterior a la fecha de inicio');
       setSaving(false);
       return;
     }
-    
+
     try {
       // Validar IDs seleccionados contra catálogos cargados
       const validAuthIdSet = new Set((autoridades || []).map((a) => Number(a.ID || a.id)).filter((n) => Number.isFinite(n) && n > 0));
@@ -916,58 +916,54 @@ const ProgramasVisitaManager = ({ onBack }) => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-end mb-4">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <button 
-              onClick={onBack}
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
-              title="Volver al Dashboard"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="sm:hidden">Volver</span>
-            </button>
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={() => (showForm ? resetForm() : setShowForm(true))}
-              className="inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold shadow-sm transition-all duration-200"
-              style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
-            >
-              {showForm ? (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
+        <button
+          onClick={onBack}
+          className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
+          title="Volver al Dashboard"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="">Volver</span>
+        </button>
+
+        <button
+          onClick={() => (showForm ? resetForm() : setShowForm(true))}
+          className="inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold shadow-sm transition-all duration-200"
+          style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
+        >
+          {showForm ? (
+            <>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Cancelar
-              </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
-                  </svg>
-                  <span className="hidden sm:inline">Nuevo Programa</span>
-                  <span className="inline sm:hidden">Nuevo</span>
-                </>
-              )}
-            </button>
-          </div>
+              </svg>
+              Cancelar
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+              </svg>
+              <span className="hidden sm:inline">Nuevo Programa</span>
+              <span className="inline sm:hidden">Nuevo</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {(error || success) && (
+        <div className="mb-4">
+          {error && <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg">{error}</div>}
+          {success && <div className="bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-lg mt-2">{success}</div>}
         </div>
+      )}
 
-        {(error || success) && (
-          <div className="mb-4">
-            {error && <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg">{error}</div>}
-            {success && <div className="bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-lg mt-2">{success}</div>}
-          </div>
-        )}
-
-        {showForm && (
-          <>
+      {showForm && (
+        <>
           {/* Formulario (estilo Estudiantes) */}
           <div className="px-0">
             <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
@@ -1012,16 +1008,16 @@ const ProgramasVisitaManager = ({ onBack }) => {
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
                               <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                               </svg>
                             </div>
-                            <input 
-                              id="datepicker-range-start" 
-                              name="start" 
-                              type="text" 
+                            <input
+                              id="datepicker-range-start"
+                              name="start"
+                              type="text"
                               value={form.fecha_inicio}
                               onChange={(e) => setForm((prev) => ({ ...prev, fecha_inicio: e.target.value }))}
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full pl-8 pr-2 py-2 transition-colors duration-200" 
+                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full pl-8 pr-2 py-2 transition-colors duration-200"
                               placeholder="Fecha inicio"
                               readOnly
                               required
@@ -1033,16 +1029,16 @@ const ProgramasVisitaManager = ({ onBack }) => {
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
                               <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                               </svg>
                             </div>
-                            <input 
-                              id="datepicker-range-end" 
-                              name="end" 
-                              type="text" 
+                            <input
+                              id="datepicker-range-end"
+                              name="end"
+                              type="text"
                               value={form.fecha_fin}
                               onChange={(e) => setForm((prev) => ({ ...prev, fecha_fin: e.target.value }))}
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full pl-8 pr-2 py-2 transition-colors duration-200" 
+                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full pl-8 pr-2 py-2 transition-colors duration-200"
                               placeholder="Fecha fin"
                               readOnly
                               required
@@ -1052,20 +1048,20 @@ const ProgramasVisitaManager = ({ onBack }) => {
                         <div className="lg:w-32">
                           <label className="block text-xs font-medium text-gray-700 mb-1">Hora</label>
                           <div className="relative">
-                            <input 
-                              id="hora-programa-timepicker" 
-                              type="time" 
+                            <input
+                              id="hora-programa-timepicker"
+                              type="time"
                               name="hora"
                               value={form.hora}
                               onChange={(e) => setForm((prev) => ({ ...prev, hora: e.target.value }))}
-                              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-colors duration-200 bg-white" 
-                              min="07:00" 
+                              className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-colors duration-200 bg-white"
+                              min="07:00"
                               max="18:00"
                               required
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                               <svg className="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd"/>
+                                <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd" />
                               </svg>
                             </div>
                           </div>
@@ -1122,7 +1118,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
                             const cedula = a.Persona?.cedula || a.persona?.cedula || '';
                             const cargo = a.cargo || '';
                             const selected = form.autoridades_ids.includes(id);
-                            const initials = (nombre || 'NA').toString().trim().split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                            const initials = (nombre || 'NA').toString().trim().split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
                             return (
                               <button
                                 type="button"
@@ -1178,20 +1174,20 @@ const ProgramasVisitaManager = ({ onBack }) => {
                                 </button>
                               )}
                               <input
-                              type="text"
-                              placeholder="Buscar por estudiante"
-                              className="w-full pl-7 pr-7 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                              value={searchStudent}
-                              onChange={(e) => setSearchStudent(e.target.value)}
-                            />
+                                type="text"
+                                placeholder="Buscar por estudiante"
+                                className="w-full pl-7 pr-7 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                value={searchStudent}
+                                onChange={(e) => setSearchStudent(e.target.value)}
+                              />
                             </div>
                             <button
                               type="button"
-                              onClick={() => { 
+                              onClick={() => {
                                 setEditingStudent(null);
                                 setQuickStudent({ nombre: '', cedula: '', correo: '', telefono: '', fecha_nacimiento: '', semestre: '' });
-                                setQuickStudentError(''); 
-                                setShowQuickAddStudent(true); 
+                                setQuickStudentError('');
+                                setShowQuickAddStudent(true);
                               }}
                               className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white shadow-sm w-full sm:w-auto justify-center"
                               style={{ backgroundColor: '#025a27' }}
@@ -1208,25 +1204,25 @@ const ProgramasVisitaManager = ({ onBack }) => {
                               <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded mb-2 text-sm">{quickStudentError}</div>
                             )}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
-                              <input className="border-gray-300 rounded-md" placeholder="Nombre" value={quickStudent.nombre} onChange={(e)=>setQuickStudent((p)=>({...p,nombre:e.target.value}))} />
-                              <input className="border-gray-300 rounded-md" placeholder="Cédula" value={quickStudent.cedula} onChange={(e)=>setQuickStudent((p)=>({...p,cedula:e.target.value}))} />
-                              <input className="border-gray-300 rounded-md" placeholder="Correo" value={quickStudent.correo} onChange={(e)=>setQuickStudent((p)=>({...p,correo:e.target.value}))} />
-                              <input className="border-gray-300 rounded-md" placeholder="Teléfono" value={quickStudent.telefono} onChange={(e)=>setQuickStudent((p)=>({...p,telefono:e.target.value}))} />
+                              <input className="border-gray-300 rounded-md" placeholder="Nombre" value={quickStudent.nombre} onChange={(e) => setQuickStudent((p) => ({ ...p, nombre: e.target.value }))} />
+                              <input className="border-gray-300 rounded-md" placeholder="Cédula" value={quickStudent.cedula} onChange={(e) => setQuickStudent((p) => ({ ...p, cedula: e.target.value }))} />
+                              <input className="border-gray-300 rounded-md" placeholder="Correo" value={quickStudent.correo} onChange={(e) => setQuickStudent((p) => ({ ...p, correo: e.target.value }))} />
+                              <input className="border-gray-300 rounded-md" placeholder="Teléfono" value={quickStudent.telefono} onChange={(e) => setQuickStudent((p) => ({ ...p, telefono: e.target.value }))} />
                               <div>
                                 <DatePicker
                                   value={quickStudent.fecha_nacimiento}
-                                  onChange={(value) => setQuickStudent((p) => ({...p, fecha_nacimiento: value}))}
+                                  onChange={(value) => setQuickStudent((p) => ({ ...p, fecha_nacimiento: value }))}
                                   placeholder="Fecha de nacimiento"
                                   className="border-gray-300 rounded-md"
                                 />
                               </div>
-                              <input className="border-gray-300 rounded-md" placeholder="Semestre" value={quickStudent.semestre} onChange={(e)=>setQuickStudent((p)=>({...p,semestre:e.target.value}))} />
+                              <input className="border-gray-300 rounded-md" placeholder="Semestre" value={quickStudent.semestre} onChange={(e) => setQuickStudent((p) => ({ ...p, semestre: e.target.value }))} />
                             </div>
                             <div className="flex items-center gap-2">
                               <button type="button" onClick={handleSaveQuickStudent} disabled={quickStudentSaving} className="px-3 py-1.5 rounded-md text-white disabled:opacity-60" style={{ backgroundColor: '#025a27' }} onMouseEnter={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#014a1f'; }} onMouseLeave={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#025a27'; }}>
                                 {quickStudentSaving ? 'Guardando...' : 'Guardar estudiante'}
                               </button>
-                              <button type="button" onClick={()=>{ setShowQuickAddStudent(false); setQuickStudentError(''); }} className="px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
+                              <button type="button" onClick={() => { setShowQuickAddStudent(false); setQuickStudentError(''); }} className="px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
                             </div>
                           </div>
                         )}
@@ -1243,21 +1239,21 @@ const ProgramasVisitaManager = ({ onBack }) => {
                                 className={`w-full px-3 py-2.5 text-sm rounded-md border transition-colors duration-200 ${selected ? 'bg-amber-50 border-amber-300' : 'bg-white hover:bg-gray-50 border-gray-200'}`}
                               >
                                 <div className="flex items-center justify-between">
-                              <button
-                                type="button"
-                                onClick={() => (selected ? removeEstudiante(id) : addEstudiante(id))}
+                                  <button
+                                    type="button"
+                                    onClick={() => (selected ? removeEstudiante(id) : addEstudiante(id))}
                                     className="flex-1 text-left flex items-center gap-3"
-                              >
-                                  <div>
-                                    <div className="font-medium text-gray-800">{nombre}</div>
-                                    <div className="text-gray-500">Cédula: {cedula || 'N/A'}</div>
-                                </div>
-                              </button>
+                                  >
+                                    <div>
+                                      <div className="font-medium text-gray-800">{nombre}</div>
+                                      <div className="text-gray-500">Cédula: {cedula || 'N/A'}</div>
+                                    </div>
+                                  </button>
                                   <div className="flex items-center gap-2">
-                                    <input 
-                                      type="checkbox" 
-                                      readOnly 
-                                      checked={selected} 
+                                    <input
+                                      type="checkbox"
+                                      readOnly
+                                      checked={selected}
                                       style={{ accentColor: '#e0ae27' }}
                                       onChange={() => (selected ? removeEstudiante(id) : addEstudiante(id))}
                                     />
@@ -1311,16 +1307,16 @@ const ProgramasVisitaManager = ({ onBack }) => {
                         </div>
                       )}
                     </button>
-                    
+
                   </div>
                 </form>
               </div>
             </div>
           </div>
-          </>
-        )}
-        {/* Listado (estilo Estudiantes) */}
-        {!showForm && (
+        </>
+      )}
+      {/* Listado (estilo Estudiantes) */}
+      {!showForm && (
         <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
           {/* Header */}
           <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -1569,17 +1565,16 @@ const ProgramasVisitaManager = ({ onBack }) => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                       </button>
-                      
+
                       <div className="flex space-x-1">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                           <button
                             key={page}
                             onClick={() => paginate(page)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                              currentPage === page
-                                ? 'text-white'
-                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
+                              ? 'text-white'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                              }`}
                             style={{
                               backgroundColor: currentPage === page ? '#025a27' : undefined,
                               borderColor: currentPage === page ? '#025a27' : undefined,
@@ -1589,7 +1584,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
                           </button>
                         ))}
                       </div>
-                      
+
                       <button
                         onClick={nextPage}
                         disabled={currentPage === totalPages}
@@ -1606,155 +1601,154 @@ const ProgramasVisitaManager = ({ onBack }) => {
             )}
           </div>
         </div>
-        )}
-        {/* Confirm Dialog para cancelar programa */}
-        <ConfirmDialog
-          isOpen={showConfirm}
-          onClose={() => { setShowConfirm(false); setToCancelId(null); }}
-          onConfirm={confirmCancel}
-          title="Cancelar Programa"
-          message="¿Está seguro que desea cancelar este programa?"
-          confirmText="Cancelar"
-          cancelText="Volver"
-          loading={deleting}
-        />
+      )}
+      {/* Confirm Dialog para cancelar programa */}
+      <ConfirmDialog
+        isOpen={showConfirm}
+        onClose={() => { setShowConfirm(false); setToCancelId(null); }}
+        onConfirm={confirmCancel}
+        title="Cancelar Programa"
+        message="¿Está seguro que desea cancelar este programa?"
+        confirmText="Cancelar"
+        cancelText="Volver"
+        loading={deleting}
+      />
 
-        {/* Modal de Actividades */}
-        {showActModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-5 sm:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-semibold text-gray-800">Gestionar Actividades</h4>
-                <button onClick={() => setShowActModal(false)} className="text-gray-500 hover:text-gray-700">✕</button>
-              </div>
-              {actError && (
-                <div className="mb-3 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-lg">{actError}</div>
-              )}
-              <div className="mb-3">
-                <input
-                  type="text"
-                  placeholder="Buscar actividad..."
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  value={actSearch}
-                  onChange={(e) => setActSearch(e.target.value)}
-                />
-              </div>
-              <div className="max-h-80 overflow-auto space-y-2">
-                {actLoading ? (
-                  <div className="p-3 text-gray-600">Cargando...</div>
-                ) : actividadesFiltered.length === 0 ? (
-                  <div className="p-3 text-gray-500">Sin resultados</div>
-                ) : (
-                  actividadesFiltered.map((a) => {
-                    const id = a.ID || a.id;
-                    const nombre = a.actividad || a.Actividad || '-';
-                    const tematica = a.tematica?.nombre || '';
-                    const duracion = a.duracion || a.Duracion || 0;
-                    const selected = actSelected.includes(id);
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => toggleActividadInModal(id)}
-                       className={`w-full text-left px-4 py-3 text-sm rounded-md border transition-colors duration-200 ${selected ? 'bg-amber-50 border-amber-300' : 'bg-white hover:bg-gray-50 border-gray-200'}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium text-gray-800">{nombre}</div>
-                            <div className="text-gray-500">{tematica || '—'}{duracion ? ` • ${duracion} min` : ''}</div>
-                          </div>
-                          <input type="checkbox" readOnly checked={selected} style={{ accentColor: '#e0ae27' }} className="h-4 w-4" />
+      {/* Modal de Actividades */}
+      {showActModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-lg font-semibold text-gray-800">Gestionar Actividades</h4>
+              <button onClick={() => setShowActModal(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            {actError && (
+              <div className="mb-3 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-lg">{actError}</div>
+            )}
+            <div className="mb-3">
+              <input
+                type="text"
+                placeholder="Buscar actividad..."
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                value={actSearch}
+                onChange={(e) => setActSearch(e.target.value)}
+              />
+            </div>
+            <div className="max-h-80 overflow-auto space-y-2">
+              {actLoading ? (
+                <div className="p-3 text-gray-600">Cargando...</div>
+              ) : actividadesFiltered.length === 0 ? (
+                <div className="p-3 text-gray-500">Sin resultados</div>
+              ) : (
+                actividadesFiltered.map((a) => {
+                  const id = a.ID || a.id;
+                  const nombre = a.actividad || a.Actividad || '-';
+                  const tematica = a.tematica?.nombre || '';
+                  const duracion = a.duracion || a.Duracion || 0;
+                  const selected = actSelected.includes(id);
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => toggleActividadInModal(id)}
+                      className={`w-full text-left px-4 py-3 text-sm rounded-md border transition-colors duration-200 ${selected ? 'bg-amber-50 border-amber-300' : 'bg-white hover:bg-gray-50 border-gray-200'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-800">{nombre}</div>
+                          <div className="text-gray-500">{tematica || '—'}{duracion ? ` • ${duracion} min` : ''}</div>
                         </div>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-              <div className="flex justify-end gap-2 mt-3">
-                <button onClick={() => setShowActModal(false)} className="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button onClick={saveActivitiesModal} disabled={actLoading || actSaving} className="px-5 py-2.5 rounded-md text-white disabled:opacity-60" style={{ backgroundColor: '#025a27' }} onMouseEnter={(e) => { if (!(actLoading || actSaving)) e.currentTarget.style.backgroundColor = '#014a1f'; }} onMouseLeave={(e) => { if (!(actLoading || actSaving)) e.currentTarget.style.backgroundColor = '#025a27'; }}>
-                  {actSaving ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
+                        <input type="checkbox" readOnly checked={selected} style={{ accentColor: '#e0ae27' }} className="h-4 w-4" />
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="flex justify-end gap-2 mt-3">
+              <button onClick={() => setShowActModal(false)} className="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
+              <button onClick={saveActivitiesModal} disabled={actLoading || actSaving} className="px-5 py-2.5 rounded-md text-white disabled:opacity-60" style={{ backgroundColor: '#025a27' }} onMouseEnter={(e) => { if (!(actLoading || actSaving)) e.currentTarget.style.backgroundColor = '#014a1f'; }} onMouseLeave={(e) => { if (!(actLoading || actSaving)) e.currentTarget.style.backgroundColor = '#025a27'; }}>
+                {actSaving ? 'Guardando...' : 'Guardar'}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Modal: Registrar Estudiante Universitario */}
-        {showQuickAddStudent && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-semibold text-gray-800">
-                  {editingStudent ? 'Editar Estudiante Universitario' : 'Registrar Estudiante Universitario'}
-                </h4>
-                <button onClick={() => { 
-                  setShowQuickAddStudent(false); 
-                  setQuickStudentError(''); 
-                  setEditingStudent(null);
-                }} className="text-gray-500 hover:text-gray-700">×</button>
-              </div>
-              {quickStudentError && (
-                <div className="mb-3 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded">{quickStudentError}</div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
-                <input required className="border border-gray-300 rounded-md px-3 py-2" placeholder="Nombre" value={quickStudent.nombre} onChange={(e)=>setQuickStudent((p)=>({...p,nombre:e.target.value}))} />
-                <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Cédula" value={quickStudent.cedula} onChange={(e)=>setQuickStudent((p)=>({...p,cedula:e.target.value}))} />
-                <input required type="email" className="border border-gray-300 rounded-md px-3 py-2" placeholder="Correo" value={quickStudent.correo} onChange={(e)=>setQuickStudent((p)=>({...p,correo:e.target.value}))} />
-                <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Teléfono" value={quickStudent.telefono} onChange={(e)=>setQuickStudent((p)=>({...p,telefono:e.target.value}))} />
-                <div>
-                  <div className="relative w-full">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                      </svg>
-                    </div>
-                    <input 
-                      id="fecha-nacimiento-quick-student-datepicker" 
-                      type="text" 
-                      name="fecha_nacimiento"
+      {/* Modal: Registrar Estudiante Universitario */}
+      {showQuickAddStudent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-lg font-semibold text-gray-800">
+                {editingStudent ? 'Editar Estudiante Universitario' : 'Registrar Estudiante Universitario'}
+              </h4>
+              <button onClick={() => {
+                setShowQuickAddStudent(false);
+                setQuickStudentError('');
+                setEditingStudent(null);
+              }} className="text-gray-500 hover:text-gray-700">×</button>
+            </div>
+            {quickStudentError && (
+              <div className="mb-3 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded">{quickStudentError}</div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+              <input required className="border border-gray-300 rounded-md px-3 py-2" placeholder="Nombre" value={quickStudent.nombre} onChange={(e) => setQuickStudent((p) => ({ ...p, nombre: e.target.value }))} />
+              <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Cédula" value={quickStudent.cedula} onChange={(e) => setQuickStudent((p) => ({ ...p, cedula: e.target.value }))} />
+              <input required type="email" className="border border-gray-300 rounded-md px-3 py-2" placeholder="Correo" value={quickStudent.correo} onChange={(e) => setQuickStudent((p) => ({ ...p, correo: e.target.value }))} />
+              <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Teléfono" value={quickStudent.telefono} onChange={(e) => setQuickStudent((p) => ({ ...p, telefono: e.target.value }))} />
+              <div>
+                <div className="relative w-full">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                  </div>
+                  <input
+                    id="fecha-nacimiento-quick-student-datepicker"
+                    type="text"
+                    name="fecha_nacimiento"
                     value={quickStudent.fecha_nacimiento}
-                      onChange={(e) => setQuickStudent((p) => ({...p, fecha_nacimiento: e.target.value}))}
-                      className="border border-gray-300 rounded-md px-3 py-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                      placeholder="Fecha de nacimiento (YYYY-MM-DD)"
-                      readOnly
+                    onChange={(e) => setQuickStudent((p) => ({ ...p, fecha_nacimiento: e.target.value }))}
+                    className="border border-gray-300 rounded-md px-3 py-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Fecha de nacimiento (YYYY-MM-DD)"
+                    readOnly
                     required
                   />
                 </div>
-                </div>
-                <select 
-                  required 
-                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" 
-                  value={quickStudent.semestre} 
-                  onChange={(e) => setQuickStudent((p) => ({...p, semestre: e.target.value}))}
-                >
-                  <option value="">Seleccionar semestre</option>
-                  <option value="1">1er Semestre</option>
-                  <option value="2">2do Semestre</option>
-                  <option value="3">3er Semestre</option>
-                  <option value="4">4to Semestre</option>
-                  <option value="5">5to Semestre</option>
-                  <option value="6">6to Semestre</option>
-                  <option value="7">7mo Semestre</option>
-                  <option value="8">8vo Semestre</option>
-                  <option value="9">9no Semestre</option>
-                  <option value="10">10mo Semestre</option>
-                </select>
               </div>
-              <div className="flex justify-end gap-2 mt-3">
-                <button onClick={() => { 
-                  setShowQuickAddStudent(false); 
-                  setQuickStudentError(''); 
-                  setEditingStudent(null);
-                }} className="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button onClick={handleSaveQuickStudent} disabled={quickStudentSaving} className="px-4 py-2 rounded-md text-white disabled:opacity-60" style={{ backgroundColor: '#025a27' }} onMouseEnter={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#014a1f'; }} onMouseLeave={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#025a27'; }}>
-                  {quickStudentSaving ? 'Guardando...' : (editingStudent ? 'Actualizar' : 'Guardar')}
-                </button>
-              </div>
+              <select
+                required
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                value={quickStudent.semestre}
+                onChange={(e) => setQuickStudent((p) => ({ ...p, semestre: e.target.value }))}
+              >
+                <option value="">Seleccionar semestre</option>
+                <option value="1">1er Semestre</option>
+                <option value="2">2do Semestre</option>
+                <option value="3">3er Semestre</option>
+                <option value="4">4to Semestre</option>
+                <option value="5">5to Semestre</option>
+                <option value="6">6to Semestre</option>
+                <option value="7">7mo Semestre</option>
+                <option value="8">8vo Semestre</option>
+                <option value="9">9no Semestre</option>
+                <option value="10">10mo Semestre</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 mt-3">
+              <button onClick={() => {
+                setShowQuickAddStudent(false);
+                setQuickStudentError('');
+                setEditingStudent(null);
+              }} className="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
+              <button onClick={handleSaveQuickStudent} disabled={quickStudentSaving} className="px-4 py-2 rounded-md text-white disabled:opacity-60" style={{ backgroundColor: '#025a27' }} onMouseEnter={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#014a1f'; }} onMouseLeave={(e) => { if (!quickStudentSaving) e.currentTarget.style.backgroundColor = '#025a27'; }}>
+                {quickStudentSaving ? 'Guardando...' : (editingStudent ? 'Actualizar' : 'Guardar')}
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

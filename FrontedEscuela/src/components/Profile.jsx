@@ -294,27 +294,26 @@ const Profile = ({ usuario, onBack }) => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-                <div className="flex justify-between items-center mb-6">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
                     <button
                         onClick={onBack}
-                        className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2"
+                        className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
+                        title="Volver"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Volver
+                        <span className="">Volver</span>
                     </button>
 
                     {!isEditing ? (
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+                            className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base bg-green-800 hover:bg-green-900"
                             style={{ backgroundColor: '#025a27' }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#014a1f'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#025a27'}
                         >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M4 20h4l10.5-10.5a2.5 2.5 0 10-3.536-3.536L4 16v4z" />
                             </svg>
                             Modificar
@@ -325,9 +324,10 @@ const Profile = ({ usuario, onBack }) => {
                                 setIsEditing(false);
                                 loadProfileData(); // Revertir cambios
                             }}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none"
+                            className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base bg-red-600 hover:bg-red-700"
+                            style={{ backgroundColor: '#dc2626' }}
                         >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                             Cancelar
@@ -347,341 +347,343 @@ const Profile = ({ usuario, onBack }) => {
                     </div>
                 )}
 
-                <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
-                        <h3 className="text-xl font-bold text-white flex items-center">
-                            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white shadow-xl rounded-xl border border-gray-200">
+                    <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 rounded-t-xl" style={{ backgroundColor: '#025a27' }}>
+                        <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             Mi Perfil
                         </h3>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                        {/* Sección Datos Personales (Común) */}
-                        <div>
-                            <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center border-b pb-2">
-                                <svg className="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0c0 .884-.5 2-2 2h4c-1.5 0-2-1.116-2-2z" />
-                                </svg>
-                                Datos Personales
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                    <input
-                                        type="text"
-                                        name="nombre"
-                                        value={formData.nombre}
-                                        onChange={handleInputChange}
-                                        disabled={!isEditing}
-                                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
-                                    <input
-                                        type="text"
-                                        name="cedula"
-                                        value={formData.cedula}
-                                        onChange={handleInputChange}
-                                        disabled={!isEditing}
-                                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                                    <input
-                                        type="email"
-                                        name="correo"
-                                        value={formData.correo}
-                                        onChange={handleInputChange}
-                                        disabled={!isEditing}
-                                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                    <input
-                                        type="tel"
-                                        name="telefono"
-                                        value={formData.telefono}
-                                        onChange={handleInputChange}
-                                        disabled={!isEditing}
-                                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
-                                    <div className="relative">
-                                        <input
-                                            id="profile-fecha-nacimiento"
-                                            type="text"
-                                            name="fecha_nacimiento"
-                                            value={formData.fecha_nacimiento}
-                                            onChange={handleInputChange}
-                                            disabled={!isEditing}
-                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                            placeholder="YYYY-MM-DD"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Sección Específica Estudiante */}
-                        {isStudent && (
-                            <>
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center border-b pb-2">
-                                        <svg className="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                                        </svg>
-                                        Datos Académicos (Solo Lectura)
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Institución</label>
-                                            <select
-                                                name="institucion_id"
-                                                value={formData.institucion_id}
-                                                disabled={true}
-                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                            >
-                                                <option value="">Seleccione una institución</option>
-                                                {instituciones.map(i => (
-                                                    <option key={i.ID} value={i.ID}>{i.nombre}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
-                                            <select
-                                                name="provincia_id"
-                                                value={formData.provincia_id}
-                                                disabled={true}
-                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                            >
-                                                <option value="">Seleccione una provincia</option>
-                                                {provincias.map(p => (
-                                                    <option key={p.ID} value={p.ID}>{p.provincia}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-                                            <select
-                                                name="ciudad_id"
-                                                value={formData.ciudad_id}
-                                                disabled={true}
-                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                            >
-                                                <option value="">Seleccione una ciudad</option>
-                                                {ciudades.map(c => (
-                                                    <option key={c.ID} value={c.ID}>{c.ciudad}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
-                                            <input
-                                                type="text"
-                                                name="especialidad"
-                                                value={formData.especialidad}
-                                                disabled={true}
-                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Redes Sociales */}
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center border-b pb-2">
-                                        <svg className="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                        </svg>
-                                        Redes Sociales
-                                    </h3>
-
-                                    {isEditing && (
-                                        <button
-                                            type="button"
-                                            onClick={handleAddSocialNetwork}
-                                            className="mb-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none"
-                                        >
-                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                            Agregar Red Social
-                                        </button>
-                                    )}
-
-                                    <div className="space-y-3">
-                                        {socialNetworks.map((network, index) => (
-                                            <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                                <div className="w-full sm:w-1/3 relative">
-                                                    {isEditing ? (
-                                                        <div className="relative">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
-                                                                className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                                                            >
-                                                                <span className="flex items-center truncate">
-                                                                    {network.platform ? (
-                                                                        <>
-                                                                            <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} mr-2`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
-                                                                            {network.platform}
-                                                                        </>
-                                                                    ) : (
-                                                                        <span className="text-gray-500">Seleccione plataforma</span>
-                                                                    )}
-                                                                </span>
-                                                                <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                                                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                    </svg>
-                                                                </span>
-                                                            </button>
-
-                                                            {openDropdownIndex === index && (
-                                                                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                                                    {socialPlatforms.map((platform) => (
-                                                                        <div
-                                                                            key={platform.name}
-                                                                            className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${network.platform === platform.name ? 'bg-green-100' : ''}`}
-                                                                            onClick={() => {
-                                                                                handleSocialNetworkChange(index, 'platform', platform.name);
-                                                                                setOpenDropdownIndex(null);
-                                                                            }}
-                                                                        >
-                                                                            <div className="flex items-center">
-                                                                                <i className={`${platform.icon} mr-2 w-5 text-center`} style={{ color: platform.color }}></i>
-                                                                                <span className={`block truncate ${network.platform === platform.name ? 'font-semibold' : 'font-normal'}`}>
-                                                                                    {platform.name}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center px-3 py-2 border border-gray-200 rounded-md bg-gray-100">
-                                                            <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} mr-2`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
-                                                            <span>{network.platform}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="w-full sm:w-1/2">
-                                                    <input
-                                                        type="text"
-                                                        value={network.url}
-                                                        onChange={(e) => handleSocialNetworkChange(index, 'url', e.target.value)}
-                                                        disabled={!isEditing}
-                                                        placeholder="Usuario o URL del perfil"
-                                                        className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                                    />
-                                                </div>
-
-                                                {isEditing && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveSocialNetwork(index)}
-                                                        className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                        {socialNetworks.length === 0 && (
-                                            <p className="text-gray-500 text-sm italic">No hay redes sociales registradas.</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        {/* Sección Específica Autoridad */}
-                        {isAdmin && (
+                    <div className="px-3 sm:px-6 py-4 sm:py-6 rounded-b-xl">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Sección Datos Personales (Común) */}
                             <div>
-                                <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center border-b pb-2">
-                                    <svg className="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 flex items-center">
+                                    <svg className="w-5 h-5 mr-2" style={{ color: '#025a27' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0c0 .884-.5 2-2 2h4c-1.5 0-2-1.116-2-2z" />
                                     </svg>
-                                    Información del Cargo
+                                    Datos Personales
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
-                                        <select
-                                            name="cargo"
-                                            value={formData.cargo}
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                                        <input
+                                            type="text"
+                                            name="nombre"
+                                            value={formData.nombre}
                                             onChange={handleInputChange}
                                             disabled={!isEditing}
-                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                        >
-                                            <option value="">Seleccione un cargo</option>
-                                            <option value="Rector">Rector</option>
-                                            <option value="Vicerrector Académico">Vicerrector Académico</option>
-                                            <option value="Vicerrector de Investigación">Vicerrector de Investigación</option>
-                                            <option value="Decano">Decano</option>
-                                            <option value="Subdecano">Subdecano</option>
-                                            <option value="Director de Carrera">Director de Carrera</option>
-                                            <option value="Coordinador/a Académico">Coordinador/a Académico</option>
-                                            <option value="Secretario General">Secretario General</option>
-                                            <option value="Director de Planificación">Director de Planificación</option>
-                                            <option value="Docente">Docente</option>
-                                            <option value="Otro">Otro</option>
-                                        </select>
+                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                        />
                                     </div>
-                                    {formData.cargo === 'Otro' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Especifique Cargo</label>
+                                    <div>
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cédula</label>
+                                        <input
+                                            type="text"
+                                            name="cedula"
+                                            value={formData.cedula}
+                                            onChange={handleInputChange}
+                                            disabled={true}
+                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500 cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                        <input
+                                            type="email"
+                                            name="correo"
+                                            value={formData.correo}
+                                            onChange={handleInputChange}
+                                            disabled={!isEditing}
+                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                        <input
+                                            type="tel"
+                                            name="telefono"
+                                            value={formData.telefono}
+                                            onChange={handleInputChange}
+                                            disabled={!isEditing}
+                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                                        <div className="relative">
                                             <input
+                                                id="profile-fecha-nacimiento"
                                                 type="text"
-                                                name="cargoPersonalizado"
-                                                value={formData.cargoPersonalizado}
+                                                name="fecha_nacimiento"
+                                                value={formData.fecha_nacimiento}
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                                placeholder="Ingrese su cargo"
+                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                                placeholder="YYYY-MM-DD"
                                             />
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
-                        )}
 
-                        {isEditing && (
-                            <div className="pt-6 border-t border-gray-200">
-                                <button
-                                    type="submit"
-                                    disabled={saving}
-                                    className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
-                                    style={{ backgroundColor: '#025a27' }}
-                                    onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#014a1f')}
-                                    onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#025a27')}
-                                >
-                                    {saving ? (
-                                        <div className="flex items-center justify-center">
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            {/* Sección Específica Estudiante */}
+                            {isStudent && (
+                                <>
+                                    <div className="pt-4 border-t border-gray-200">
+                                        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 flex items-center">
+                                            <svg className="w-5 h-5 mr-2" style={{ color: '#025a27' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                                             </svg>
-                                            Guardando...
+                                            Datos Académicos (Solo Lectura)
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Institución</label>
+                                                <select
+                                                    name="institucion_id"
+                                                    value={formData.institucion_id}
+                                                    disabled={true}
+                                                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                >
+                                                    <option value="">Seleccione una institución</option>
+                                                    {instituciones.map(i => (
+                                                        <option key={i.ID} value={i.ID}>{i.nombre}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                                                <select
+                                                    name="provincia_id"
+                                                    value={formData.provincia_id}
+                                                    disabled={true}
+                                                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                >
+                                                    <option value="">Seleccione una provincia</option>
+                                                    {provincias.map(p => (
+                                                        <option key={p.ID} value={p.ID}>{p.provincia}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                                                <select
+                                                    name="ciudad_id"
+                                                    value={formData.ciudad_id}
+                                                    disabled={true}
+                                                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                >
+                                                    <option value="">Seleccione una ciudad</option>
+                                                    {ciudades.map(c => (
+                                                        <option key={c.ID} value={c.ID}>{c.ciudad}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                                                <input
+                                                    type="text"
+                                                    name="especialidad"
+                                                    value={formData.especialidad}
+                                                    disabled={true}
+                                                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                />
+                                            </div>
                                         </div>
-                                    ) : 'Guardar Cambios'}
-                                </button>
-                            </div>
-                        )}
-                    </form>
+                                    </div>
+
+                                    {/* Redes Sociales */}
+                                    <div className="pt-4 border-t border-gray-200">
+                                        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 flex items-center">
+                                            <svg className="w-5 h-5 mr-2" style={{ color: '#025a27' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                            Redes Sociales
+                                        </h3>
+
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={handleAddSocialNetwork}
+                                                className="mb-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none"
+                                            >
+                                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                                Agregar Red Social
+                                            </button>
+                                        )}
+
+                                        <div className="space-y-3">
+                                            {socialNetworks.map((network, index) => (
+                                                <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                                    <div className="w-full sm:w-1/3 relative">
+                                                        {isEditing ? (
+                                                            <div className="relative">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
+                                                                    className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                                                >
+                                                                    <span className="flex items-center truncate">
+                                                                        {network.platform ? (
+                                                                            <>
+                                                                                <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} mr-2`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
+                                                                                {network.platform}
+                                                                            </>
+                                                                        ) : (
+                                                                            <span className="text-gray-500">Seleccione plataforma</span>
+                                                                        )}
+                                                                    </span>
+                                                                    <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                                        <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    </span>
+                                                                </button>
+
+                                                                {openDropdownIndex === index && (
+                                                                    <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                                                        {socialPlatforms.map((platform) => (
+                                                                            <div
+                                                                                key={platform.name}
+                                                                                className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${network.platform === platform.name ? 'bg-green-100' : ''}`}
+                                                                                onClick={() => {
+                                                                                    handleSocialNetworkChange(index, 'platform', platform.name);
+                                                                                    setOpenDropdownIndex(null);
+                                                                                }}
+                                                                            >
+                                                                                <div className="flex items-center">
+                                                                                    <i className={`${platform.icon} mr-2 w-5 text-center`} style={{ color: platform.color }}></i>
+                                                                                    <span className={`block truncate ${network.platform === platform.name ? 'font-semibold' : 'font-normal'}`}>
+                                                                                        {platform.name}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center px-3 py-2 border border-gray-200 rounded-md bg-gray-100">
+                                                                <i className={`${socialPlatforms.find(p => p.name === network.platform)?.icon || 'fa-solid fa-globe'} mr-2`} style={{ color: socialPlatforms.find(p => p.name === network.platform)?.color }}></i>
+                                                                <span>{network.platform}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="w-full sm:w-1/2">
+                                                        <input
+                                                            type="text"
+                                                            value={network.url}
+                                                            onChange={(e) => handleSocialNetworkChange(index, 'url', e.target.value)}
+                                                            disabled={!isEditing}
+                                                            placeholder="Usuario o URL del perfil"
+                                                            className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                                        />
+                                                    </div>
+
+                                                    {isEditing && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveSocialNetwork(index)}
+                                                            className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            {socialNetworks.length === 0 && (
+                                                <p className="text-gray-500 text-sm italic">No hay redes sociales registradas.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Sección Específica Autoridad */}
+                            {isAdmin && (
+                                <div className="pt-4 border-t border-gray-200">
+                                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 flex items-center">
+                                        <svg className="w-5 h-5 mr-2" style={{ color: '#025a27' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Información del Cargo
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                                            <select
+                                                name="cargo"
+                                                value={formData.cargo}
+                                                onChange={handleInputChange}
+                                                disabled={!isEditing}
+                                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                            >
+                                                <option value="">Seleccione un cargo</option>
+                                                <option value="Rector">Rector</option>
+                                                <option value="Vicerrector Académico">Vicerrector Académico</option>
+                                                <option value="Vicerrector de Investigación">Vicerrector de Investigación</option>
+                                                <option value="Decano">Decano</option>
+                                                <option value="Subdecano">Subdecano</option>
+                                                <option value="Director de Carrera">Director de Carrera</option>
+                                                <option value="Coordinador/a Académico">Coordinador/a Académico</option>
+                                                <option value="Secretario General">Secretario General</option>
+                                                <option value="Director de Planificación">Director de Planificación</option>
+                                                <option value="Docente">Docente</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        {formData.cargo === 'Otro' && (
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Especifique Cargo</label>
+                                                <input
+                                                    type="text"
+                                                    name="cargoPersonalizado"
+                                                    value={formData.cargoPersonalizado}
+                                                    onChange={handleInputChange}
+                                                    disabled={!isEditing}
+                                                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base transition-colors duration-200 disabled:bg-gray-100 disabled:text-gray-500"
+                                                    placeholder="Ingrese su cargo"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {isEditing && (
+                                <div className="pt-4 sm:pt-6 border-t border-gray-200">
+                                    <button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
+                                        style={{ backgroundColor: '#025a27' }}
+                                        onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#014a1f')}
+                                        onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#025a27')}
+                                    >
+                                        {saving ? (
+                                            <div className="flex items-center justify-center">
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Guardando...
+                                            </div>
+                                        ) : 'Guardar Cambios'}
+                                    </button>
+                                </div>
+                            )}
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

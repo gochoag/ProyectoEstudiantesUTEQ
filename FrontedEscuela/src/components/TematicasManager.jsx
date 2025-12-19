@@ -39,7 +39,7 @@ const TematicasManager = ({ onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.nombre.trim()) {
       setError('El nombre es obligatorio');
       return;
@@ -49,7 +49,7 @@ const TematicasManager = ({ onBack }) => {
       setLoading(true);
       setError('');
       setSuccess('');
-      
+
       if (editingTematica) {
         await api.put(`${API_URL}/${editingTematica.ID}`, formData);
       } else {
@@ -57,14 +57,14 @@ const TematicasManager = ({ onBack }) => {
       }
 
       await fetchTematicas();
-      
+
       setSuccess(editingTematica ? 'Temática actualizada exitosamente' : 'Temática registrada exitosamente');
-      
+
       // Resetear formulario
       setFormData({ nombre: '', descripcion: '' });
       setShowForm(false);
       setEditingTematica(null);
-      
+
     } catch (error) {
       setError('Error al guardar: ' + error.message);
     } finally {
@@ -131,7 +131,7 @@ const TematicasManager = ({ onBack }) => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center mb-4 sm:mb-6`}>
           {!showForm && (
-            <button 
+            <button
               onClick={onBack}
               className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
               title="Volver al Dashboard"
@@ -139,7 +139,7 @@ const TematicasManager = ({ onBack }) => {
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="sm:hidden">Volver</span>
+              <span className="">Volver</span>
             </button>
           )}
           <button
@@ -150,11 +150,10 @@ const TematicasManager = ({ onBack }) => {
               setError('');
               setSuccess('');
             }}
-            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${
-              showForm 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : 'bg-green-800 hover:bg-green-900'
-            }`}
+            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-green-800 hover:bg-green-900'
+              }`}
             style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
           >
             {showForm ? (
@@ -175,28 +174,24 @@ const TematicasManager = ({ onBack }) => {
             )}
           </button>
         </div>
-      </div>
 
-      {/* Mensajes */}
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+
+        {/* Mensajes */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
-        </div>
-      )}
+        )}
 
-      {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {success}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Formulario */}
-      {showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {/* Formulario */}
+        {showForm && (
+
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header del formulario */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -276,12 +271,12 @@ const TematicasManager = ({ onBack }) => {
               </form>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Lista de temáticas */}
-      {!showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        )}
+
+        {/* Lista de temáticas */}
+        {!showForm && (
+
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header de la tabla */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -292,7 +287,7 @@ const TematicasManager = ({ onBack }) => {
                 Lista de Temáticas
               </h3>
             </div>
-            
+
             <div className="px-3 sm:px-6 py-4 sm:py-6">
               {/* Barra de búsqueda */}
               <div className="mb-6">
@@ -320,7 +315,7 @@ const TematicasManager = ({ onBack }) => {
                     </button>
                   )}
                 </div>
-                
+
                 {/* Estadísticas de búsqueda */}
                 <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
                   <div>
@@ -371,11 +366,10 @@ const TematicasManager = ({ onBack }) => {
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {filteredTematicas.map((tematica, index) => (
-                          <tr 
-                            key={tematica.ID} 
-                            className={`hover:bg-gray-50 transition-colors duration-200 ${
-                              index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                            }`}
+                          <tr
+                            key={tematica.ID}
+                            className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                              }`}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
@@ -432,8 +426,8 @@ const TematicasManager = ({ onBack }) => {
                   {/* Vista de tarjetas para móvil y tablet */}
                   <div className="lg:hidden space-y-4">
                     {filteredTematicas.map((tematica, index) => (
-                      <div 
-                        key={tematica.ID} 
+                      <div
+                        key={tematica.ID}
                         className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -456,7 +450,7 @@ const TematicasManager = ({ onBack }) => {
                             {tematica.actividades?.length || 0} actividades
                           </span>
                         </div>
-                        
+
                         <div className="mb-4">
                           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Descripción</p>
                           <p className="text-sm text-gray-900">
@@ -491,8 +485,10 @@ const TematicasManager = ({ onBack }) => {
               )}
             </div>
           </div>
-        </div>
-      )}
+
+        )}
+
+      </div>
 
       {/* Diálogo de confirmación */}
       <ConfirmDialog

@@ -4,7 +4,7 @@ import ConfirmDialog from './ConfirmDialog';
 
 const SystemConfig = ({ onBack }) => {
   // Cliente API centralizado con token
-  
+
   const [currentSection, setCurrentSection] = useState('provincias');
   const [provincias, setProvincias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
@@ -21,7 +21,7 @@ const SystemConfig = ({ onBack }) => {
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+
   // Estado para búsqueda
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -70,10 +70,10 @@ const SystemConfig = ({ onBack }) => {
 
     try {
       const endpoint = currentSection;
-      
+
       // Preparar datos para enviar - solo enviar los campos necesarios
       let dataToSend = {};
-      
+
       if (currentSection === 'provincias') {
         if (!formData.provincia || formData.provincia.trim() === '') {
           setError('El nombre de la provincia es requerido');
@@ -120,14 +120,14 @@ const SystemConfig = ({ onBack }) => {
     setEditingItem(item);
     // Solo copiar los campos necesarios para el formulario
     const cleanFormData = {};
-    
+
     if (currentSection === 'provincias') {
       cleanFormData.provincia = item.provincia;
     } else if (currentSection === 'ciudades') {
       cleanFormData.ciudad = item.ciudad;
       cleanFormData.provincia_id = item.provincia_id;
     }
-    
+
     setFormData(cleanFormData);
     setShowForm(true);
   };
@@ -182,7 +182,7 @@ const SystemConfig = ({ onBack }) => {
 
   const getItemDisplayName = (item) => {
     if (!item) return 'este elemento';
-    
+
     switch (currentSection) {
       case 'provincias':
         return item.provincia || 'esta provincia';
@@ -208,7 +208,7 @@ const SystemConfig = ({ onBack }) => {
 
     return data.filter(item => {
       const searchLower = searchTerm.toLowerCase();
-      
+
       if (currentSection === 'provincias') {
         return (item.provincia || '').toLowerCase().includes(searchLower);
       } else if (currentSection === 'ciudades') {
@@ -217,7 +217,7 @@ const SystemConfig = ({ onBack }) => {
           getProvinciaName(item.provincia_id).toLowerCase().includes(searchLower)
         );
       }
-      
+
       return false;
     });
   };
@@ -326,11 +326,10 @@ const SystemConfig = ({ onBack }) => {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {currentItems.map((provincia, index) => (
-                    <tr 
-                      key={provincia.ID} 
-                      className={`hover:bg-gray-50 transition-colors duration-200 ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                      }`}
+                    <tr
+                      key={provincia.ID}
+                      className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        }`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -382,8 +381,8 @@ const SystemConfig = ({ onBack }) => {
             {/* Vista de tarjetas para móvil y tablet */}
             <div className="lg:hidden space-y-4">
               {currentItems.map((provincia) => (
-                <div 
-                  key={provincia.ID} 
+                <div
+                  key={provincia.ID}
                   className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -454,11 +453,10 @@ const SystemConfig = ({ onBack }) => {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {currentItems.map((ciudad, index) => (
-                    <tr 
-                      key={ciudad.ID} 
-                      className={`hover:bg-gray-50 transition-colors duration-200 ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                      }`}
+                    <tr
+                      key={ciudad.ID}
+                      className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        }`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -515,8 +513,8 @@ const SystemConfig = ({ onBack }) => {
             {/* Vista de tarjetas para móvil y tablet */}
             <div className="lg:hidden space-y-4">
               {currentItems.map((ciudad) => (
-                <div 
-                  key={ciudad.ID} 
+                <div
+                  key={ciudad.ID}
                   className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -536,7 +534,7 @@ const SystemConfig = ({ onBack }) => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mb-4">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Provincia</p>
                     <p className="text-sm text-gray-900">
@@ -575,14 +573,14 @@ const SystemConfig = ({ onBack }) => {
     }
   };
 
-  
+
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Barra superior con botón de volver */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="flex justify-start items-center mb-4 sm:mb-6">
-          <button 
+          <button
             onClick={onBack}
             className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
             title="Volver al Dashboard"
@@ -590,29 +588,25 @@ const SystemConfig = ({ onBack }) => {
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="sm:hidden">Volver</span>
+            <span className="">Volver</span>
           </button>
         </div>
-      </div>
 
-      {/* Mensajes */}
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+
+        {/* Mensajes */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
-        </div>
-      )}
+        )}
 
-      {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {success}
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar con estilo moderno */}
           <div className="w-full lg:w-64 bg-white shadow-xl rounded-xl p-6 border border-gray-200">
@@ -634,11 +628,10 @@ const SystemConfig = ({ onBack }) => {
                   setCurrentPage(1);
                   setSearchTerm('');
                 }}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  currentSection === 'provincias' 
-                    ? 'text-white' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50'
-                }`}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentSection === 'provincias'
+                  ? 'text-white'
+                  : 'text-gray-700 bg-white hover:bg-gray-50'
+                  }`}
                 style={{
                   backgroundColor: currentSection === 'provincias' ? '#025a27' : undefined
                 }}
@@ -653,11 +646,10 @@ const SystemConfig = ({ onBack }) => {
                   setCurrentPage(1);
                   setSearchTerm('');
                 }}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  currentSection === 'ciudades' 
-                    ? 'text-white' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50'
-                }`}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentSection === 'ciudades'
+                  ? 'text-white'
+                  : 'text-gray-700 bg-white hover:bg-gray-50'
+                  }`}
                 style={{
                   backgroundColor: currentSection === 'ciudades' ? '#025a27' : undefined
                 }}
@@ -709,7 +701,7 @@ const SystemConfig = ({ onBack }) => {
                   </div>
                   <div className="mt-6">
                     <p className="text-gray-600">
-                      Desde aquí puedes gestionar las configuraciones básicas del sistema como provincias y ciudades. 
+                      Desde aquí puedes gestionar las configuraciones básicas del sistema como provincias y ciudades.
                       Selecciona una opción del menú lateral para comenzar.
                     </p>
                   </div>
@@ -734,7 +726,7 @@ const SystemConfig = ({ onBack }) => {
                     <div className="px-3 sm:px-6 py-4 sm:py-6">
                       <form onSubmit={handleSubmit} className="space-y-6">
                         {renderForm()}
-                        
+
                         {/* Botones de acción */}
                         <div className="pt-4 sm:pt-6 border-t border-gray-200">
                           <div className="flex flex-col sm:flex-row gap-3">
@@ -804,12 +796,11 @@ const SystemConfig = ({ onBack }) => {
                           setEditingItem(null);
                           setFormData({});
                         }}
-                        className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${
-                          showForm 
-                            ? 'bg-red-600 hover:bg-red-700' 
-                            : 'bg-white hover:bg-gray-100'
-                        }`}
-                        style={{ 
+                        className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : 'bg-white hover:bg-gray-100'
+                          }`}
+                        style={{
                           backgroundColor: showForm ? '#dc2626' : '#ffffff',
                           color: showForm ? '#ffffff' : '#025a27'
                         }}
@@ -832,7 +823,7 @@ const SystemConfig = ({ onBack }) => {
                         )}
                       </button>
                     </div>
-                    
+
                     <div className="px-3 sm:px-6 py-4 sm:py-6">
                       {getCurrentData().length === 0 ? (
                         <div className="text-center py-8 sm:py-12">
@@ -866,17 +857,16 @@ const SystemConfig = ({ onBack }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                   </svg>
                                 </button>
-                                
+
                                 <div className="flex space-x-1">
                                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                     <button
                                       key={page}
                                       onClick={() => paginate(page)}
-                                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                                        currentPage === page
-                                          ? 'text-white'
-                                          : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                      }`}
+                                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
+                                        ? 'text-white'
+                                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                        }`}
                                       style={{
                                         backgroundColor: currentPage === page ? '#025a27' : undefined,
                                         borderColor: currentPage === page ? '#025a27' : undefined
@@ -886,7 +876,7 @@ const SystemConfig = ({ onBack }) => {
                                     </button>
                                   ))}
                                 </div>
-                                
+
                                 <button
                                   onClick={nextPage}
                                   disabled={currentPage === totalPages}
@@ -908,6 +898,8 @@ const SystemConfig = ({ onBack }) => {
             )}
           </div>
         </div>
+
+
       </div>
 
       {/* Modal de confirmación para eliminación */}

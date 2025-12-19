@@ -880,10 +880,8 @@ const Dashboard = ({ usuario, onLogout }) => {
     // Ruta directa para Dudas y Preguntas
     if (currentView === 'dudas' && hasPermission('dudas')) {
       return (
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <BancoDudas onBack={() => handleNavigate('home')} />
-          </div>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
+          <BancoDudas onBack={() => handleNavigate('home')} />
         </div>
       );
     }
@@ -903,12 +901,10 @@ const Dashboard = ({ usuario, onLogout }) => {
         return hasPermission('actividades') ? <ActividadesManager onBack={() => handleNavigate('home')} /> : null;
       case 'dudas':
         return hasPermission('dudas') ? (
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Dudas y Preguntas</h2>
-                <p className="text-gray-600">Esta sección estará disponible próximamente.</p>
-              </div>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Dudas y Preguntas</h2>
+              <p className="text-gray-600">Esta sección estará disponible próximamente.</p>
             </div>
           </div>
         ) : null;
@@ -925,68 +921,66 @@ const Dashboard = ({ usuario, onLogout }) => {
       case 'home':
       default:
         return (
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              {/* Información del Usuario - Compacto y Flotante */}
-              <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 mb-6 border-l-4 border-green-600 hover:shadow-xl transition-shadow duration-300">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm sm:text-base">{usuario.persona?.nombre || 'Usuario'}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">{usuario.tipo_usuario?.nombre || 'Usuario'}</p>
-                    </div>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
+            {/* Información del Usuario - Compacto y Flotante */}
+            <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 mb-6 border-l-4 border-green-600 hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   </div>
-                  <div className="hidden sm:flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-gray-500">En línea</span>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{usuario.persona?.nombre || 'Usuario'}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{usuario.tipo_usuario?.nombre || 'Usuario'}</p>
                   </div>
+                </div>
+                <div className="hidden sm:flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-500">En línea</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Layout de dos columnas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Columna izquierda - Carruseles QR */}
+              <div className="space-y-4 sm:space-y-6">
+                {/* Sección 1: Apps UTEQ */}
+                <div>
+                  <Carousel
+                    data={appsData}
+                    currentIndex={currentAppsIndex}
+                    type="apps"
+                    title="Aplicaciones Software"
+                  />
+                </div>
+
+                {/* Sección 2: Información de Software */}
+                <div>
+                  <Carousel
+                    data={softwData}
+                    currentIndex={currentSoftwIndex}
+                    type="softw"
+                    title="Información de la Carrera"
+                  />
+                </div>
+
+                {/* Sección 3: Redes Sociales UTEQ */}
+                <div>
+                  <Carousel
+                    data={socialData}
+                    currentIndex={currentSocialIndex}
+                    type="social"
+                    title="Redes Sociales Software"
+                  />
                 </div>
               </div>
 
-              {/* Layout de dos columnas */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Columna izquierda - Carruseles QR */}
-                <div className="space-y-4 sm:space-y-6">
-                  {/* Sección 1: Apps UTEQ */}
-                  <div>
-                    <Carousel
-                      data={appsData}
-                      currentIndex={currentAppsIndex}
-                      type="apps"
-                      title="Aplicaciones Software"
-                    />
-                  </div>
-
-                  {/* Sección 2: Información de Software */}
-                  <div>
-                    <Carousel
-                      data={softwData}
-                      currentIndex={currentSoftwIndex}
-                      type="softw"
-                      title="Información de la Carrera"
-                    />
-                  </div>
-
-                  {/* Sección 3: Redes Sociales UTEQ */}
-                  <div>
-                    <Carousel
-                      data={socialData}
-                      currentIndex={currentSocialIndex}
-                      type="social"
-                      title="Redes Sociales Software"
-                    />
-                  </div>
-                </div>
-
-                {/* Columna derecha - Carrusel vertical de noticias */}
-                <div className="lg:sticky lg:top-24">
-                  <NewsCarousel />
-                </div>
+              {/* Columna derecha - Carrusel vertical de noticias */}
+              <div className="lg:sticky lg:top-24">
+                <NewsCarousel />
               </div>
             </div>
           </div>

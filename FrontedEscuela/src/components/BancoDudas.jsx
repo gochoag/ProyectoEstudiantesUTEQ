@@ -34,13 +34,13 @@ const getStudentName = (d) => {
   try {
     const persona = d?.estudiante?.persona || d?.persona || {};
     const estudiante = d?.estudiante || {};
-    
+
     // Construir nombre completo desde nombres y apellidos
     const nombreCompleto = [
       persona.nombres || persona.nombre,
       persona.apellidos || persona.apellido
     ].filter(Boolean).join(' ').trim();
-    
+
     // Intentar diferentes campos donde puede estar el nombre
     return (
       nombreCompleto ||
@@ -63,13 +63,13 @@ const getResponderName = (d) => {
   try {
     const autoridad = d?.autoridad_uteq || d?.autoridad || {};
     const persona = autoridad?.persona || {};
-    
+
     // Construir nombre completo desde nombres y apellidos
     const nombreCompleto = [
       persona.nombres || persona.nombre,
       persona.apellidos || persona.apellido
     ].filter(Boolean).join(' ').trim();
-    
+
     // Intentar diferentes campos donde puede estar el nombre
     return (
       nombreCompleto ||
@@ -106,7 +106,7 @@ function useUsuario() {
     try {
       const raw = localStorage.getItem('usuario');
       if (raw) setUsuario(JSON.parse(raw));
-    } catch {}
+    } catch { }
   }, []);
   const isAutoridad = useMemo(() => {
     const nombre = (usuario?.tipo_usuario?.nombre || '').toLowerCase();
@@ -193,21 +193,21 @@ export default function BancoDudas({ onBack }) {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-3 sm:p-4">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
       {/* Barra superior con botón Volver */}
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-         <button 
-              onClick={onBack}
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
-              title="Volver al Dashboard"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="sm:hidden">Volver</span>
-            </button>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <button
+          onClick={onBack}
+          className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
+          title="Volver al Dashboard"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="">Volver</span>
+        </button>
       </div>
-  
+
 
       <div className="flex flex-wrap gap-2 mb-4">
         <button
@@ -225,7 +225,7 @@ export default function BancoDudas({ onBack }) {
       </div>
 
       {errorIds && (
-        <div className="mb-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{errorIds}</div>
+        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{errorIds}</div>
       )}
       {activeTab === 'publico' ? (
         <DudasPublicas
@@ -332,7 +332,7 @@ function DudasPublicas({ estudianteId, isAutoridad, autoridadId }) {
         pregunta: pregunta.trim(),
         privacidad: 'publico',
         estudiante_id: estudianteId,
-        
+
 
       });
       setPregunta('');
@@ -378,7 +378,7 @@ function DudasPublicas({ estudianteId, isAutoridad, autoridadId }) {
                 <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filter === 'sin-responder' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilter('sin-responder')}>Sin responder</button>
                 <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filter === 'respondidas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilter('respondidas')}>Respondidas</button>
               </div>
-              
+
             </div>
           </div>
         </form>
@@ -392,7 +392,7 @@ function DudasPublicas({ estudianteId, isAutoridad, autoridadId }) {
               <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filter === 'sin-responder' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilter('sin-responder')}>Sin responder</button>
               <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filter === 'respondidas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilter('respondidas')}>Respondidas</button>
             </div>
-            
+
           </div>
         </div>
       )}
@@ -628,7 +628,7 @@ function DudasPrivadas({ estudianteId, isAutoridad, autoridadId }) {
                 <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'sin-responder' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('sin-responder')}>Sin responder</button>
                 <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'respondidas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('respondidas')}>Respondidas</button>
               </div>
-              
+
             </div>
           </div>
         </form>
@@ -637,15 +637,15 @@ function DudasPrivadas({ estudianteId, isAutoridad, autoridadId }) {
       {/* Filtro de estado (botones) - solo autoridad */}
       {isAutoridad && (
         <div className="bg-white rounded-2xl shadow p-3 sm:p-4 mb-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-700">Filtrar:</span>
-              <div className="flex flex-wrap rounded-md overflow-hidden border border-gray-300">
-                <button type="button" className={`px-3 py-1 text-xs sm:text-sm ${filterPriv === 'todas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('todas')}>Todas</button>
-                <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'sin-responder' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('sin-responder')}>Sin responder</button>
-                <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'respondidas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('respondidas')}>Respondidas</button>
-              </div>
-              
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-700">Filtrar:</span>
+            <div className="flex flex-wrap rounded-md overflow-hidden border border-gray-300">
+              <button type="button" className={`px-3 py-1 text-xs sm:text-sm ${filterPriv === 'todas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('todas')}>Todas</button>
+              <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'sin-responder' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('sin-responder')}>Sin responder</button>
+              <button type="button" className={`px-3 py-1 text-xs sm:text-sm border-l border-gray-300 ${filterPriv === 'respondidas' ? 'bg-[#025a27] text-white' : 'bg-white text-gray-700'}`} onClick={() => setFilterPriv('respondidas')}>Respondidas</button>
             </div>
+
+          </div>
         </div>
       )}
 
@@ -762,9 +762,8 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
           {/* Chips */}
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                duda.privacidad === 'privado' ? '' : 'bg-green-50 text-green-700 border-green-200'
-              }`}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${duda.privacidad === 'privado' ? '' : 'bg-green-50 text-green-700 border-green-200'
+                }`}
               style={
                 duda.privacidad === 'privado'
                   ? { backgroundColor: '#fff6db', color: '#e0ae27', borderColor: '#f1d48a' }
@@ -773,11 +772,10 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
             >
               {duda.privacidad === 'privado' ? 'Privada' : 'Pública'}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-              duda.respuesta && duda.respuesta !== ''
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-amber-50 text-amber-700 border-amber-200'
-            }`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${duda.respuesta && duda.respuesta !== ''
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : 'bg-amber-50 text-amber-700 border-amber-200'
+              }`}>
               {duda.respuesta && duda.respuesta !== '' ? 'Respondida' : 'Pendiente'}
             </span>
           </div>
@@ -789,13 +787,13 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
           <div className="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             {duda.fecha_pregunta && (
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 {new Date(duda.fecha_pregunta).toLocaleString()}
               </span>
             )}
             {studentName && (
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 {studentName}
               </span>
             )}
@@ -827,7 +825,7 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
       {duda.respuesta ? (
         <div className="mt-3 sm:mt-4 rounded-lg border border-emerald-200 bg-emerald-50/70 p-3 sm:p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-800 mb-1.5">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
             Respuesta
           </div>
           <div className="text-gray-900 break-words whitespace-pre-wrap">{duda.respuesta}</div>
@@ -835,14 +833,14 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
             {duda.fecha_respuesta && (
               <>
                 <span className="inline-flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   {new Date(duda.fecha_respuesta).toLocaleString()}
                 </span>
                 {responderName && (
                   <>
                     <span>•</span>
                     <span className="inline-flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                       {responderName}
                     </span>
                   </>

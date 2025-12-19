@@ -4,14 +4,14 @@ import ConfirmDialog from './ConfirmDialog';
 
 const InstitucionesManager = ({ onBack }) => {
   // Cliente API centralizado con token
-  
+
   const [instituciones, setInstituciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingInstitucion, setEditingInstitucion] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Estados para el modal de confirmación
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [institucionToDelete, setInstitucionToDelete] = useState(null);
@@ -50,7 +50,7 @@ const InstitucionesManager = ({ onBack }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Limpiar errores de validación cuando el usuario empiece a escribir
     if (validationErrors[name]) {
       setValidationErrors({
@@ -69,7 +69,7 @@ const InstitucionesManager = ({ onBack }) => {
           ...formData,
           [name]: numericValue
         });
-        
+
         // Validar longitud si hay contenido
         if (numericValue && numericValue.length !== 10) {
           setValidationErrors({
@@ -83,7 +83,7 @@ const InstitucionesManager = ({ onBack }) => {
           ...formData,
           [name]: value
         });
-        
+
         // Si contiene @ probablemente es email, validar formato básico
         if (value.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           setValidationErrors({
@@ -136,7 +136,7 @@ const InstitucionesManager = ({ onBack }) => {
 
       // Recargar la lista
       await loadInstituciones();
-      
+
       // Resetear formulario
       setFormData({
         nombre: '',
@@ -150,7 +150,7 @@ const InstitucionesManager = ({ onBack }) => {
 
     } catch (err) {
       console.error('Error completo:', err);
-      
+
       let errorMessage = 'Error al guardar la institución: ';
       if (err.response?.data?.error) {
         errorMessage += err.response.data.error;
@@ -188,7 +188,7 @@ const InstitucionesManager = ({ onBack }) => {
     if (institucionToDelete) {
       try {
         setDeleting(true);
-          await api.delete(`/api/instituciones/${institucionToDelete.ID}`);
+        await api.delete(`/api/instituciones/${institucionToDelete.ID}`);
         setSuccess('Institución eliminada exitosamente');
         await loadInstituciones();
         setError('');
@@ -241,7 +241,7 @@ const InstitucionesManager = ({ onBack }) => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center mb-4 sm:mb-6`}>
           {!showForm && (
-            <button 
+            <button
               onClick={onBack}
               className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
               title="Volver al Dashboard"
@@ -249,7 +249,7 @@ const InstitucionesManager = ({ onBack }) => {
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="sm:hidden">Volver</span>
+              <span className="">Volver</span>
             </button>
           )}
           <button
@@ -265,11 +265,10 @@ const InstitucionesManager = ({ onBack }) => {
                 direccion: ''
               });
             }}
-            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${
-              showForm 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : 'bg-green-800 hover:bg-green-900'
-            }`}
+            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-green-800 hover:bg-green-900'
+              }`}
             style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
           >
             {showForm ? (
@@ -290,28 +289,22 @@ const InstitucionesManager = ({ onBack }) => {
             )}
           </button>
         </div>
-      </div>
 
-      {/* Mensajes */}
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+        {/* Mensajes */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
-        </div>
-      )}
+        )}
 
-      {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {success}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Formulario */}
-      {showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {/* Formulario */}
+        {showForm && (
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header del formulario */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -367,11 +360,10 @@ const InstitucionesManager = ({ onBack }) => {
                         name="contacto"
                         value={formData.contacto}
                         onChange={handleInputChange}
-                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${
-                          validationErrors.contacto 
-                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                            : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                        }`}
+                        className={`block w-full border rounded-md shadow-sm py-2 sm:py-2.5 px-3 focus:outline-none focus:ring-2 text-sm sm:text-base transition-colors duration-200 ${validationErrors.contacto
+                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                          : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                          }`}
                         placeholder="Teléfono (10 dígitos)"
                       />
                       {validationErrors.contacto && (
@@ -441,12 +433,10 @@ const InstitucionesManager = ({ onBack }) => {
               </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Lista de instituciones */}
-      {!showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {/* Lista de instituciones */}
+        {!showForm && (
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header de la tabla */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -457,7 +447,7 @@ const InstitucionesManager = ({ onBack }) => {
                 Lista de Instituciones Educativas
               </h3>
             </div>
-            
+
             <div className="px-3 sm:px-6 py-4 sm:py-6">
               {instituciones.length === 0 ? (
                 <div className="text-center py-8 sm:py-12">
@@ -496,11 +486,10 @@ const InstitucionesManager = ({ onBack }) => {
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {currentInstituciones.map((institucion, index) => (
-                          <tr 
-                            key={institucion.ID} 
-                            className={`hover:bg-gray-50 transition-colors duration-200 ${
-                              index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                            }`}
+                          <tr
+                            key={institucion.ID}
+                            className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                              }`}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
@@ -567,8 +556,8 @@ const InstitucionesManager = ({ onBack }) => {
                   {/* Vista de tarjetas para móvil y tablet */}
                   <div className="lg:hidden space-y-4">
                     {currentInstituciones.map((institucion, index) => (
-                      <div 
-                        key={institucion.ID} 
+                      <div
+                        key={institucion.ID}
                         className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -585,7 +574,7 @@ const InstitucionesManager = ({ onBack }) => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <div>
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Autoridad</p>
@@ -654,17 +643,16 @@ const InstitucionesManager = ({ onBack }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                           </svg>
                         </button>
-                        
+
                         <div className="flex space-x-1">
                           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <button
                               key={page}
                               onClick={() => paginate(page)}
-                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                                currentPage === page
-                                  ? 'text-white'
-                                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
+                                ? 'text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                }`}
                               style={{
                                 backgroundColor: currentPage === page ? '#025a27' : undefined,
                                 borderColor: currentPage === page ? '#025a27' : undefined
@@ -674,7 +662,7 @@ const InstitucionesManager = ({ onBack }) => {
                             </button>
                           ))}
                         </div>
-                        
+
                         <button
                           onClick={nextPage}
                           disabled={currentPage === totalPages}
@@ -691,8 +679,8 @@ const InstitucionesManager = ({ onBack }) => {
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Modal de confirmación para eliminación */}
       <ConfirmDialog

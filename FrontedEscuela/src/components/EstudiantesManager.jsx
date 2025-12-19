@@ -73,10 +73,10 @@ const EstudiantesManager = ({ onBack }) => {
   // Función para generar la URL de la red social basándose en el username
   const getSocialUrl = (platform, username) => {
     if (!username) return null;
-    
+
     // Limpiar el username: remover @ al inicio si existe
     const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
-    
+
     const urlPatterns = {
       'Facebook': `https://www.facebook.com/${cleanUsername}`,
       'X (Twitter)': `https://www.x.com/${cleanUsername}`,
@@ -86,7 +86,7 @@ const EstudiantesManager = ({ onBack }) => {
       'YouTube': `https://www.youtube.com/@${cleanUsername}`,
       'Otro': null // Para "Otro" no generamos URL automática
     };
-    
+
     return urlPatterns[platform] || null;
   };
 
@@ -770,7 +770,7 @@ const EstudiantesManager = ({ onBack }) => {
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="sm:hidden">Volver</span>
+              <span className="">Volver</span>
             </button>
           )}
           <button
@@ -817,28 +817,24 @@ const EstudiantesManager = ({ onBack }) => {
             )}
           </button>
         </div>
-      </div>
 
-      {/* Mensajes */}
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+
+        {/* Mensajes */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
-        </div>
-      )}
+        )}
 
-      {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {success}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Formulario */}
-      {showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        {/* Formulario */}
+        {showForm && (
+
           <div className="bg-white shadow-xl rounded-xl border border-gray-200">
             {/* Header del formulario */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 rounded-t-xl" style={{ backgroundColor: '#025a27' }}>
@@ -1159,12 +1155,12 @@ const EstudiantesManager = ({ onBack }) => {
               </form>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Lista de estudiantes */}
-      {!showForm && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+        )}
+
+        {/* Lista de estudiantes */}
+        {!showForm && (
+
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             {/* Header de la tabla */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
@@ -1597,8 +1593,10 @@ const EstudiantesManager = ({ onBack }) => {
               )}
             </div>
           </div>
-        </div>
-      )}
+
+        )}
+
+      </div>
 
       {/* Modal de confirmación para habilitar/deshabilitar */}
       <ConfirmDialog
@@ -1651,7 +1649,7 @@ const EstudiantesManager = ({ onBack }) => {
                   viewingStudentSocials.parsedNetworks.map((network, index) => {
                     const socialUrl = getSocialUrl(network.platform, network.url);
                     const displayUrl = socialUrl || (network.url?.startsWith('http') ? network.url : null);
-                    
+
                     return (
                       <a
                         key={index}
