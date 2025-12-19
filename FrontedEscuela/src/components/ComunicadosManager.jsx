@@ -44,10 +44,19 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   // Estado para modal de vista de comunicado
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedComunicado, setSelectedComunicado] = useState(null);
+  
+  // Estado para modal de destinatarios
+  const [showDestinatariosModal, setShowDestinatariosModal] = useState(false);
+  const [comunicadoDestinatarios, setComunicadoDestinatarios] = useState(null);
+
+  // Estados para filtros de búsqueda en selección de destinatarios
+  const [busquedaInstitucion, setBusquedaInstitucion] = useState('');
+  const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
 
   // Módulos de Quill
   const quillModules = {
     toolbar: [
+      [{ 'font': [] }],
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'color': [] }, { 'background': [] }],
@@ -59,7 +68,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   };
 
   const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
+    'font', 'header', 'bold', 'italic', 'underline', 'strike',
     'color', 'background', 'list', 'bullet', 'align', 'link'
   ];
 
@@ -112,7 +121,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
       [name]: value
     }));
 
-    // Limpiar selecciones cuando cambia el tipo de destinatario
+    // Limpiar selecciones y búsquedas cuando cambia el tipo de destinatario
     if (name === 'tipoDestinatario') {
       setFormData(prev => ({
         ...prev,
@@ -120,6 +129,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         institucionesSeleccionadas: [],
         estudiantesSeleccionados: []
       }));
+      setBusquedaInstitucion('');
+      setBusquedaEstudiante('');
     }
   };
 
@@ -330,6 +341,11 @@ const ComunicadosManager = ({ onBack, usuario }) => {
     setShowViewModal(true);
   };
 
+  const handleViewDestinatarios = (comunicado) => {
+    setComunicadoDestinatarios(comunicado);
+    setShowDestinatariosModal(true);
+  };
+
   const getDestinatarioTipo = (destinatariosJSON) => {
     try {
       const dest = JSON.parse(destinatariosJSON);
@@ -527,8 +543,32 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Seleccione Instituciones <span className="text-red-500">*</span>
                     </label>
+                    {/* Input de búsqueda */}
+                    <div className="relative mb-2">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Buscar por nombre o correo..."
+                        value={busquedaInstitucion}
+                        onChange={(e) => setBusquedaInstitucion(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
                     <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
-                      {instituciones.map(inst => (
+                      {instituciones
+                        .filter(inst => {
+                          if (!busquedaInstitucion.trim()) return true;
+                          const search = busquedaInstitucion.toLowerCase();
+                          return (
+                            inst.nombre?.toLowerCase().includes(search) ||
+                            inst.correo?.toLowerCase().includes(search)
+                          );
+                        })
+                        .map(inst => (
                         <label key={inst.ID} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
                           <input
                             type="checkbox"
@@ -542,6 +582,13 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           )}
                         </label>
                       ))}
+                      {instituciones.filter(inst => {
+                        if (!busquedaInstitucion.trim()) return true;
+                        const search = busquedaInstitucion.toLowerCase();
+                        return inst.nombre?.toLowerCase().includes(search) || inst.correo?.toLowerCase().includes(search);
+                      }).length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-2">No se encontraron instituciones</p>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
                       {formData.institucionesSeleccionadas.length} institución(es) seleccionada(s)
@@ -555,8 +602,33 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Seleccione Estudiantes <span className="text-red-500">*</span>
                     </label>
+                    {/* Input de búsqueda */}
+                    <div className="relative mb-2">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Buscar por nombre, cédula o correo..."
+                        value={busquedaEstudiante}
+                        onChange={(e) => setBusquedaEstudiante(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
                     <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
-                      {estudiantes.map(est => (
+                      {estudiantes
+                        .filter(est => {
+                          if (!busquedaEstudiante.trim()) return true;
+                          const search = busquedaEstudiante.toLowerCase();
+                          return (
+                            est.persona?.nombre?.toLowerCase().includes(search) ||
+                            est.persona?.cedula?.toLowerCase().includes(search) ||
+                            est.persona?.correo?.toLowerCase().includes(search)
+                          );
+                        })
+                        .map(est => (
                         <label key={est.ID} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
                           <input
                             type="checkbox"
@@ -572,6 +644,17 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           )}
                         </label>
                       ))}
+                      {estudiantes.filter(est => {
+                        if (!busquedaEstudiante.trim()) return true;
+                        const search = busquedaEstudiante.toLowerCase();
+                        return (
+                          est.persona?.nombre?.toLowerCase().includes(search) ||
+                          est.persona?.cedula?.toLowerCase().includes(search) ||
+                          est.persona?.correo?.toLowerCase().includes(search)
+                        );
+                      }).length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-2">No se encontraron estudiantes</p>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
                       {formData.estudiantesSeleccionados.length} estudiante(s) seleccionado(s)
@@ -825,8 +908,29 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {getDestinatarioLabel(comunicado.destinatarios)}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-900">
+                                  {getDestinatarioLabel(comunicado.destinatarios)}
+                                </span>
+                                {(() => {
+                                  try {
+                                    const dest = JSON.parse(comunicado.destinatarios);
+                                    if ((dest.tipo === 'instituciones' || dest.tipo === 'estudiantes') && dest.ids?.length > 0) {
+                                      return (
+                                        <button
+                                          onClick={() => handleViewDestinatarios(comunicado)}
+                                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                                          title="Ver lista de destinatarios"
+                                        >
+                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                          </svg>
+                                        </button>
+                                      );
+                                    }
+                                    return null;
+                                  } catch { return null; }
+                                })()}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -895,9 +999,30 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <div>
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Destinatarios</p>
-                            <p className="text-sm text-gray-900 mt-1">
-                              {getDestinatarioLabel(comunicado.destinatarios)}
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-sm text-gray-900">
+                                {getDestinatarioLabel(comunicado.destinatarios)}
+                              </p>
+                              {(() => {
+                                try {
+                                  const dest = JSON.parse(comunicado.destinatarios);
+                                  if ((dest.tipo === 'instituciones' || dest.tipo === 'estudiantes') && dest.ids?.length > 0) {
+                                    return (
+                                      <button
+                                        onClick={() => handleViewDestinatarios(comunicado)}
+                                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                                        title="Ver lista de destinatarios"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                      </button>
+                                    );
+                                  }
+                                  return null;
+                                } catch { return null; }
+                              })()}
+                            </div>
                           </div>
                         </div>
 
@@ -1036,11 +1161,15 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                 />
               </div>
 
-              {selectedComunicado.adjuntos && selectedComunicado.adjuntos !== '[]' && (
+              {selectedComunicado.adjuntos && selectedComunicado.adjuntos !== '[]' && selectedComunicado.adjuntos !== 'null' && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Archivos Adjuntos</h4>
                   <div className="space-y-2">
-                    {JSON.parse(selectedComunicado.adjuntos || '[]').map((adjunto, index) => {
+                    {(() => {
+                      try {
+                        const parsedAdjuntos = JSON.parse(selectedComunicado.adjuntos);
+                        if (!Array.isArray(parsedAdjuntos) || parsedAdjuntos.length === 0) return null;
+                        return parsedAdjuntos.map((adjunto, index) => {
                       // Extraer el nombre del archivo de la ruta completa
                       const fileName = adjunto.split('/').pop();
                       // Determinar si es imagen o PDF
@@ -1084,11 +1213,104 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                         </a>
-                      );
-                    })}
+                        );
+                      });
+                      } catch (e) {
+                        return null;
+                      }
+                    })()}
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Destinatarios */}
+      {showDestinatariosModal && comunicadoDestinatarios && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100 max-h-[80vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center" style={{ backgroundColor: '#025a27' }}>
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Destinatarios
+              </h3>
+              <button
+                onClick={() => setShowDestinatariosModal(false)}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Comunicado</h4>
+                <p className="text-gray-900 font-semibold">{comunicadoDestinatarios.asunto}</p>
+              </div>
+
+              {(() => {
+                try {
+                  const dest = JSON.parse(comunicadoDestinatarios.destinatarios);
+                  if (dest.tipo === 'instituciones' && dest.ids?.length > 0) {
+                    const institucionesSeleccionadas = instituciones.filter(i => dest.ids.includes(i.ID));
+                    return (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+                          Instituciones ({institucionesSeleccionadas.length})
+                        </h4>
+                        <ul className="space-y-2">
+                          {institucionesSeleccionadas.map(inst => (
+                            <li key={inst.ID} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-100 mr-3">
+                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">{inst.nombre}</p>
+                                {inst.correo && <p className="text-xs text-gray-500">{inst.correo}</p>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  } else if (dest.tipo === 'estudiantes' && dest.ids?.length > 0) {
+                    const estudiantesSeleccionados = estudiantes.filter(e => dest.ids.includes(e.ID));
+                    return (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+                          Estudiantes ({estudiantesSeleccionados.length})
+                        </h4>
+                        <ul className="space-y-2">
+                          {estudiantesSeleccionados.map(est => (
+                            <li key={est.ID} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 mr-3">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">{est.persona?.nombre || 'Sin nombre'}</p>
+                                {est.persona?.correo && <p className="text-xs text-gray-500">{est.persona.correo}</p>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  }
+                  return <p className="text-gray-500 text-sm">No hay destinatarios específicos</p>;
+                } catch {
+                  return <p className="text-gray-500 text-sm">Error al cargar destinatarios</p>;
+                }
+              })()}
             </div>
           </div>
         </div>

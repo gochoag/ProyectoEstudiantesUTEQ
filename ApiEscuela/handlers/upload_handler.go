@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"mime/multipart"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -81,8 +82,8 @@ func (h *UploadHandler) UploadFile(c *fiber.Ctx) error {
 		// Fallback: construir la URL desde el request
 		baseURL = c.BaseURL()
 		// Si detectamos que estamos en el servidor de produccion, agregar el puerto
-		if strings.Contains(c.Get("Host"), ":9602") {
-			baseURL = strings.Replace(baseURL, "aplicaciones.uteq.edu.ec", "aplicaciones.uteq.edu.ec:9602", 1)
+		if strings.Contains(c.Get("Host"), ":9612") {
+			baseURL = strings.Replace(baseURL, "aplicaciones.uteq.edu.ec", "aplicaciones.uteq.edu.ec:9612", 1)
 		}
 	}
 
@@ -110,14 +111,26 @@ func (h *UploadHandler) GetFile(c *fiber.Ctx) error {
 		})
 	}
 
+	// Decodificar nombres con caracteres especiales (espacios, etc.)
+	decodedNombre, err := url.QueryUnescape(nombre)
+	if err != nil {
+		decodedNombre = nombre
+	}
+	decodedSubcarpeta := subcarpeta
+	if subcarpeta != "" {
+		if decoded, err := url.QueryUnescape(subcarpeta); err == nil {
+			decodedSubcarpeta = decoded
+		}
+	}
+
 	// Construir la ruta completa del archivo
 	var rutaCompleta string
-	if subcarpeta != "" {
+	if decodedSubcarpeta != "" {
 		// Para rutas con subcarpeta: assets/{tipo}/{subcarpeta}/{nombre}
-		rutaCompleta = filepath.Join("assets", tipo, subcarpeta, nombre)
+		rutaCompleta = filepath.Join("assets", tipo, decodedSubcarpeta, decodedNombre)
 	} else {
 		// Para rutas simples: assets/{tipo}/{nombre}
-		rutaCompleta = filepath.Join("assets", tipo, nombre)
+		rutaCompleta = filepath.Join("assets", tipo, decodedNombre)
 	}
 
 	// Verificar que el archivo existe físicamente
