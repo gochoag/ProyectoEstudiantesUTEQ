@@ -60,6 +60,7 @@ func SetupAllRoutes(app *fiber.App, handlers *AllHandlers) {
 	estudiantes.Get("/ciudad/:ciudad_id", handlers.EstudianteHandler.GetEstudiantesByCity)
 	estudiantes.Get("/institucion/:institucion_id", handlers.EstudianteHandler.GetEstudiantesByInstitucion)
 	estudiantes.Get("/especialidad/:especialidad", handlers.EstudianteHandler.GetEstudiantesByEspecialidad)
+	estudiantes.Post("/bulk", handlers.EstudianteHandler.CreateEstudiantesBulk) // Carga masiva desde Excel
 
 	// ==================== PERSONAS ====================
 	personas := protected.Group("/personas")

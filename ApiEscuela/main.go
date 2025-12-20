@@ -146,8 +146,12 @@ func main() {
 	noticiaRepo := repositories.NewNoticiaRepository(db)
 	comunicadoRepo := repositories.NewComunicadoRepository(db)
 
+	// Inicializar servicios (antes de handlers que los necesiten)
+	authService := services.NewAuthService(usuarioRepo, personaRepo, codigoUsuarioRepo)
+	comunicadoService := services.NewComunicadoService(comunicadoRepo, estudianteRepo, institucionRepo)
+
 	// Inicializar handlers
-	estudianteHandler := handlers.NewEstudianteHandler(estudianteRepo, personaRepo, institucionRepo, ciudadRepo)
+	estudianteHandler := handlers.NewEstudianteHandler(estudianteRepo, personaRepo, institucionRepo, ciudadRepo, usuarioRepo, tipoUsuarioRepo, authService)
 	personaHandler := handlers.NewPersonaHandler(personaRepo)
 	provinciaHandler := handlers.NewProvinciaHandler(provinciaRepo)
 	ciudadHandler := handlers.NewCiudadHandler(ciudadRepo)
@@ -166,10 +170,6 @@ func main() {
 	noticiaHandler := handlers.NewNoticiaHandler(noticiaRepo)
 	uploadHandler := handlers.NewUploadHandler()
 	codigoHandler := handlers.NewCodigoHandler(codigoUsuarioRepo)
-
-	// Inicializar servicios
-	authService := services.NewAuthService(usuarioRepo, personaRepo, codigoUsuarioRepo)
-	comunicadoService := services.NewComunicadoService(comunicadoRepo, estudianteRepo, institucionRepo)
 
 	// Inicializar handlers que dependen de servicios
 	authHandler := handlers.NewAuthHandler(authService)
@@ -207,7 +207,7 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"message": "¡Bienvenido a ApiEscuela!",
-			"version": "1.0",
+			"version": "4.2.2",
 			"status":  "running",
 		})
 	})

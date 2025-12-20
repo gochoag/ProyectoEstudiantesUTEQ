@@ -161,8 +161,23 @@ func (s *AuthService) ChangePassword(userID uint, oldPassword, newPassword strin
 		return errors.New("usuario no encontrado")
 	}
 
-	// Verificar contraseña actual
-	if !s.CheckPassword(oldPassword, usuario.Contraseña) {
+	// Verificar contraseña actual (soporta tanto encriptada como texto plano)
+	passwordValida := false
+
+	// Verificar si la contraseña está encriptada (hash bcrypt tiene al menos 60 caracteres)
+	if len(usuario.Contraseña) < 60 {
+		// Contraseña no está encriptada, comparar directamente
+		if oldPassword == usuario.Contraseña {
+			passwordValida = true
+		}
+	} else {
+		// Verificar contraseña encriptada con bcrypt
+		if s.CheckPassword(oldPassword, usuario.Contraseña) {
+			passwordValida = true
+		}
+	}
+
+	if !passwordValida {
 		return errors.New("contraseña actual incorrecta")
 	}
 

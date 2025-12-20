@@ -104,8 +104,8 @@ func (s *ComunicadoService) GetCorreosDestinatarios(destinatario DestinatarioInf
 	return correosDestinatarios, nil
 }
 
-// SendEmailWithAttachments envía un correo con archivos adjuntos
-func (s *ComunicadoService) SendEmailWithAttachments(to, subject, htmlBody string, attachments []Attachment) error {
+// SendEmailWithAttachments envía un correo con archivos adjuntos a múltiples destinatarios usando BCC
+func (s *ComunicadoService) SendEmailWithAttachments(recipients []string, subject, htmlBody string, attachments []Attachment) error {
 	host := os.Getenv("SMTP_HOST")
 	port := os.Getenv("SMTP_PORT")
 	user := os.Getenv("SMTP_USER")
@@ -117,6 +117,10 @@ func (s *ComunicadoService) SendEmailWithAttachments(to, subject, htmlBody strin
 		return fmt.Errorf("configuración SMTP incompleta")
 	}
 
+	if len(recipients) == 0 {
+		return fmt.Errorf("no hay destinatarios")
+	}
+
 	addr := host + ":" + port
 	auth := smtp.PlainAuth("", user, pass, host)
 
@@ -124,9 +128,10 @@ func (s *ComunicadoService) SendEmailWithAttachments(to, subject, htmlBody strin
 
 	var msgBuilder strings.Builder
 
-	// Headers
+	// Headers - Usamos BCC para todos los destinatarios (no se muestra en el header To)
 	msgBuilder.WriteString(fmt.Sprintf("From: %s <%s>\r\n", fromName, from))
-	msgBuilder.WriteString(fmt.Sprintf("To: %s\r\n", to))
+	// El campo To muestra el remitente o un texto genérico para que los destinatarios no vean los otros correos
+	msgBuilder.WriteString(fmt.Sprintf("To: %s\r\n", from))
 	msgBuilder.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
 	msgBuilder.WriteString("MIME-Version: 1.0\r\n")
 
@@ -171,23 +176,28 @@ func (s *ComunicadoService) SendEmailWithAttachments(to, subject, htmlBody strin
 		msgBuilder.WriteString(htmlBody)
 	}
 
-	return smtp.SendMail(addr, auth, from, []string{to}, []byte(msgBuilder.String()))
+	// Enviar un solo correo a todos los destinatarios (BCC - los destinatarios van en el envelope, no en los headers)
+	return smtp.SendMail(addr, auth, from, recipients, []byte(msgBuilder.String()))
 }
 
-// SendBulkEmails envía correos masivos a una lista de destinatarios
+// SendBulkEmails envía UN SOLO correo a todos los destinatarios usando BCC
+// Esto es más eficiente que enviar correos individuales
 func (s *ComunicadoService) SendBulkEmails(correos []string, subject, htmlBody string, attachments []Attachment) EmailResult {
 	result := EmailResult{
 		Total:   len(correos),
 		Errores: []string{},
 	}
 
-	for _, correo := range correos {
-		err := s.SendEmailWithAttachments(correo, subject, htmlBody, attachments)
-		if err != nil {
-			result.Errores = append(result.Errores, fmt.Sprintf("%s: %v", correo, err))
-		} else {
-			result.Enviados++
-		}
+	if len(correos) == 0 {
+		return result
+	}
+
+	// Enviar un solo correo a todos los destinatarios
+	err := s.SendEmailWithAttachments(correos, subject, htmlBody, attachments)
+	if err != nil {
+		result.Errores = append(result.Errores, fmt.Sprintf("Error al enviar correo masivo: %v", err))
+	} else {
+		result.Enviados = len(correos)
 	}
 
 	return result

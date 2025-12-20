@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
+import GeneracionFormatoExcel from './GeneracionFormatoExcel';
 
 const SystemConfig = ({ onBack }) => {
   // Cliente API centralizado con token
@@ -17,6 +18,9 @@ const SystemConfig = ({ onBack }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Estados para generar Excel
+  const [instituciones, setInstituciones] = useState([]);
 
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +49,14 @@ const SystemConfig = ({ onBack }) => {
           ]);
           setCiudades(ciudadesRes.data);
           setProvincias(provinciasForCities.data);
+          break;
+        case 'generar_excel':
+          const [institucionesRes, ciudadesForExcel] = await Promise.all([
+            api.get(`/api/instituciones`),
+            api.get(`/api/ciudades`)
+          ]);
+          setInstituciones(institucionesRes.data);
+          setCiudades(ciudadesForExcel.data);
           break;
       }
     } catch (err) {
@@ -656,6 +668,29 @@ const SystemConfig = ({ onBack }) => {
               >
                 Ciudades
               </button>
+              <button
+                onClick={() => {
+                  setCurrentSection('generar_excel');
+                  setShowForm(false);
+                  resetForm();
+                  setCurrentPage(1);
+                  setSearchTerm('');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentSection === 'generar_excel'
+                  ? 'text-white'
+                  : 'text-gray-700 bg-white hover:bg-gray-50'
+                  }`}
+                style={{
+                  backgroundColor: currentSection === 'generar_excel' ? '#025a27' : undefined
+                }}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Generar Excel
+                </span>
+              </button>
             </nav>
           </div>
 
@@ -705,6 +740,77 @@ const SystemConfig = ({ onBack }) => {
                       Selecciona una opción del menú lateral para comenzar.
                     </p>
                   </div>
+                </div>
+              </div>
+            ) : currentSection === 'generar_excel' ? (
+              <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
+                {/* Header */}
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
+                  <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Generar formato Excel
+                  </h3>
+                </div>
+
+                <div className="px-4 sm:px-6 py-6">
+                  <p className="text-gray-600 mb-6">
+                    Genera un archivo Excel con el formato correcto para cargar estudiantes de forma masiva. 
+                    El archivo incluirá listas desplegables para seleccionar instituciones y ciudades.
+                  </p>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <svg className="animate-spin h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="ml-3 text-gray-600">Cargando datos...</span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Resumen de datos disponibles */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                          <div className="flex items-center">
+                            <svg className="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <div>
+                              <h4 className="font-semibold text-blue-700">Instituciones</h4>
+                              <p className="text-2xl font-bold text-blue-600">{instituciones.length}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                          <div className="flex items-center">
+                            <svg className="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <div>
+                              <h4 className="font-semibold text-green-700">Ciudades</h4>
+                              <p className="text-2xl font-bold text-green-600">{ciudades.length}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      {/* Botón de descargar */}
+                      <div className="flex justify-center">
+                        <GeneracionFormatoExcel
+                          instituciones={instituciones}
+                          ciudades={ciudades}
+                          onGenerated={(filename) => {
+                            setSuccess(`Archivo "${filename}" generado exitosamente`);
+                            setTimeout(() => setSuccess(''), 5000);
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (

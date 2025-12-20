@@ -3,9 +3,11 @@ package handlers
 import (
 	"ApiEscuela/models"
 	"ApiEscuela/repositories"
+	"ApiEscuela/services"
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,14 +17,28 @@ type EstudianteHandler struct {
 	personaRepo     *repositories.PersonaRepository
 	institucionRepo *repositories.InstitucionRepository
 	ciudadRepo      *repositories.CiudadRepository
+	usuarioRepo     *repositories.UsuarioRepository
+	tipoUsuarioRepo *repositories.TipoUsuarioRepository
+	authService     *services.AuthService
 }
 
-func NewEstudianteHandler(estudianteRepo *repositories.EstudianteRepository, personaRepo *repositories.PersonaRepository, institucionRepo *repositories.InstitucionRepository, ciudadRepo *repositories.CiudadRepository) *EstudianteHandler {
+func NewEstudianteHandler(
+	estudianteRepo *repositories.EstudianteRepository,
+	personaRepo *repositories.PersonaRepository,
+	institucionRepo *repositories.InstitucionRepository,
+	ciudadRepo *repositories.CiudadRepository,
+	usuarioRepo *repositories.UsuarioRepository,
+	tipoUsuarioRepo *repositories.TipoUsuarioRepository,
+	authService *services.AuthService,
+) *EstudianteHandler {
 	return &EstudianteHandler{
 		estudianteRepo:  estudianteRepo,
 		personaRepo:     personaRepo,
 		institucionRepo: institucionRepo,
 		ciudadRepo:      ciudadRepo,
+		usuarioRepo:     usuarioRepo,
+		tipoUsuarioRepo: tipoUsuarioRepo,
+		authService:     authService,
 	}
 }
 
@@ -185,7 +201,7 @@ func (h *EstudianteHandler) UpdateEstudiante(c *fiber.Ctx) error {
 	existingEstudiante.InstitucionID = updateData.InstitucionID
 	existingEstudiante.CiudadID = updateData.CiudadID
 	existingEstudiante.Especialidad = strings.TrimSpace(updateData.Especialidad)
-	
+
 	// Actualizar redsocial si se proporciona (validar JSON)
 	// Verificar si el campo redsocial está presente en el JSON del body
 	bodyBytes := c.Body()
@@ -335,6 +351,199 @@ func (h *EstudianteHandler) GetEstudiantesByEspecialidad(c *fiber.Ctx) error {
 	}
 
 	return SendSuccess(c, 200, estudiantes)
+}
+
+// BulkEstudianteRequest representa un estudiante en la carga masiva
+type BulkEstudianteRequest struct {
+	Cedula          string `json:"cedula"`
+	Nombre          string `json:"nombre"`
+	Correo          string `json:"correo"`
+	Telefono        string `json:"telefono"`
+	FechaNacimiento string `json:"fecha_nacimiento"`
+	InstitucionID   uint   `json:"institucion_id"`
+	CiudadID        uint   `json:"ciudad_id"`
+	Especialidad    string `json:"especialidad"`
+}
+
+// BulkEstudianteResult representa el resultado de procesar un estudiante
+type BulkEstudianteResult struct {
+	Fila    int    `json:"fila"`
+	Cedula  string `json:"cedula"`
+	Nombre  string `json:"nombre"`
+	Error   string `json:"error,omitempty"`
+	Usuario string `json:"usuario,omitempty"`
+}
+
+// CreateEstudiantesBulk crea múltiples estudiantes desde una carga masiva (Excel)
+func (h *EstudianteHandler) CreateEstudiantesBulk(c *fiber.Ctx) error {
+	var request struct {
+		Estudiantes []BulkEstudianteRequest `json:"estudiantes"`
+	}
+
+	// Parsear request
+	if err := c.BodyParser(&request); err != nil {
+		return SendError(c, 400, "json_invalido", "No se puede procesar el JSON", err.Error())
+	}
+
+	if len(request.Estudiantes) == 0 {
+		return SendError(c, 400, "lista_vacia", "No se proporcionaron estudiantes para registrar", "El array de estudiantes está vacío")
+	}
+
+	// Obtener el tipo de usuario "Estudiante"
+	tipoEstudiante, err := h.tipoUsuarioRepo.GetTipoUsuarioByNombre("Estudiante")
+	if err != nil {
+		return SendError(c, 500, "tipo_usuario_no_encontrado", "No se encontró el tipo de usuario Estudiante", "Configure el tipo de usuario en el sistema")
+	}
+
+	var exitosos []BulkEstudianteResult
+	var fallidos []BulkEstudianteResult
+
+	for i, est := range request.Estudiantes {
+		fila := i + 1 // Fila en el Excel (1-indexed, asumiendo que la fila 1 es el encabezado)
+		result := BulkEstudianteResult{
+			Fila:   fila,
+			Cedula: est.Cedula,
+			Nombre: est.Nombre,
+		}
+
+		// Validar campos requeridos
+		if strings.TrimSpace(est.Cedula) == "" {
+			result.Error = "La cédula es requerida"
+			fallidos = append(fallidos, result)
+			continue
+		}
+		if strings.TrimSpace(est.Nombre) == "" {
+			result.Error = "El nombre es requerido"
+			fallidos = append(fallidos, result)
+			continue
+		}
+		if est.InstitucionID == 0 {
+			result.Error = "La institución es requerida"
+			fallidos = append(fallidos, result)
+			continue
+		}
+		if est.CiudadID == 0 {
+			result.Error = "La ciudad es requerida"
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// Validar que la cédula tenga 10 dígitos
+		cedula := strings.TrimSpace(est.Cedula)
+		if len(cedula) != 10 {
+			result.Error = "La cédula debe tener 10 dígitos"
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// Verificar que institución y ciudad existen
+		if !h.institucionExists(est.InstitucionID) {
+			result.Error = "La institución especificada no existe"
+			fallidos = append(fallidos, result)
+			continue
+		}
+		if !h.ciudadExists(est.CiudadID) {
+			result.Error = "La ciudad especificada no existe"
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// Parsear fecha de nacimiento si se proporciona
+		var fechaNacimiento time.Time
+		if est.FechaNacimiento != "" {
+			parsed, err := time.Parse("2006-01-02", est.FechaNacimiento)
+			if err != nil {
+				result.Error = "Formato de fecha inválido (use YYYY-MM-DD)"
+				fallidos = append(fallidos, result)
+				continue
+			}
+			fechaNacimiento = parsed
+		}
+
+		// 1. Crear Persona
+		persona := &models.Persona{
+			Nombre:          strings.TrimSpace(est.Nombre),
+			Cedula:          cedula,
+			Correo:          strings.TrimSpace(est.Correo),
+			Telefono:        strings.TrimSpace(est.Telefono),
+			FechaNacimiento: fechaNacimiento,
+		}
+
+		if err := h.personaRepo.CreatePersona(persona); err != nil {
+			errorMsg := "Error al crear persona"
+			if strings.Contains(err.Error(), "cedula") || strings.Contains(err.Error(), "duplicado") {
+				errorMsg = "Ya existe una persona con esta cédula"
+			} else if strings.Contains(err.Error(), "correo") {
+				errorMsg = "Ya existe una persona con este correo"
+			}
+			result.Error = errorMsg
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// 2. Crear Usuario (cédula como usuario y contraseña)
+		hashedPassword, err := h.authService.HashPassword(cedula)
+		if err != nil {
+			// Rollback: eliminar persona
+			h.personaRepo.DeletePersona(persona.ID)
+			result.Error = "Error al procesar la contraseña"
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		usuario := &models.Usuario{
+			Usuario:       cedula,
+			Contraseña:    hashedPassword,
+			PersonaID:     persona.ID,
+			TipoUsuarioID: tipoEstudiante.ID,
+		}
+
+		if err := h.usuarioRepo.CreateUsuario(usuario); err != nil {
+			// Rollback: eliminar persona
+			h.personaRepo.DeletePersona(persona.ID)
+			errorMsg := "Error al crear usuario"
+			if strings.Contains(err.Error(), "duplicado") || strings.Contains(err.Error(), "repetido") {
+				errorMsg = "Ya existe un usuario con esta cédula"
+			}
+			result.Error = errorMsg
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// 3. Crear Estudiante
+		estudiante := &models.Estudiante{
+			PersonaID:     persona.ID,
+			InstitucionID: est.InstitucionID,
+			CiudadID:      est.CiudadID,
+			Especialidad:  strings.TrimSpace(est.Especialidad),
+		}
+
+		if err := h.estudianteRepo.CreateEstudiante(estudiante); err != nil {
+			// Rollback: eliminar usuario y persona
+			h.usuarioRepo.DeleteUsuario(usuario.ID)
+			h.personaRepo.DeletePersona(persona.ID)
+			errorMsg := "Error al crear estudiante"
+			if strings.Contains(err.Error(), "duplicado") || strings.Contains(err.Error(), "existe") {
+				errorMsg = "Ya existe un estudiante para esta persona"
+			}
+			result.Error = errorMsg
+			fallidos = append(fallidos, result)
+			continue
+		}
+
+		// Éxito
+		result.Usuario = cedula
+		exitosos = append(exitosos, result)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success":        true,
+		"total":          len(request.Estudiantes),
+		"total_exitosos": len(exitosos),
+		"total_fallidos": len(fallidos),
+		"exitosos":       exitosos,
+		"fallidos":       fallidos,
+	})
 }
 
 // validateEstudiante valida los datos de un estudiante

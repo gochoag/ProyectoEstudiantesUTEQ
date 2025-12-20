@@ -10,41 +10,49 @@ export const validarCedulaEcuatoriana = (cedula) => {
     mensaje: ''
   };
 
-  // 1. Verificar que tenga 10 dígitos
-  if (!cedula || typeof cedula !== 'string') {
+  // 1. Verificar que la cédula exista
+  if (!cedula || (typeof cedula !== 'string' && typeof cedula !== 'number')) {
     resultado.mensaje = 'La cédula es requerida';
     return resultado;
   }
 
-  // Eliminar espacios y asegurar que solo contenga dígitos
-  const cedulaLimpia = cedula.trim().replace(/\D/g, '');
+  // Convertir a string si es número y eliminar espacios
+  const cedulaLimpia = String(cedula).trim().replace(/\D/g, '');
   
+  if (cedulaLimpia.length === 0) {
+    resultado.mensaje = 'La cédula es requerida';
+    return resultado;
+  }
+  
+  // 2. Verificar que tenga exactamente 10 dígitos
   if (cedulaLimpia.length !== 10) {
     resultado.mensaje = 'La cédula debe tener exactamente 10 dígitos';
     return resultado;
   }
 
-  // 2. Verificar que solo contenga dígitos
+  // 3. Verificar que solo contenga dígitos
   if (!/^\d{10}$/.test(cedulaLimpia)) {
-    resultado.mensaje = 'La cédula debe contener solo dígitos';
+    resultado.mensaje = 'La cédula debe contener solo números';
     return resultado;
   }
 
-  // 3. Verificar código de provincia (primeros dos dígitos)
+  // 4. Verificar código de provincia (primeros dos dígitos)
+  // En Ecuador hay 24 provincias, código válido: 01-24
   const provincia = parseInt(cedulaLimpia.substring(0, 2), 10);
   if (provincia < 1 || provincia > 24) {
-    resultado.mensaje = 'La cedula no es valida';
+    resultado.mensaje = 'La cédula no es ecuatoriana';
     return resultado;
   }
 
-  // 4. Verificar tercer dígito (menor a 6)
+  // 5. Verificar tercer dígito (tipo de documento)
+  // Para cédulas de ciudadanía debe ser menor a 6
   const tercerDigito = parseInt(cedulaLimpia.charAt(2), 10);
   if (tercerDigito >= 6) {
-    resultado.mensaje = 'La cedula no es valida';
+    resultado.mensaje = 'La cédula no es ecuatoriana';
     return resultado;
   }
 
-  // 5. Algoritmo de validación del último dígito (dígito verificador)
+  // 6. Algoritmo de validación del último dígito (dígito verificador - módulo 10)
   const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
   const verificador = parseInt(cedulaLimpia.charAt(9), 10);
   
@@ -60,11 +68,12 @@ export const validarCedulaEcuatoriana = (cedula) => {
   const digitoVerificador = (suma % 10 === 0) ? 0 : 10 - (suma % 10);
   
   if (verificador !== digitoVerificador) {
-    resultado.mensaje = 'La cédula no es válida';
+    resultado.mensaje = 'La cédula no es ecuatoriana';
     return resultado;
   }
 
   // Si pasó todas las validaciones
   resultado.esValida = true;
+  resultado.mensaje = 'Cédula válida';
   return resultado;
 };

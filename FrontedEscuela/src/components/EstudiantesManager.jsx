@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
+import ModalCargaExcel from './ModalCargaExcel';
+import ReporteEstudiantes from './ReporteEstudiantes';
+import Paginacion from './Paginacion';
 import { Datepicker } from 'flowbite';
+import { validarCedulaEcuatoriana } from '../utils/validaciones';
 
 const EstudiantesManager = ({ onBack }) => {
   // Cliente API centralizado con token
@@ -59,6 +63,12 @@ const EstudiantesManager = ({ onBack }) => {
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [viewingStudentSocials, setViewingStudentSocials] = useState(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
+
+  // Estado para carga masiva desde Excel
+  const [showExcelModal, setShowExcelModal] = useState(false);
+
+  // Estado para modal de exportación
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const socialPlatforms = [
     { name: 'Facebook', icon: 'fa-brands fa-facebook', color: '#1877F2' },
@@ -232,49 +242,6 @@ const EstudiantesManager = ({ onBack }) => {
   };
 
 
-  // Función para validar cédula ecuatoriana
-  const validarCedulaEcuatoriana = (cedula) => {
-    // Verificar longitud
-    if (cedula.length !== 10) {
-      return { isValid: false, message: 'La cédula debe tener exactamente 10 dígitos' };
-    }
-
-    // Verificar que todos sean dígitos
-    if (!/^\d+$/.test(cedula)) {
-      return { isValid: false, message: 'La cédula debe contener solo dígitos' };
-    }
-
-    // Verificar código de provincia (primeros dos dígitos)
-    const provincia = parseInt(cedula.substring(0, 2), 10);
-    if (provincia < 1 || provincia > 24) {
-      return { isValid: false, message: 'La cedula no es valida' };
-    }
-
-    // Verificar tercer dígito (menor a 6)
-    const tercerDigito = parseInt(cedula.charAt(2), 10);
-    if (tercerDigito > 6) {
-      return { isValid: false, message: 'La cedula no es valida' };
-    }
-
-    // Algoritmo de validación
-    const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
-    const verificador = parseInt(cedula.charAt(9), 10);
-
-    let suma = 0;
-    for (let i = 0; i < coeficientes.length; i++) {
-      let valor = parseInt(cedula.charAt(i), 10) * coeficientes[i];
-      if (valor > 9) valor -= 9;
-      suma += valor;
-    }
-
-    const digitoVerificador = (suma % 10 === 0) ? 0 : 10 - (suma % 10);
-
-    if (digitoVerificador !== verificador) {
-      return { isValid: false, message: 'La cédula no es válida' };
-    }
-
-    return { isValid: true, message: '' };
-  };
 
   const validateForm = () => {
     const errors = [];
@@ -290,8 +257,8 @@ const EstudiantesManager = ({ onBack }) => {
     // Validación de cédula ecuatoriana
     if (formData.cedula) {
       const validacionCedula = validarCedulaEcuatoriana(formData.cedula);
-      if (!validacionCedula.isValid) {
-        errors.push(validacionCedula.message);
+      if (!validacionCedula.esValida) {
+        errors.push(validacionCedula.mensaje);
       }
     }
 
@@ -736,17 +703,7 @@ const EstudiantesManager = ({ onBack }) => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
 
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
 
   if (loading && !showForm) {
     return (
@@ -760,11 +717,11 @@ const EstudiantesManager = ({ onBack }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Barra de botones */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center mb-4 sm:mb-6`}>
+        <div className={`flex flex-col sm:flex-row ${showForm ? 'justify-end' : 'justify-between'} items-center gap-3 mb-4 sm:mb-6`}>
           {!showForm && (
             <button
               onClick={onBack}
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
+              className="w-full sm:w-auto justify-center text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base order-2 sm:order-1"
               title="Volver al Dashboard"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -773,49 +730,84 @@ const EstudiantesManager = ({ onBack }) => {
               <span className="">Volver</span>
             </button>
           )}
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditingEstudiante(null);
-              setValidationErrors({});
-              setFormData({
-                nombre: '',
-                fecha_nacimiento: '',
-                correo: '',
-                telefono: '',
-                cedula: '',
-                institucion_id: '',
-                ciudad_id: '',
-                provincia_id: '',
-                provincia_id: '',
-                especialidad: ''
-              });
-              setSocialNetworks([]);
-              setCiudadesFiltered([]);
-            }}
-            className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
-              ? 'bg-red-600 hover:bg-red-700'
-              : 'bg-green-800 hover:bg-green-900'
-              }`}
-            style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
-          >
-            {showForm ? (
-              <>
+          {/* Grupo de botones de acción */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto order-1 sm:order-2">
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingEstudiante(null);
+                setValidationErrors({});
+                setFormData({
+                  nombre: '',
+                  fecha_nacimiento: '',
+                  correo: '',
+                  telefono: '',
+                  cedula: '',
+                  institucion_id: '',
+                  ciudad_id: '',
+                  provincia_id: '',
+                  provincia_id: '',
+                  especialidad: ''
+                });
+                setSocialNetworks([]);
+                setCiudadesFiltered([]);
+              }}
+              className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-green-800 hover:bg-green-900'
+                }`}
+              style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
+            >
+              {showForm ? (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancelar
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span className="hidden sm:inline">Nuevo Estudiante</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </>
+              )}
+            </button>
+            {/* Botón Cargar Excel - solo visible cuando no hay formulario abierto */}
+            {!showForm && (
+              <button
+                onClick={() => setShowExcelModal(true)}
+                className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
+                style={{ backgroundColor: '#025a27' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#014a1f'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#025a27'}
+              >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Cancelar
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span className="hidden sm:inline">Nuevo Estudiante</span>
-                <span className="sm:hidden">Nuevo</span>
-              </>
+                <span className="hidden sm:inline">Cargar Excel</span>
+                <span className="sm:hidden">Excel</span>
+              </button>
             )}
-          </button>
+            {/* Botón Exportar - solo visible cuando no hay formulario abierto */}
+            {!showForm && (
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
+                style={{ backgroundColor: '#1c1c1c' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#333333'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#1c1c1c'}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="hidden sm:inline">Exportar</span>
+                <span className="sm:hidden">Exportar</span>
+              </button>
+            )}
+          </div>
         </div>
 
 
@@ -1539,56 +1531,16 @@ const EstudiantesManager = ({ onBack }) => {
                   </div>
 
                   {/* Paginación */}
-                  {totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                      <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                        Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredEstudiantes.length)} de {filteredEstudiantes.length} estudiantes
-                        {searchTerm && filteredEstudiantes.length !== estudiantes.length && (
-                          <span className="text-gray-500"> (de {estudiantes.length} total)</span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={prevPage}
-                          disabled={currentPage === 1}
-                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-
-                        <div className="flex space-x-1">
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <button
-                              key={page}
-                              onClick={() => paginate(page)}
-                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
-                                ? 'text-white'
-                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                }`}
-                              style={{
-                                backgroundColor: currentPage === page ? '#025a27' : undefined,
-                                borderColor: currentPage === page ? '#025a27' : undefined
-                              }}
-                            >
-                              {page}
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={nextPage}
-                          disabled={currentPage === totalPages}
-                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Paginación */}
+                  <Paginacion
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={paginate}
+                    totalItems={filteredEstudiantes.length}
+                    itemsPerPage={itemsPerPage}
+                    totalItemsOriginal={searchTerm ? estudiantes.length : null}
+                    itemName="estudiantes"
+                  />
                 </>
               )}
             </div>
@@ -1617,6 +1569,19 @@ const EstudiantesManager = ({ onBack }) => {
         loading={deleting}
         type={actionType === 'disable' ? 'danger' : 'success'}
       />
+      
+      {/* Modal de Carga Masiva desde Excel */}
+      <ModalCargaExcel
+        isOpen={showExcelModal}
+        onClose={() => setShowExcelModal(false)}
+        onSuccess={() => loadInitialData()}
+        onError={(msg) => setError(msg)}
+        instituciones={instituciones}
+        ciudades={ciudades}
+        estudiantes={estudiantes}
+      />
+      
+      
       {/* Modal de Redes Sociales */}
       {showSocialModal && viewingStudentSocials && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1691,6 +1656,15 @@ const EstudiantesManager = ({ onBack }) => {
           </div>
         </div>
       )}
+      
+      {/* Modal de Exportación de Estudiantes */}
+      <ReporteEstudiantes
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        estudiantes={filteredEstudiantes}
+        instituciones={instituciones}
+        ciudades={ciudades}
+      />
     </div>
   );
 };
