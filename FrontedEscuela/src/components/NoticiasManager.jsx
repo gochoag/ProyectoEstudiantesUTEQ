@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
+import Paginacion from './Paginacion';
 
 const NoticiasManager = ({ onBack, usuario }) => {
   const [loading, setLoading] = useState(true);
@@ -88,6 +89,7 @@ const NoticiasManager = ({ onBack, usuario }) => {
   const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
   const indexOfLastItem = Math.min(indexOfFirstItem + itemsPerPage, noticiasFiltered.length);
   const currentNoticias = useMemo(() => noticiasFiltered.slice(indexOfFirstItem, indexOfLastItem), [noticiasFiltered, indexOfFirstItem, indexOfLastItem]);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -663,56 +665,16 @@ const NoticiasManager = ({ onBack, usuario }) => {
                   ))}
                 </div>
 
-                {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                    <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                      Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, noticiasFiltered.length)} de {noticiasFiltered.length} noticias
-                      {searchTerm && noticiasFiltered.length !== noticias.length && (
-                        <span className="text-gray-500"> (de {noticias.length} total)</span>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-
-                      <div className="flex space-x-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
-                              ? 'text-white'
-                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
-                            style={{
-                              backgroundColor: currentPage === page ? '#025a27' : undefined,
-                              borderColor: currentPage === page ? '#025a27' : undefined
-                            }}
-                          >
-                            {page}
-                          </button>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Paginación */}
+                <Paginacion
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={paginate}
+                  totalItems={noticiasFiltered.length}
+                  itemsPerPage={itemsPerPage}
+                  totalItemsOriginal={searchTerm ? noticias.length : null}
+                  itemName="noticias"
+                />
               </>
             )}
           </div>

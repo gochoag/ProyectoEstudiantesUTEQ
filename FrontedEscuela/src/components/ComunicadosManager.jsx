@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
+import Paginacion from './Paginacion';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -1047,53 +1048,15 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                 </div>
 
                 {/* Paginación */}
-                {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200">
-                    <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                      Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredComunicados.length)} de {filteredComunicados.length} comunicados
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={prevPage}
-                        disabled={currentPage === 1}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-
-                      <div className="flex space-x-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <button
-                            key={page}
-                            onClick={() => paginate(page)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${currentPage === page
-                              ? 'text-white'
-                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
-                            style={{
-                              backgroundColor: currentPage === page ? '#025a27' : undefined,
-                              borderColor: currentPage === page ? '#025a27' : undefined
-                            }}
-                          >
-                            {page}
-                          </button>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={nextPage}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Paginacion
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={paginate}
+                  totalItems={filteredComunicados.length}
+                  itemsPerPage={itemsPerPage}
+                  totalItemsOriginal={(searchTerm || destinatarioFilter !== 'todos') ? comunicados.length : null}
+                  itemName="comunicados"
+                />
               </>
             )}
           </div>

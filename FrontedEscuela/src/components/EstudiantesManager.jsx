@@ -717,21 +717,41 @@ const EstudiantesManager = ({ onBack }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Barra de botones */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className={`flex flex-col sm:flex-row ${showForm ? 'justify-end' : 'justify-between'} items-center gap-3 mb-4 sm:mb-6`}>
+        <div className="mb-4 sm:mb-6">
+          {/* Botón Volver - En móvil arriba, en desktop a la izquierda */}
           {!showForm && (
-            <button
-              onClick={onBack}
-              className="w-full sm:w-auto justify-center text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base order-2 sm:order-1"
-              title="Volver al Dashboard"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="">Volver</span>
-            </button>
+            <div className="flex justify-start mb-3 sm:hidden">
+              <button
+                onClick={onBack}
+                className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 text-sm"
+                title="Volver al Dashboard"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Volver</span>
+              </button>
+            </div>
           )}
-          {/* Grupo de botones de acción */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto order-1 sm:order-2">
+          
+          {/* Contenedor principal de botones */}
+          <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center`}>
+            {/* Botón Volver - Solo visible en desktop */}
+            {!showForm && (
+              <button
+                onClick={onBack}
+                className="hidden sm:flex text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 items-center gap-2 text-base"
+                title="Volver al Dashboard"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Volver</span>
+              </button>
+            )}
+            
+            {/* Grupo de botones de acción */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
             <button
               onClick={() => {
                 setShowForm(!showForm);
@@ -745,7 +765,6 @@ const EstudiantesManager = ({ onBack }) => {
                   cedula: '',
                   institucion_id: '',
                   ciudad_id: '',
-                  provincia_id: '',
                   provincia_id: '',
                   especialidad: ''
                 });
@@ -781,7 +800,7 @@ const EstudiantesManager = ({ onBack }) => {
                 onClick={() => setShowExcelModal(true)}
                 className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                 style={{ backgroundColor: '#025a27' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#014a1f'}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#025a27'}
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#025a27'}
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -797,7 +816,7 @@ const EstudiantesManager = ({ onBack }) => {
                 onClick={() => setShowExportModal(true)}
                 className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                 style={{ backgroundColor: '#1c1c1c' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#333333'}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#1c1c1c'}
                 onMouseLeave={(e) => e.target.style.backgroundColor = '#1c1c1c'}
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -808,6 +827,7 @@ const EstudiantesManager = ({ onBack }) => {
               </button>
             )}
           </div>
+        </div>
         </div>
 
 

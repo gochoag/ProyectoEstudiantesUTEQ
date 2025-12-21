@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ConfirmDialog from './ConfirmDialog';
+import Paginacion from './Paginacion';
 import api from '../api/client';
 
 const ActividadesManager = ({ onBack }) => {
@@ -14,6 +15,10 @@ const ActividadesManager = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [tematicaFilter, setTematicaFilter] = useState('');
   const [deleting, setDeleting] = useState(false);
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const API_URL = `/api/actividades`;
   const TEMATICAS_URL = `/api/tematicas`;
@@ -174,6 +179,18 @@ const ActividadesManager = ({ onBack }) => {
     const matchesTematica = !tematicaFilter || actividad.tematica_id?.toString() === tematicaFilter;
     return matchesSearch && matchesTematica;
   }) : [];
+
+  // Lógica de paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentActividades = filteredActividades.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredActividades.length / itemsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Resetear a la primera página cuando cambia la búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, tematicaFilter]);
 
   const formatDuration = (minutes) => {
     if (!minutes) return 'No especificada';
@@ -482,7 +499,7 @@ const ActividadesManager = ({ onBack }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {filteredActividades.map((actividad, index) => (
+                      {currentActividades.map((actividad, index) => (
                         <tr
                           key={actividad.ID}
                           className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
@@ -542,7 +559,7 @@ const ActividadesManager = ({ onBack }) => {
 
                 {/* Vista de tarjetas para móvil y tablet */}
                 <div className="lg:hidden space-y-4">
-                  {filteredActividades.map((actividad, index) => (
+                  {currentActividades.map((actividad, index) => (
                     <div
                       key={actividad.ID}
                       className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -603,6 +620,17 @@ const ActividadesManager = ({ onBack }) => {
                     </div>
                   ))}
                 </div>
+
+                {/* Paginación */}
+                <Paginacion
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={paginate}
+                  totalItems={filteredActividades.length}
+                  itemsPerPage={itemsPerPage}
+                  totalItemsOriginal={(searchTerm || tematicaFilter) ? actividades.length : null}
+                  itemName="actividades"
+                />
               </>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ConfirmDialog from './ConfirmDialog';
+import Paginacion from './Paginacion';
 import api from '../api/client';
 
 const TematicasManager = ({ onBack }) => {
@@ -12,6 +13,10 @@ const TematicasManager = ({ onBack }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null });
   const [searchTerm, setSearchTerm] = useState('');
   const [deleting, setDeleting] = useState(false);
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const API_URL = `/api/tematicas`;
 
@@ -116,6 +121,18 @@ const TematicasManager = ({ onBack }) => {
     tematica.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tematica.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Lógica de paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTematicas = filteredTematicas.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredTematicas.length / itemsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Resetear a la primera página cuando cambia la búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (loading && !showForm) {
     return (
@@ -365,67 +382,67 @@ const TematicasManager = ({ onBack }) => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {filteredTematicas.map((tematica, index) => (
-                          <tr
-                            key={tematica.ID}
-                            className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                              }`}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-8 w-8">
-                                  <div className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: '#4ade80' }}>
-                                    {(tematica.nombre || 'T').charAt(0).toUpperCase()}
-                                  </div>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {tematica.nombre}
-                                  </div>
+                      {currentTematicas.map((tematica, index) => (
+                        <tr
+                          key={tematica.ID}
+                          className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                            }`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-8 w-8">
+                                <div className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: '#4ade80' }}>
+                                  {(tematica.nombre || 'T').charAt(0).toUpperCase()}
                                 </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900 max-w-xs truncate">
-                                {tematica.descripcion || 'Sin descripción'}
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {tematica.nombre}
+                                </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {tematica.actividades?.length || 0} actividades
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="flex justify-center space-x-2">
-                                <button
-                                  onClick={() => handleEdit(tematica)}
-                                  className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-gray-700 bg-yellow-100 hover:bg-yellow-200 transition-all duration-200 hover:shadow-md"
-                                >
-                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                  Editar
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(tematica.ID)}
-                                  className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-red-700 bg-red-100 hover:bg-red-200 transition-all duration-200 hover:shadow-md"
-                                >
-                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                  Eliminar
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate">
+                              {tematica.descripcion || 'Sin descripción'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                              {tematica.actividades?.length || 0} actividades
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex justify-center space-x-2">
+                              <button
+                                onClick={() => handleEdit(tematica)}
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-gray-700 bg-yellow-100 hover:bg-yellow-200 transition-all duration-200 hover:shadow-md"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDelete(tematica.ID)}
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-lg text-red-700 bg-red-100 hover:bg-red-200 transition-all duration-200 hover:shadow-md"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                       </tbody>
                     </table>
                   </div>
 
                   {/* Vista de tarjetas para móvil y tablet */}
                   <div className="lg:hidden space-y-4">
-                    {filteredTematicas.map((tematica, index) => (
+                    {currentTematicas.map((tematica, index) => (
                       <div
                         key={tematica.ID}
                         className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -481,6 +498,17 @@ const TematicasManager = ({ onBack }) => {
                       </div>
                     ))}
                   </div>
+
+                  {/* Paginación */}
+                  <Paginacion
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={paginate}
+                    totalItems={filteredTematicas.length}
+                    itemsPerPage={itemsPerPage}
+                    totalItemsOriginal={searchTerm ? tematicas.length : null}
+                    itemName="temáticas"
+                  />
                 </>
               )}
             </div>
