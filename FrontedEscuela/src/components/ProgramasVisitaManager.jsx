@@ -65,11 +65,14 @@ const ProgramasVisitaManager = ({ onBack }) => {
     fecha_nacimiento: '',
     semestre: '',
   });
+  const [cedulaValidation, setCedulaValidation] = useState({ esValida: false, mensaje: '' });
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
   // Al abrir el modal de registro de estudiante, limpiar mensajes previos
   useEffect(() => {
     if (showQuickAddStudent) {
       setQuickStudentError('');
+      setAttemptedSubmit(false);
     }
   }, [showQuickAddStudent]);
 
@@ -86,6 +89,31 @@ const ProgramasVisitaManager = ({ onBack }) => {
       return prev;
     });
   }, [quickStudent.cedula, quickStudent.telefono, showQuickAddStudent]);
+
+  // Validar cédula ecuatoriana en tiempo real
+  useEffect(() => {
+    if (!showQuickAddStudent) return;
+
+    // Solo validar si hay algo escrito
+    if (quickStudent.cedula && quickStudent.cedula.length > 0) {
+      const validacion = validarCedulaEcuatoriana(quickStudent.cedula);
+      setCedulaValidation(validacion);
+    } else {
+      // Resetear validación si está vacío
+      setCedulaValidation({ esValida: false, mensaje: '' });
+    }
+  }, [quickStudent.cedula, showQuickAddStudent]);
+
+  // Ocultar alerta de validación automáticamente después de 5 segundos
+  useEffect(() => {
+    if (attemptedSubmit) {
+      const timer = setTimeout(() => {
+        setAttemptedSubmit(false);
+      }, 5000); // 5 segundos
+
+      return () => clearTimeout(timer);
+    }
+  }, [attemptedSubmit]);
 
   useEffect(() => {
     loadInitial();
@@ -614,6 +642,13 @@ const ProgramasVisitaManager = ({ onBack }) => {
 
   const handleSaveQuickStudent = async () => {
     setQuickStudentError('');
+    setAttemptedSubmit(true);
+
+    // Validar cédula ecuatoriana primero
+    if (!cedulaValidation.esValida) {
+      return; // No continuar si la cédula es inválida
+    }
+
     // Normalización y validación de campos requeridos
     const nombre = (quickStudent.nombre || '').trim();
     const cedula = (quickStudent.cedula || '').toString().replace(/\D/g, '').slice(0, 10);
@@ -1652,9 +1687,20 @@ const ProgramasVisitaManager = ({ onBack }) => {
             {quickStudentError && (
               <div className="mb-3 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded">{quickStudentError}</div>
             )}
+            {/* Alerta de validación de cédula */}
+            {attemptedSubmit && !cedulaValidation.esValida && quickStudent.cedula.length > 0 && (
+              <div className="mb-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                {cedulaValidation.mensaje}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
               <input required className="border border-gray-300 rounded-md px-3 py-2" placeholder="Nombre" value={quickStudent.nombre} onChange={(e) => setQuickStudent((p) => ({ ...p, nombre: e.target.value }))} />
-              <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Cédula" value={quickStudent.cedula} onChange={(e) => setQuickStudent((p) => ({ ...p, cedula: e.target.value }))} />
+              <input
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+                placeholder="Cédula"
+                value={quickStudent.cedula}
+                onChange={(e) => setQuickStudent((p) => ({ ...p, cedula: e.target.value }))}
+              />
               <input required type="email" className="border border-gray-300 rounded-md px-3 py-2" placeholder="Correo" value={quickStudent.correo} onChange={(e) => setQuickStudent((p) => ({ ...p, correo: e.target.value }))} />
               <input className="border border-gray-300 rounded-md px-3 py-2" placeholder="Teléfono" value={quickStudent.telefono} onChange={(e) => setQuickStudent((p) => ({ ...p, telefono: e.target.value }))} />
               <div>
