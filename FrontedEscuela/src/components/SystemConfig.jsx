@@ -921,7 +921,7 @@ const SystemConfig = ({ onBack }) => {
 
                 <div className="px-4 sm:px-6 py-6">
                   <p className="text-gray-600 mb-6">
-                    Conecta tu cuenta de WhatsApp para poder enviar comunicados por este medio. 
+                    Conecta tu cuenta de WhatsApp para poder enviar comunicados. 
                     Escanea el código QR con tu aplicación de WhatsApp.
                   </p>
 

@@ -324,9 +324,38 @@ const ComunicadosManager = ({ onBack, usuario }) => {
       }
 
       if (canalEnvio === 'whatsapp') {
+        // Verificar estado de WhatsApp ANTES de intentar enviar
+        try {
+          const statusResponse = await api.get('/api/whatsapp/status');
+          const wsStatus = statusResponse.data?.status;
+          
+          if (wsStatus === 'disconnected') {
+            setError('WhatsApp no está conectado. Por favor, ve a Configuración del Sistema para vincular WhatsApp escaneando el código QR.');
+            setSending(false);
+            return;
+          } else if (wsStatus === 'qr') {
+            setError('WhatsApp está esperando que se escanee el código QR. Por favor, ve a Configuración del Sistema y escanea el QR con tu teléfono.');
+            setSending(false);
+            return;
+          } else if (wsStatus === 'authenticated') {
+            setError('WhatsApp se está conectando, por favor espera unos segundos e intenta nuevamente.');
+            setSending(false);
+            return;
+          } else if (wsStatus !== 'ready') {
+            setError(`WhatsApp no está listo para enviar mensajes. Estado actual: ${wsStatus || 'desconocido'}. Verifica la conexión en Configuración del Sistema.`);
+            setSending(false);
+            return;
+          }
+        } catch (statusError) {
+          setError('No se pudo verificar el estado de WhatsApp. El servicio puede estar reiniciándose. Por favor, espera unos segundos e intenta nuevamente.');
+          setSending(false);
+          return;
+        }
+
         // Envío por WhatsApp
         let telefonosValidos = [];
         let telefonosInvalidos = 0;
+
 
         // Obtener teléfonos según el tipo de destinatario
         if (formData.tipoDestinatario === 'todos' || formData.tipoDestinatario === 'estudiantes') {
@@ -454,13 +483,23 @@ const ComunicadosManager = ({ onBack, usuario }) => {
 
         if (enviados > 0) {
           setSuccess(`Mensajes de WhatsApp enviados: ${enviados}/${telefonosValidos.length}. ${telefonosInvalidos > 0 ? `${telefonosInvalidos} número(s) inválido(s) omitido(s).` : ''}`);
+          if (erroresEnvio.length > 0) {
+            console.warn('Algunos envíos fallaron:', erroresEnvio);
+          }
         } else {
-          setError('No se pudo enviar ningún mensaje de WhatsApp');
+          // Mostrar errores específicos si los hay
+          if (erroresEnvio.length > 0) {
+            const primerError = erroresEnvio[0];
+            if (primerError.includes('no está listo') || primerError.includes('not ready')) {
+              setError('No se pudo enviar: WhatsApp perdió la conexión durante el envío. Por favor, verifica el estado en Configuración del Sistema.');
+            } else {
+              setError(`No se pudo enviar ningún mensaje de WhatsApp. Error: ${primerError}`);
+            }
+          } else {
+            setError('No se pudo enviar ningún mensaje de WhatsApp. Verifica la conexión en Configuración del Sistema.');
+          }
         }
 
-        if (erroresEnvio.length > 0) {
-          console.warn('Errores de envío WhatsApp:', erroresEnvio);
-        }
 
 
       } else {

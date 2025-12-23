@@ -222,6 +222,27 @@ const Dashboard = ({ usuario, onLogout }) => {
     loadNews();
   }, []);
 
+  // Ping único a WhatsApp para activar reconexión al cargar el Dashboard
+  useEffect(() => {
+    // Solo para administradores y coadministradores
+    const userType = usuario?.tipo_usuario?.nombre?.toLowerCase();
+    if (userType !== 'administrador' && userType !== 'coadministrador') {
+      return;
+    }
+
+    // Un solo ping para activar la conexión si no está activa
+    const activateWhatsApp = async () => {
+      try {
+        await api.get('/api/whatsapp/status');
+      } catch {
+        // Silenciar errores
+      }
+    };
+
+    activateWhatsApp();
+  }, [usuario]);
+
+
   // Recargar noticias cuando se regrese al dashboard o haya cambios
   useEffect(() => {
     const handleStorageChange = () => {
