@@ -264,6 +264,13 @@ func SetupAllRoutes(app *fiber.App, handlers *AllHandlers) {
 	comunicados.Delete("/:id", handlers.ComunicadoHandler.DeleteComunicado)
 	comunicados.Get("/buscar/:termino", handlers.ComunicadoHandler.SearchComunicados)
 
+	// ==================== WHATSAPP ====================
+	whatsapp := protected.Group("/whatsapp")
+	whatsapp.Get("/status", handlers.WhatsAppHandler.GetStatus)
+	whatsapp.Get("/qr", handlers.WhatsAppHandler.GetQR)
+	whatsapp.Post("/send-message", handlers.WhatsAppHandler.SendMessage)
+	whatsapp.Post("/logout", handlers.WhatsAppHandler.Logout)
+
 }
 
 // AllHandlers contiene todos los handlers de la aplicación
@@ -289,6 +296,7 @@ type AllHandlers struct {
 	AuthHandler                                   *handlers.AuthHandler
 	CodigoHandler                                 *handlers.CodigoHandler
 	ComunicadoHandler                             *handlers.ComunicadoHandler
+	WhatsAppHandler                               *handlers.WhatsAppHandler
 }
 
 // NewAllHandlers crea una instancia con todos los handlers
@@ -314,6 +322,7 @@ func NewAllHandlers(
 	authHandler *handlers.AuthHandler,
 	codigoHandler *handlers.CodigoHandler,
 	comunicadoHandler *handlers.ComunicadoHandler,
+	whatsappHandler *handlers.WhatsAppHandler,
 ) *AllHandlers {
 	return &AllHandlers{
 		EstudianteHandler:                     estudianteHandler,
@@ -337,5 +346,6 @@ func NewAllHandlers(
 		AuthHandler:       authHandler,
 		CodigoHandler:     codigoHandler,
 		ComunicadoHandler: comunicadoHandler,
+		WhatsAppHandler:   whatsappHandler,
 	}
 }

@@ -865,6 +865,7 @@ const Dashboard = ({ usuario, onLogout }) => {
     }
   ];
 
+
   // Filtrar elementos del menú según permisos del usuario
   const menuItems = allMenuItems.filter(item => hasPermission(item.id));
 

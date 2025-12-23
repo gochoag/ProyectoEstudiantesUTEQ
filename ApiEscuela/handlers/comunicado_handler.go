@@ -78,6 +78,12 @@ func (h *ComunicadoHandler) CreateComunicado(c *fiber.Ctx) error {
 		})
 	}
 
+	// Obtener canal (correo o whatsapp)
+	canal := "correo"
+	if canales, ok := form.Value["canal"]; ok && len(canales) > 0 {
+		canal = canales[0]
+	}
+
 	// Parsear destinatarios
 	var destinatario services.DestinatarioInfo
 	if err := json.Unmarshal([]byte(destinatariosJSON), &destinatario); err != nil {
@@ -162,25 +168,44 @@ func (h *ComunicadoHandler) CreateComunicado(c *fiber.Ctx) error {
 		}
 	}
 
-	// Obtener lista de correos según el tipo de destinatario
-	correosDestinatarios, err := h.comunicadoService.GetCorreosDestinatarios(destinatario)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	if len(correosDestinatarios) == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "No se encontraron destinatarios con correo electrónico",
-		})
-	}
-
-	// Enviar correos masivos
-	result := h.comunicadoService.SendBulkEmails(correosDestinatarios, asunto, mensaje, attachments)
-
 	// Guardar adjuntos como JSON
 	adjuntosJSON, _ := json.Marshal(adjuntosPaths)
+
+	var enviados int
+	var total int
+	var erroresEnvio []string
+
+	// Si el canal es correo, enviar emails
+	if canal == "correo" {
+		// Obtener lista de correos según el tipo de destinatario
+		correosDestinatarios, err := h.comunicadoService.GetCorreosDestinatarios(destinatario)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+
+		if len(correosDestinatarios) == 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "No se encontraron destinatarios con correo electrónico",
+			})
+		}
+
+		// Enviar correos masivos
+		result := h.comunicadoService.SendBulkEmails(correosDestinatarios, asunto, mensaje, attachments)
+		enviados = result.Enviados
+		total = result.Total
+		erroresEnvio = result.Errores
+	} else {
+		// Para WhatsApp, los mensajes ya se enviaron desde el frontend
+		// Solo obtener el conteo de enviados del formulario
+		if enviadoAStr, ok := form.Value["enviado_a"]; ok && len(enviadoAStr) > 0 {
+			if val, err := strconv.Atoi(enviadoAStr[0]); err == nil {
+				enviados = val
+			}
+		}
+		total = enviados
+	}
 
 	// Crear el comunicado en la base de datos
 	comunicado := &models.Comunicado{
@@ -189,8 +214,9 @@ func (h *ComunicadoHandler) CreateComunicado(c *fiber.Ctx) error {
 		Mensaje:       mensaje,
 		Adjuntos:      string(adjuntosJSON),
 		UsuarioID:     uint(usuarioID),
-		EnviadoA:      result.Enviados,
+		EnviadoA:      enviados,
 		Estado:        "enviado",
+		Canal:         canal,
 	}
 
 	if err := h.comunicadoService.CreateComunicado(comunicado); err != nil {
@@ -202,15 +228,16 @@ func (h *ComunicadoHandler) CreateComunicado(c *fiber.Ctx) error {
 	response := fiber.Map{
 		"success":    true,
 		"comunicado": comunicado,
-		"enviados":   result.Enviados,
-		"total":      result.Total,
+		"enviados":   enviados,
+		"total":      total,
 	}
 
-	if len(result.Errores) > 0 {
-		response["errores"] = result.Errores
+	if len(erroresEnvio) > 0 {
+		response["errores"] = erroresEnvio
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(response)
+
 }
 
 // GetComunicado obtiene un comunicado por ID

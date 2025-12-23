@@ -16,6 +16,27 @@ services:
       - '3000:3000'
     env_file:
       - .env
+    environment:
+      - WHATSAPP_SERVICE_URL=http://wa-node-service:3001
+    depends_on:
+      - wa-node-service
+    networks:
+      - escuela_network
+
+  wa-node-service:
+    container_name: wa-node-service
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "apk add --no-cache chromium && npm install && npm start"
+    restart: always
+    volumes:
+      - ./wa-node-service:/app
+      - ./wa-node-service/.wwebjs_auth:/app/.wwebjs_auth
+      - /app/node_modules
+    environment:
+      - PORT=3001
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     networks:
       - escuela_network
 

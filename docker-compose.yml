@@ -14,8 +14,29 @@ services:
       - "3250:3000"
     env_file:
       - .env
+    environment:
+      - WHATSAPP_SERVICE_URL=http://wa-node-service-uteq:3001
+    depends_on:
+      - wa-node-service
     networks:
       - escuela_network
+
+  wa-node-service:
+    container_name: wa-node-service-uteq
+    build:
+      context: ./wa-node-service
+      dockerfile: Dockerfile
+    image: wa-node-service-image
+    restart: always
+    volumes:
+      - wa_session_data:/app/.wwebjs_auth
+    environment:
+      - PORT=3001
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    networks:
+      - escuela_network
+
   frontedescuela-frontend:
     container_name: frontedescuela-frontend-uteq
     build:
@@ -32,6 +53,7 @@ services:
       - apiescuela-backend
     networks:
       - escuela_network
+
   nginxescuelauteq:
     container_name: nginxescuelauteq-uteq
     image: nginx
@@ -90,6 +112,8 @@ services:
 volumes:
   nginxfiles:
     external: true
+  wa_session_data:
+    driver: local
 
 networks:
   escuela_network:

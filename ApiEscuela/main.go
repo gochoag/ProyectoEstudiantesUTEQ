@@ -174,6 +174,7 @@ func main() {
 	// Inicializar handlers que dependen de servicios
 	authHandler := handlers.NewAuthHandler(authService)
 	comunicadoHandler := handlers.NewComunicadoHandler(comunicadoService)
+	whatsappHandler := handlers.NewWhatsAppHandler()
 
 	// Crear contenedor de todos los handlers
 	allHandlers := routers.NewAllHandlers(
@@ -198,6 +199,7 @@ func main() {
 		authHandler,
 		codigoHandler,
 		comunicadoHandler,
+		whatsappHandler,
 	)
 
 	// Configurar todas las rutas

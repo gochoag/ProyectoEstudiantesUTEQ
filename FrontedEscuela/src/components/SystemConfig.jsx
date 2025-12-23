@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import ConfirmDialog from './ConfirmDialog';
 import GeneracionFormatoExcel from './GeneracionFormatoExcel';
@@ -28,6 +28,11 @@ const SystemConfig = ({ onBack }) => {
 
   // Estado para búsqueda
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados para WhatsApp
+  const [whatsappStatus, setWhatsappStatus] = useState('disconnected');
+  const [whatsappQR, setWhatsappQR] = useState(null);
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
 
   // Cargar datos según la sección actual
   useEffect(() => {
@@ -65,6 +70,72 @@ const SystemConfig = ({ onBack }) => {
       setLoading(false);
     }
   };
+
+  // Funciones de WhatsApp
+  const fetchWhatsappStatus = useCallback(async () => {
+    try {
+      const response = await api.get('/api/whatsapp/status');
+      setWhatsappStatus(response.data.status);
+      return response.data.status;
+    } catch (err) {
+      console.error('Error obteniendo estado WhatsApp:', err);
+      return 'error';
+    }
+  }, []);
+
+  const fetchWhatsappQR = useCallback(async () => {
+    try {
+      const response = await api.get('/api/whatsapp/qr');
+      if (response.data.success && response.data.qr) {
+        setWhatsappQR(response.data.qr);
+      } else {
+        setWhatsappQR(null);
+      }
+      setWhatsappStatus(response.data.status);
+    } catch (err) {
+      console.error('Error obteniendo QR:', err);
+    }
+  }, []);
+
+  const handleWhatsappLogout = async () => {
+    try {
+      await api.post('/api/whatsapp/logout');
+      setWhatsappStatus('disconnected');
+      setWhatsappQR(null);
+      setSuccess('Sesión de WhatsApp cerrada. Espere a que aparezca un nuevo QR.');
+    } catch (err) {
+      console.error('Error cerrando sesión:', err);
+      setError('Error al cerrar sesión de WhatsApp');
+    }
+  };
+
+  // Polling para WhatsApp cuando la sección está activa
+  useEffect(() => {
+    let interval;
+    
+    if (currentSection === 'whatsapp') {
+      const init = async () => {
+        setWhatsappLoading(true);
+        const status = await fetchWhatsappStatus();
+        if (status === 'qr' || status === 'disconnected') {
+          await fetchWhatsappQR();
+        }
+        setWhatsappLoading(false);
+      };
+      init();
+
+      interval = setInterval(async () => {
+        const status = await fetchWhatsappStatus();
+        if (status === 'qr') {
+          await fetchWhatsappQR();
+        } else if (status === 'ready') {
+          setWhatsappQR(null);
+        }
+      }, 3000);
+    }
+
+    return () => clearInterval(interval);
+  }, [currentSection, fetchWhatsappStatus, fetchWhatsappQR]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -691,6 +762,29 @@ const SystemConfig = ({ onBack }) => {
                   Generar Excel
                 </span>
               </button>
+              <button
+                onClick={() => {
+                  setCurrentSection('whatsapp');
+                  setShowForm(false);
+                  resetForm();
+                  setCurrentPage(1);
+                  setSearchTerm('');
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${currentSection === 'whatsapp'
+                  ? 'text-white'
+                  : 'text-gray-700 bg-white hover:bg-gray-50'
+                  }`}
+                style={{
+                  backgroundColor: currentSection === 'whatsapp' ? '#025a27' : undefined
+                }}
+              >
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  WhatsApp
+                </span>
+              </button>
             </nav>
           </div>
 
@@ -811,6 +905,106 @@ const SystemConfig = ({ onBack }) => {
                       </div>
                     </>
                   )}
+                </div>
+              </div>
+            ) : currentSection === 'whatsapp' ? (
+              <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
+                {/* Header */}
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ backgroundColor: '#025a27' }}>
+                  <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Conexión WhatsApp
+                  </h3>
+                </div>
+
+                <div className="px-4 sm:px-6 py-6">
+                  <p className="text-gray-600 mb-6">
+                    Conecta tu cuenta de WhatsApp para poder enviar comunicados por este medio. 
+                    Escanea el código QR con tu aplicación de WhatsApp.
+                  </p>
+
+                  {/* Estado de conexión */}
+                  <div className="flex items-center justify-center mb-6">
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                      whatsappStatus === 'ready' ? 'bg-green-100 text-green-800' :
+                      whatsappStatus === 'qr' ? 'bg-yellow-100 text-yellow-800' :
+                      whatsappStatus === 'authenticated' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${
+                        whatsappStatus === 'ready' ? 'bg-green-500 animate-pulse' :
+                        whatsappStatus === 'qr' ? 'bg-yellow-500 animate-pulse' :
+                        whatsappStatus === 'authenticated' ? 'bg-blue-500 animate-pulse' :
+                        'bg-red-500'
+                      }`}></span>
+                      {whatsappStatus === 'ready' ? 'Conectado' :
+                       whatsappStatus === 'qr' ? 'Esperando escaneo' :
+                       whatsappStatus === 'authenticated' ? 'Autenticado' :
+                       'Desconectado'}
+                    </span>
+                  </div>
+
+                  {whatsappLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+                      <p className="text-gray-500">Conectando con WhatsApp...</p>
+                    </div>
+                  ) : whatsappStatus === 'ready' ? (
+                    <div className="text-center py-8">
+                      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-lg font-medium text-gray-800 mb-2">WhatsApp Conectado</p>
+                      <p className="text-gray-500 mb-6">Listo para enviar mensajes desde Comunicados</p>
+                      <button
+                        onClick={handleWhatsappLogout}
+                        className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        Cerrar sesión de WhatsApp
+                      </button>
+                    </div>
+                  ) : whatsappQR ? (
+                    <div className="text-center">
+                      <p className="text-gray-600 mb-4">Escanea este código QR con WhatsApp</p>
+                      <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-xl shadow-lg">
+                        <img src={whatsappQR} alt="QR Code" className="w-64 h-64" />
+                      </div>
+                      <p className="text-sm text-gray-500 mt-4">
+                        Abre WhatsApp → Dispositivos vinculados → Vincular dispositivo
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-10 h-10 text-yellow-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-600">Generando código QR...</p>
+                      <p className="text-sm text-gray-400 mt-2">Esto puede tomar unos segundos</p>
+                    </div>
+                  )}
+
+                  {/* Información */}
+                  <div className="mt-6 bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-blue-800">Información importante</p>
+                        <ul className="text-sm text-blue-700 mt-1 list-disc list-inside">
+                          <li>La sesión permanece activa mientras el servicio esté corriendo</li>
+                          <li>Si cierras sesión, deberás escanear el QR nuevamente</li>
+                          <li>Los mensajes se envían desde la cuenta de WhatsApp vinculada</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

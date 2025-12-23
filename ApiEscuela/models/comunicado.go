@@ -12,6 +12,7 @@ type Comunicado struct {
 	UsuarioID     uint   `json:"usuario_id" gorm:"not null"`      // Who sent it
 	EnviadoA      int    `json:"enviado_a"`                       // Count of recipients
 	Estado        string `json:"estado" gorm:"default:'enviado'"` // enviado, borrador
+	Canal         string `json:"canal" gorm:"default:'correo'"`   // correo, whatsapp
 
 	// Relaciones
 	Usuario Usuario `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`

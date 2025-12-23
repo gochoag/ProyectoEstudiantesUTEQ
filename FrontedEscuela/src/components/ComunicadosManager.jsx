@@ -23,6 +23,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
     estudiantesSeleccionados: [],
     mensaje: ''
   });
+  const [canalEnvio, setCanalEnvio] = useState('correo'); // 'correo' o 'whatsapp'
   const [adjuntos, setAdjuntos] = useState([]);
   const [adjuntosError, setAdjuntosError] = useState('');
   const fileInputRef = useRef(null);
@@ -185,18 +186,33 @@ const ComunicadosManager = ({ onBack, usuario }) => {
     setAdjuntosError('');
 
     files.forEach(file => {
-      // Validar tipo (solo PDF e imágenes)
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-      if (!allowedTypes.includes(file.type)) {
-        errors.push(`"${file.name}": Solo se permiten archivos PDF e imágenes`);
-        return;
-      }
-
-      // Validar tamaño (5MB máximo)
-      if (file.size > 5 * 1024 * 1024) {
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        errors.push(`"${file.name}" (${sizeMB}MB): Excede el límite de 5MB`);
-        return;
+      // Validar tipo según canal
+      if (canalEnvio === 'whatsapp') {
+        // Solo imágenes para WhatsApp
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+          errors.push(`"${file.name}": Solo se permiten imágenes para WhatsApp`);
+          return;
+        }
+        // Máximo 1MB para WhatsApp
+        if (file.size > 1 * 1024 * 1024) {
+          const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          errors.push(`"${file.name}" (${sizeMB}MB): Para WhatsApp máximo 1MB`);
+          return;
+        }
+      } else {
+        // PDF e imágenes para correo
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+          errors.push(`"${file.name}": Solo se permiten archivos PDF e imágenes`);
+          return;
+        }
+        // 5MB máximo para correo
+        if (file.size > 5 * 1024 * 1024) {
+          const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          errors.push(`"${file.name}" (${sizeMB}MB): Excede el límite de 5MB`);
+          return;
+        }
       }
 
       validFiles.push(file);
@@ -242,6 +258,36 @@ const ComunicadosManager = ({ onBack, usuario }) => {
     return errors;
   };
 
+  // Función para validar y formatear números de teléfono ecuatorianos
+  const validarTelefonoEC = (telefono) => {
+    if (!telefono) return null;
+    
+    // Eliminar espacios y caracteres no numéricos
+    let numero = telefono.toString().replace(/[^0-9]/g, '');
+    
+    // Si empieza con 0, quitar el 0 y agregar 593
+    if (numero.startsWith('0')) {
+      numero = '593' + numero.substring(1);
+    }
+    
+    // Si no empieza con 593, agregarlo
+    if (!numero.startsWith('593')) {
+      numero = '593' + numero;
+    }
+    
+    // Validar longitud (593 + 9 dígitos = 12 dígitos)
+    if (numero.length !== 12) {
+      return null;
+    }
+    
+    // Validar que el 4to dígito sea 9 (números celulares Ecuador)
+    if (numero.charAt(3) !== '9') {
+      return null;
+    }
+    
+    return numero;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -264,28 +310,118 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         destinatarios.ids = formData.estudiantesSeleccionados;
       }
 
-      // Crear FormData para enviar archivos
-      const formDataToSend = new FormData();
-      formDataToSend.append('asunto', formData.asunto);
-      formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
-      formDataToSend.append('mensaje', formData.mensaje);
-      formDataToSend.append('usuario_id', usuario?.ID || usuario?.id);
+      if (canalEnvio === 'whatsapp') {
+        // Envío por WhatsApp
+        let telefonosValidos = [];
+        let telefonosInvalidos = 0;
 
-      adjuntos.forEach(file => {
-        formDataToSend.append('adjuntos', file);
-      });
-
-      const response = await api.post('/api/comunicados', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+        // Obtener teléfonos según el tipo de destinatario
+        if (formData.tipoDestinatario === 'todos' || formData.tipoDestinatario === 'estudiantes') {
+          const estudiantesTarget = formData.tipoDestinatario === 'todos' 
+            ? estudiantes 
+            : estudiantes.filter(e => formData.estudiantesSeleccionados.includes(e.ID));
+          
+          estudiantesTarget.forEach(est => {
+            const telefono = est.persona?.telefono || est.persona?.celular;
+            const telefonoValido = validarTelefonoEC(telefono);
+            if (telefonoValido) {
+              telefonosValidos.push({
+                telefono: telefonoValido,
+                nombre: est.persona?.nombre || 'Estudiante'
+              });
+            } else {
+              telefonosInvalidos++;
+            }
+          });
         }
-      });
 
-      const data = response.data;
-      setSuccess(`Comunicado enviado exitosamente. Correos enviados: ${data.enviados}/${data.total}`);
+        if (telefonosValidos.length === 0) {
+          setError(`No hay números de teléfono válidos para enviar. ${telefonosInvalidos} número(s) inválido(s) o faltantes.`);
+          setSending(false);
+          return;
+        }
 
-      if (data.errores && data.errores.length > 0) {
-        console.warn('Errores de envío:', data.errores);
+        // Formatear mensaje para WhatsApp: Asunto en negrita + Mensaje
+        const mensajeLimpio = formData.mensaje
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .trim();
+
+        const mensajeWhatsApp = `*${formData.asunto}*\n\n${mensajeLimpio}`;
+
+        // Enviar mensajes de WhatsApp
+        let enviados = 0;
+        let erroresEnvio = [];
+
+        for (const dest of telefonosValidos) {
+          try {
+            await api.post('/api/whatsapp/send-message', {
+              phone: dest.telefono,
+              message: mensajeWhatsApp
+            });
+            enviados++;
+          } catch (err) {
+            console.error(`Error enviando a ${dest.telefono}:`, err);
+            erroresEnvio.push(`${dest.nombre}: ${err.response?.data?.error || err.message}`);
+          }
+        }
+
+        // Guardar comunicado en BD después de enviar
+        const formDataToSend = new FormData();
+        formDataToSend.append('asunto', formData.asunto);
+        formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
+        formDataToSend.append('mensaje', formData.mensaje);
+        formDataToSend.append('usuario_id', usuario?.ID || usuario?.id);
+        formDataToSend.append('canal', 'whatsapp');
+        formDataToSend.append('enviado_a', enviados.toString());
+
+        // Para WhatsApp no enviamos adjuntos al servidor (ya no se envían por WS)
+        try {
+          await api.post('/api/comunicados', formDataToSend, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        } catch (saveErr) {
+          console.warn('Error guardando comunicado en BD:', saveErr);
+        }
+
+        if (enviados > 0) {
+          setSuccess(`Mensajes de WhatsApp enviados: ${enviados}/${telefonosValidos.length}. ${telefonosInvalidos > 0 ? `${telefonosInvalidos} número(s) inválido(s) omitido(s).` : ''}`);
+        } else {
+          setError('No se pudo enviar ningún mensaje de WhatsApp');
+        }
+
+        if (erroresEnvio.length > 0) {
+          console.warn('Errores de envío WhatsApp:', erroresEnvio);
+        }
+
+      } else {
+        // Envío por Correo
+        const formDataToSend = new FormData();
+        formDataToSend.append('asunto', formData.asunto);
+        formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
+        formDataToSend.append('mensaje', formData.mensaje);
+        formDataToSend.append('usuario_id', usuario?.ID || usuario?.id);
+        formDataToSend.append('canal', 'correo');
+
+        adjuntos.forEach(file => {
+          formDataToSend.append('adjuntos', file);
+        });
+
+        const response = await api.post('/api/comunicados', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        const data = response.data;
+        setSuccess(`Comunicado enviado exitosamente. Correos enviados: ${data.enviados}/${data.total}`);
+
+        if (data.errores && data.errores.length > 0) {
+          console.warn('Errores de envío:', data.errores);
+        }
       }
 
       // Resetear formulario
@@ -296,6 +432,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         estudiantesSeleccionados: [],
         mensaje: ''
       });
+      setCanalEnvio('correo');
       setAdjuntos([]);
       setShowForm(false);
 
@@ -308,6 +445,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
       setSending(false);
     }
   };
+
+
 
   const handleDeleteClick = (comunicado) => {
     setComunicadoToDelete(comunicado);
@@ -497,6 +636,69 @@ const ComunicadosManager = ({ onBack, usuario }) => {
 
           <div className="px-3 sm:px-6 py-4 sm:py-6">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Selector de canal de envío */}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                  Enviar comunicado vía:
+                </label>
+                <div className="flex items-center space-x-6">
+                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${
+                    canalEnvio === 'correo' 
+                      ? 'border-green-600 bg-green-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="canalEnvio"
+                      value="correo"
+                      checked={canalEnvio === 'correo'}
+                      onChange={(e) => {
+                        setCanalEnvio(e.target.value);
+                        setAdjuntos([]); // Limpiar adjuntos al cambiar canal
+                      }}
+                      className="hidden"
+                    />
+                    <svg className={`w-5 h-5 mr-2 ${canalEnvio === 'correo' ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span className={`font-medium ${canalEnvio === 'correo' ? 'text-green-700' : 'text-gray-600'}`}>
+                      Correo
+                    </span>
+                  </label>
+                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${
+                    canalEnvio === 'whatsapp' 
+                      ? 'border-green-600 bg-green-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="canalEnvio"
+                      value="whatsapp"
+                      checked={canalEnvio === 'whatsapp'}
+                      onChange={(e) => {
+                        setCanalEnvio(e.target.value);
+                        setAdjuntos([]); // Limpiar adjuntos al cambiar canal
+                      }}
+                      className="hidden"
+                    />
+                    <svg className={`w-5 h-5 mr-2 ${canalEnvio === 'whatsapp' ? 'text-green-600' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    <span className={`font-medium ${canalEnvio === 'whatsapp' ? 'text-green-700' : 'text-gray-600'}`}>
+                      WhatsApp
+                    </span>
+                  </label>
+                </div>
+                {canalEnvio === 'whatsapp' && (
+                  <p className="text-xs text-amber-600 mt-2 flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Solo para estudiantes con número de celular válido. Instituciones no disponibles.
+                  </p>
+                )}
+              </div>
+
               {/* Asunto */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
@@ -527,11 +729,16 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                 >
                   <option value="">Seleccione tipo de destinatario</option>
                   <option value="todos">Todos los estudiantes</option>
-                  <option value="todas_instituciones">Todas las instituciones</option>
-                  <option value="instituciones">Instituciones específicas</option>
+                  <option value="todas_instituciones" disabled={canalEnvio === 'whatsapp'}>
+                    Todas las instituciones {canalEnvio === 'whatsapp' ? '(No disponible para WhatsApp)' : ''}
+                  </option>
+                  <option value="instituciones" disabled={canalEnvio === 'whatsapp'}>
+                    Instituciones específicas {canalEnvio === 'whatsapp' ? '(No disponible para WhatsApp)' : ''}
+                  </option>
                   <option value="estudiantes">Estudiantes específicos</option>
                 </select>
               </div>
+
 
               {/* Selección de Instituciones */}
               {formData.tipoDestinatario === 'instituciones' && (
@@ -607,7 +814,9 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     </div>
                     <input
                       type="text"
-                      placeholder="Buscar por nombre, cédula o correo..."
+                      placeholder={canalEnvio === 'whatsapp' 
+                        ? "Buscar por nombre, cédula o teléfono..." 
+                        : "Buscar por nombre, cédula o correo..."}
                       value={busquedaEstudiante}
                       onChange={(e) => setBusquedaEstudiante(e.target.value)}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -618,13 +827,17 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                       .filter(est => {
                         if (!busquedaEstudiante.trim()) return true;
                         const search = busquedaEstudiante.toLowerCase();
+                        const telefono = est.persona?.telefono || est.persona?.celular || '';
                         return (
                           est.persona?.nombre?.toLowerCase().includes(search) ||
                           est.persona?.cedula?.toLowerCase().includes(search) ||
-                          est.persona?.correo?.toLowerCase().includes(search)
+                          est.persona?.correo?.toLowerCase().includes(search) ||
+                          telefono.toString().toLowerCase().includes(search)
                         );
                       })
-                      .map(est => (
+                      .map(est => {
+                        const telefono = est.persona?.telefono || est.persona?.celular;
+                        return (
                         <label key={est.ID} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
                           <input
                             type="checkbox"
@@ -635,18 +848,28 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           <span className="ml-2 text-sm text-gray-700">
                             {est.persona?.nombre || 'Sin nombre'} - {est.persona?.cedula || 'Sin cédula'}
                           </span>
-                          {est.persona?.correo && (
-                            <span className="ml-2 text-xs text-gray-500">({est.persona.correo})</span>
+                          {canalEnvio === 'whatsapp' ? (
+                            telefono ? (
+                              <span className="ml-2 text-xs text-green-600">({telefono})</span>
+                            ) : (
+                              <span className="ml-2 text-xs text-red-500">(Sin teléfono)</span>
+                            )
+                          ) : (
+                            est.persona?.correo && (
+                              <span className="ml-2 text-xs text-gray-500">({est.persona.correo})</span>
+                            )
                           )}
                         </label>
-                      ))}
+                      )})}
                     {estudiantes.filter(est => {
                       if (!busquedaEstudiante.trim()) return true;
                       const search = busquedaEstudiante.toLowerCase();
+                      const telefono = est.persona?.telefono || est.persona?.celular || '';
                       return (
                         est.persona?.nombre?.toLowerCase().includes(search) ||
                         est.persona?.cedula?.toLowerCase().includes(search) ||
-                        est.persona?.correo?.toLowerCase().includes(search)
+                        est.persona?.correo?.toLowerCase().includes(search) ||
+                        telefono.toString().toLowerCase().includes(search)
                       );
                     }).length === 0 && (
                         <p className="text-sm text-gray-500 text-center py-2">No se encontraron estudiantes</p>
@@ -680,14 +903,18 @@ const ComunicadosManager = ({ onBack, usuario }) => {
               {/* Adjuntos */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Archivos Adjuntos <span className="text-gray-400">(Opcional - PDF e imágenes, máx. 5MB c/u)</span>
+                  Archivos Adjuntos <span className="text-gray-400">
+                    {canalEnvio === 'whatsapp' 
+                      ? '(Opcional - Solo imágenes, máx. 1MB c/u)' 
+                      : '(Opcional - PDF e imágenes, máx. 5MB c/u)'}
+                  </span>
                 </label>
                 <div className="flex items-center gap-2">
                   <input
                     ref={fileInputRef}
                     type="file"
                     onChange={handleFileChange}
-                    accept=".pdf,.jpg,.jpeg,.png,.gif"
+                    accept={canalEnvio === 'whatsapp' ? '.jpg,.jpeg,.png,.gif' : '.pdf,.jpg,.jpeg,.png,.gif'}
                     multiple
                     className="hidden"
                   />
@@ -699,9 +926,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                     </svg>
-                    Adjuntar Archivos
+                    Adjuntar {canalEnvio === 'whatsapp' ? 'Imágenes' : 'Archivos'}
                   </button>
                 </div>
+
 
                 {/* Mensaje de error de adjuntos */}
                 {adjuntosError && (
@@ -870,6 +1098,9 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                         <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
                           Enviados
                         </th>
+                        <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
+                          Canal
+                        </th>
                         <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider" style={{ color: '#025a27' }}>
                           Acciones
                         </th>
@@ -931,8 +1162,25 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              {comunicado.enviado_a} correo(s)
+                              {comunicado.enviado_a} {comunicado.canal === 'whatsapp' ? 'mensaje(s)' : 'correo(s)'}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {comunicado.canal === 'whatsapp' ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                </svg>
+                                WhatsApp
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Correo
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex justify-center space-x-2">
@@ -1020,7 +1268,28 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                             })()}
                           </div>
                         </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Canal</p>
+                          <div className="mt-1">
+                            {comunicado.canal === 'whatsapp' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                </svg>
+                                WhatsApp
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Correo
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
+
 
                       <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200">
                         <button
@@ -1103,9 +1372,11 @@ const ComunicadosManager = ({ onBack, usuario }) => {
               </div>
 
               <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Correos Enviados</h4>
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                  {selectedComunicado.canal === 'whatsapp' ? 'Mensajes Enviados' : 'Correos Enviados'}
+                </h4>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
-                  {selectedComunicado.enviado_a} correo(s)
+                  {selectedComunicado.enviado_a} {selectedComunicado.canal === 'whatsapp' ? 'mensaje(s)' : 'correo(s)'}
                 </span>
               </div>
 
@@ -1246,7 +1517,9 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           Estudiantes ({estudiantesSeleccionados.length})
                         </h4>
                         <ul className="space-y-2">
-                          {estudiantesSeleccionados.map(est => (
+                          {estudiantesSeleccionados.map(est => {
+                            const telefono = est.persona?.telefono || est.persona?.celular;
+                            return (
                             <li key={est.ID} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
                               <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 mr-3">
                                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1255,10 +1528,18 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900">{est.persona?.nombre || 'Sin nombre'}</p>
-                                {est.persona?.correo && <p className="text-xs text-gray-500">{est.persona.correo}</p>}
+                                {comunicadoDestinatarios.canal === 'whatsapp' ? (
+                                  telefono ? (
+                                    <p className="text-xs text-green-600">{telefono}</p>
+                                  ) : (
+                                    <p className="text-xs text-red-500">Sin teléfono</p>
+                                  )
+                                ) : (
+                                  est.persona?.correo && <p className="text-xs text-gray-500">{est.persona.correo}</p>
+                                )}
                               </div>
                             </li>
-                          ))}
+                          )})}
                         </ul>
                       </div>
                     );
