@@ -718,6 +718,14 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
   const [respuesta, setRespuesta] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [preguntaExpanded, setPreguntaExpanded] = useState(false);
+  const [respuestaExpanded, setRespuestaExpanded] = useState(false);
+
+  const MAX_CHARS = 200; // Límite de caracteres para mostrar inicialmente
+
+  const shouldTruncate = (text) => {
+    return text && text.length > MAX_CHARS;
+  };
 
   const dudaId = duda?.id ?? duda?.ID;
   const canModerate = !!isAutoridad;
@@ -781,7 +789,19 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
           </div>
 
           {/* Pregunta */}
-          <div className="text-base sm:text-lg font-semibold text-gray-900 break-words whitespace-pre-wrap">{duda.pregunta}</div>
+          <div className="text-base sm:text-lg font-semibold text-gray-900 break-words whitespace-pre-wrap">
+            {shouldTruncate(duda.pregunta) && !preguntaExpanded
+              ? duda.pregunta.substring(0, MAX_CHARS) + '...'
+              : duda.pregunta}
+            {shouldTruncate(duda.pregunta) && (
+              <button
+                onClick={() => setPreguntaExpanded(!preguntaExpanded)}
+                className="ml-2 text-sm text-[#2563eb] hover:underline font-bold"
+              >
+                {preguntaExpanded ? 'ver menos' : 'ver más'}
+              </button>
+            )}
+          </div>
 
           {/* Metadatos: hora, estudiante, respondido por */}
           <div className="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -828,7 +848,19 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
             Respuesta
           </div>
-          <div className="text-gray-900 break-words whitespace-pre-wrap">{duda.respuesta}</div>
+          <div className="text-gray-900 break-words whitespace-pre-wrap">
+            {shouldTruncate(duda.respuesta) && !respuestaExpanded
+              ? duda.respuesta.substring(0, MAX_CHARS) + '...'
+              : duda.respuesta}
+            {shouldTruncate(duda.respuesta) && (
+              <button
+                onClick={() => setRespuestaExpanded(!respuestaExpanded)}
+                className="ml-2 text-sm text-[#2563eb] hover:underline font-extrabold"
+              >
+                {respuestaExpanded ? 'ver menos' : 'ver más'}
+              </button>
+            )}
+          </div>
           <div className="text-xs text-gray-600 mt-2 flex items-center gap-2 flex-wrap">
             {duda.fecha_respuesta && (
               <>
