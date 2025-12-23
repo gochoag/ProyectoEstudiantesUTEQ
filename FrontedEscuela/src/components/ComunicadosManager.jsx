@@ -51,9 +51,13 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   const [showDestinatariosModal, setShowDestinatariosModal] = useState(false);
   const [comunicadoDestinatarios, setComunicadoDestinatarios] = useState(null);
 
+  // Estado para modal de confirmación de envío
+  const [showConfirmEnvio, setShowConfirmEnvio] = useState(false);
+
   // Estados para filtros de búsqueda en selección de destinatarios
   const [busquedaInstitucion, setBusquedaInstitucion] = useState('');
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
+
 
   // Módulos de Quill
   const quillModules = {
@@ -288,6 +292,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
     return numero;
   };
 
+  // Función para mostrar modal de confirmación antes de enviar
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -297,9 +302,17 @@ const ComunicadosManager = ({ onBack, usuario }) => {
       return;
     }
 
+    // Mostrar modal de confirmación
+    setShowConfirmEnvio(true);
+  };
+
+  // Función que realiza el envío real del comunicado
+  const enviarComunicado = async () => {
+    setShowConfirmEnvio(false);
     setSending(true);
     setError('');
     setSuccess('');
+
 
     try {
       // Preparar destinatarios según el tipo
@@ -352,16 +365,63 @@ const ComunicadosManager = ({ onBack, usuario }) => {
 
         const mensajeWhatsApp = `*${formData.asunto}*\n\n${mensajeLimpio}`;
 
+        // Convertir imágenes a base64 para WhatsApp
+        const imagenesBase64 = [];
+        for (const file of adjuntos) {
+          const base64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              // Extraer solo la parte base64 (sin el prefijo data:...)
+              const base64Data = reader.result.split(',')[1];
+              resolve({
+                data: base64Data,
+                mimeType: file.type,
+                filename: file.name
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+          imagenesBase64.push(base64);
+        }
+
         // Enviar mensajes de WhatsApp
         let enviados = 0;
         let erroresEnvio = [];
 
         for (const dest of telefonosValidos) {
           try {
-            await api.post('/api/whatsapp/send-message', {
-              phone: dest.telefono,
-              message: mensajeWhatsApp
-            });
+            if (imagenesBase64.length > 0) {
+              // Si hay imágenes, enviar la primera con el mensaje como caption
+              await api.post('/api/whatsapp/send-media', {
+                phone: dest.telefono,
+                message: mensajeWhatsApp, // El mensaje va como caption de la imagen
+                mediaBase64: imagenesBase64[0].data,
+                mimeType: imagenesBase64[0].mimeType,
+                filename: imagenesBase64[0].filename
+              });
+
+              // Enviar las demás imágenes sin caption
+              for (let i = 1; i < imagenesBase64.length; i++) {
+                try {
+                  await api.post('/api/whatsapp/send-media', {
+                    phone: dest.telefono,
+                    message: '',
+                    mediaBase64: imagenesBase64[i].data,
+                    mimeType: imagenesBase64[i].mimeType,
+                    filename: imagenesBase64[i].filename
+                  });
+                } catch (imgErr) {
+                  console.error(`Error enviando imagen adicional a ${dest.telefono}:`, imgErr);
+                }
+              }
+            } else {
+              // Si no hay imágenes, solo enviar mensaje de texto
+              await api.post('/api/whatsapp/send-message', {
+                phone: dest.telefono,
+                message: mensajeWhatsApp
+              });
+            }
+
             enviados++;
           } catch (err) {
             console.error(`Error enviando a ${dest.telefono}:`, err);
@@ -369,7 +429,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
           }
         }
 
-        // Guardar comunicado en BD después de enviar
+
+        // Guardar comunicado en BD con adjuntos
         const formDataToSend = new FormData();
         formDataToSend.append('asunto', formData.asunto);
         formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
@@ -378,7 +439,11 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         formDataToSend.append('canal', 'whatsapp');
         formDataToSend.append('enviado_a', enviados.toString());
 
-        // Para WhatsApp no enviamos adjuntos al servidor (ya no se envían por WS)
+        // Incluir adjuntos para guardarlos en el servidor
+        adjuntos.forEach(file => {
+          formDataToSend.append('adjuntos', file);
+        });
+
         try {
           await api.post('/api/comunicados', formDataToSend, {
             headers: { 'Content-Type': 'multipart/form-data' }
@@ -396,6 +461,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         if (erroresEnvio.length > 0) {
           console.warn('Errores de envío WhatsApp:', erroresEnvio);
         }
+
 
       } else {
         // Envío por Correo
@@ -980,9 +1046,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                   disabled={sending}
                   className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                   style={{ backgroundColor: '#025a27' }}
-                  onMouseEnter={(e) => !sending && (e.target.style.backgroundColor = '#014a1f')}
-                  onMouseLeave={(e) => !sending && (e.target.style.backgroundColor = '#025a27')}
+                  onMouseEnter={(e) => !sending && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                  onMouseLeave={(e) => !sending && (e.currentTarget.style.backgroundColor = '#025a27')}
                 >
+
                   {sending ? (
                     <div className="flex items-center justify-center">
                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
@@ -1566,7 +1633,28 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         loading={deleting}
         type="danger"
       />
+
+      {/* Modal de confirmación para envío */}
+      <ConfirmDialog
+        isOpen={showConfirmEnvio}
+        onClose={() => setShowConfirmEnvio(false)}
+        onConfirm={enviarComunicado}
+        title="Confirmar Envío"
+        message={`¿Está seguro de que desea enviar este comunicado vía ${canalEnvio === 'whatsapp' ? 'WhatsApp' : 'Correo Electrónico'}? 
+        
+Asunto: "${formData.asunto}"
+Destinatarios: ${formData.tipoDestinatario === 'todos' ? 'Todos los estudiantes' : 
+  formData.tipoDestinatario === 'todas_instituciones' ? 'Todas las instituciones' :
+  formData.tipoDestinatario === 'instituciones' ? `${formData.institucionesSeleccionadas.length} institución(es)` :
+  formData.tipoDestinatario === 'estudiantes' ? `${formData.estudiantesSeleccionados.length} estudiante(s)` : 'Sin destinatarios'}
+${adjuntos.length > 0 ? `\nAdjuntos: ${adjuntos.length} archivo(s)` : ''}`}
+        confirmText="Enviar"
+        cancelText="Cancelar"
+        loading={false}
+        type="success"
+      />
     </div>
+
 
   );
 };

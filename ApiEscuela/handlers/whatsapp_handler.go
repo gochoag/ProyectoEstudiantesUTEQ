@@ -206,3 +206,77 @@ func (h *WhatsAppHandler) Logout(c *fiber.Ctx) error {
 
 	return c.JSON(logoutResp)
 }
+
+// SendMediaRequest representa la solicitud para enviar imagen
+type SendMediaRequest struct {
+	Phone       string `json:"phone"`
+	Message     string `json:"message"`
+	MediaURL    string `json:"mediaUrl,omitempty"`
+	MediaBase64 string `json:"mediaBase64,omitempty"`
+	MimeType    string `json:"mimeType,omitempty"`
+	Filename    string `json:"filename,omitempty"`
+}
+
+// SendMedia envía una imagen por WhatsApp
+func (h *WhatsAppHandler) SendMedia(c *fiber.Ctx) error {
+	var req SendMediaRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Datos inválidos",
+		})
+	}
+
+	if req.Phone == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Se requiere phone",
+		})
+	}
+
+	if req.MediaURL == "" && req.MediaBase64 == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Se requiere mediaUrl o mediaBase64",
+		})
+	}
+
+	// Preparar request para Node.js
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error preparando datos",
+		})
+	}
+
+	resp, err := h.httpClient.Post(
+		h.serviceURL+"/send-media",
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		log.Printf("Error conectando con servicio WhatsApp: %v", err)
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error":   "Servicio de WhatsApp no disponible",
+			"details": err.Error(),
+		})
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error leyendo respuesta",
+		})
+	}
+
+	var sendResp SendMessageResponse
+	if err := json.Unmarshal(body, &sendResp); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error parseando respuesta",
+		})
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return c.Status(resp.StatusCode).JSON(sendResp)
+	}
+
+	return c.JSON(sendResp)
+}

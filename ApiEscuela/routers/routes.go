@@ -269,6 +269,7 @@ func SetupAllRoutes(app *fiber.App, handlers *AllHandlers) {
 	whatsapp.Get("/status", handlers.WhatsAppHandler.GetStatus)
 	whatsapp.Get("/qr", handlers.WhatsAppHandler.GetQR)
 	whatsapp.Post("/send-message", handlers.WhatsAppHandler.SendMessage)
+	whatsapp.Post("/send-media", handlers.WhatsAppHandler.SendMedia)
 	whatsapp.Post("/logout", handlers.WhatsAppHandler.Logout)
 
 }

@@ -216,6 +216,79 @@ app.post('/logout', async (req, res) => {
     }
 });
 
+// Enviar mensaje con imagen
+app.post('/send-media', async (req, res) => {
+    const { phone, message, mediaUrl, mediaBase64, mimeType, filename } = req.body;
+    
+    if (!phone) {
+        return res.status(400).json({
+            success: false,
+            error: 'Se requiere phone'
+        });
+    }
+    
+    if (!mediaUrl && !mediaBase64) {
+        return res.status(400).json({
+            success: false,
+            error: 'Se requiere mediaUrl o mediaBase64'
+        });
+    }
+    
+    if (clientStatus !== 'ready') {
+        return res.status(400).json({
+            success: false,
+            error: 'WhatsApp no está listo. Estado actual: ' + clientStatus
+        });
+    }
+    
+    try {
+        const { MessageMedia } = require('whatsapp-web.js');
+        
+        // Formatear número
+        let formattedPhone = phone.replace(/[^0-9]/g, '');
+        if (!formattedPhone.endsWith('@c.us')) {
+            formattedPhone = formattedPhone + '@c.us';
+        }
+        
+        let media;
+        
+        if (mediaBase64) {
+            // Crear media desde base64
+            media = new MessageMedia(
+                mimeType || 'image/jpeg',
+                mediaBase64,
+                filename || 'image.jpg'
+            );
+        } else if (mediaUrl) {
+            // Descargar media desde URL
+            media = await MessageMedia.fromUrl(mediaUrl, {
+                unsafeMime: true
+            });
+        }
+        
+        // Enviar mensaje con media
+        const result = await client.sendMessage(formattedPhone, media, {
+            caption: message || ''
+        });
+        
+        console.log(`📤 Imagen enviada a ${phone}`);
+        
+        res.json({
+            success: true,
+            message: 'Imagen enviada correctamente',
+            messageId: result.id._serialized,
+            to: phone
+        });
+    } catch (error) {
+        console.error('Error enviando imagen:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al enviar imagen: ' + error.message
+        });
+    }
+});
+
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'wa-node-service' });
