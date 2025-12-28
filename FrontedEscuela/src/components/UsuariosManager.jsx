@@ -560,8 +560,8 @@ const UsuariosManager = ({ onBack }) => {
                     disabled={submitting}
                     className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                     style={{ backgroundColor: '#025a27' }}
-                    onMouseEnter={(e) => !submitting && (e.target.style.backgroundColor = '#014a1f')}
-                    onMouseLeave={(e) => !submitting && (e.target.style.backgroundColor = '#025a27')}
+                    onMouseEnter={(e) => !submitting && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                    onMouseLeave={(e) => !submitting && (e.currentTarget.style.backgroundColor = '#025a27')}
                   >
                     {submitting ? (
                       <div className="flex items-center justify-center">

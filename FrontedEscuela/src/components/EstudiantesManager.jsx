@@ -733,7 +733,7 @@ const EstudiantesManager = ({ onBack }) => {
               </button>
             </div>
           )}
-          
+
           {/* Contenedor principal de botones */}
           <div className={`flex ${showForm ? 'justify-end' : 'justify-between'} items-center`}>
             {/* Botón Volver - Solo visible en desktop */}
@@ -749,85 +749,87 @@ const EstudiantesManager = ({ onBack }) => {
                 <span>Volver</span>
               </button>
             )}
-            
+
             {/* Grupo de botones de acción */}
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => {
-                setShowForm(!showForm);
-                setEditingEstudiante(null);
-                setValidationErrors({});
-                setFormData({
-                  nombre: '',
-                  fecha_nacimiento: '',
-                  correo: '',
-                  telefono: '',
-                  cedula: '',
-                  institucion_id: '',
-                  ciudad_id: '',
-                  provincia_id: '',
-                  especialidad: ''
-                });
-                setSocialNetworks([]);
-                setCiudadesFiltered([]);
-              }}
-              className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-green-800 hover:bg-green-900'
-                }`}
-              style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
-            >
-              {showForm ? (
-                <>
+              <button
+                onClick={() => {
+                  setShowForm(!showForm);
+                  setEditingEstudiante(null);
+                  setValidationErrors({});
+                  setFormData({
+                    nombre: '',
+                    fecha_nacimiento: '',
+                    correo: '',
+                    telefono: '',
+                    cedula: '',
+                    institucion_id: '',
+                    ciudad_id: '',
+                    provincia_id: '',
+                    especialidad: ''
+                  });
+                  setSocialNetworks([]);
+                  setCiudadesFiltered([]);
+                }}
+                className={`inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base ${showForm
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-green-800 hover:bg-green-900'
+                  }`}
+                style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
+              >
+                {showForm ? (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancelar
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span className="hidden sm:inline">Nuevo Estudiante</span>
+                    <span className="sm:hidden">Nuevo</span>
+                  </>
+                )}
+              </button>
+              {/* Botón Cargar Excel - solo visible cuando no hay formulario abierto */}
+              {!showForm && (
+                <button
+                  onClick={() => setShowExcelModal(true)}
+                  className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
+                  style={{ backgroundColor: '#025a27' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#014a1f'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#025a27'}
+                >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Cancelar
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span className="hidden sm:inline">Nuevo Estudiante</span>
-                  <span className="sm:hidden">Nuevo</span>
-                </>
+                  <span className="hidden sm:inline">Cargar Excel</span>
+                  <span className="sm:hidden">Excel</span>
+                </button>
               )}
-            </button>
-            {/* Botón Cargar Excel - solo visible cuando no hay formulario abierto */}
-            {!showForm && (
-              <button
-                onClick={() => setShowExcelModal(true)}
-                className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
-                style={{ backgroundColor: '#025a27' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#025a27'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#025a27'}
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span className="hidden sm:inline">Cargar Excel</span>
-                <span className="sm:hidden">Excel</span>
-              </button>
-            )}
-            {/* Botón Exportar - solo visible cuando no hay formulario abierto */}
-            {!showForm && (
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
-                style={{ backgroundColor: '#1c1c1c' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#1c1c1c'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#1c1c1c'}
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span className="hidden sm:inline">Exportar</span>
-                <span className="sm:hidden">Exportar</span>
-              </button>
-            )}
+              {/* Botón Exportar - solo visible cuando no hay formulario abierto */}
+              {!showForm && (
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
+                  style={{ backgroundColor: '#1c1c1c' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#1c1c1c'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#1c1c1c'}
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="hidden sm:inline">Exportar</span>
+                  <span className="sm:hidden">Exportar</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
         </div>
 
 
@@ -1143,8 +1145,8 @@ const EstudiantesManager = ({ onBack }) => {
                     disabled={loading}
                     className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                     style={{ backgroundColor: '#025a27' }}
-                    onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#014a1f')}
-                    onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#025a27')}
+                    onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                    onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#025a27')}
                   >
                     {loading ? (
                       <div className="flex items-center justify-center">
@@ -1589,7 +1591,7 @@ const EstudiantesManager = ({ onBack }) => {
         loading={deleting}
         type={actionType === 'disable' ? 'danger' : 'success'}
       />
-      
+
       {/* Modal de Carga Masiva desde Excel */}
       <ModalCargaExcel
         isOpen={showExcelModal}
@@ -1600,8 +1602,8 @@ const EstudiantesManager = ({ onBack }) => {
         ciudades={ciudades}
         estudiantes={estudiantes}
       />
-      
-      
+
+
       {/* Modal de Redes Sociales */}
       {showSocialModal && viewingStudentSocials && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1676,7 +1678,7 @@ const EstudiantesManager = ({ onBack }) => {
           </div>
         </div>
       )}
-      
+
       {/* Modal de Exportación de Estudiantes */}
       <ReporteEstudiantes
         isOpen={showExportModal}

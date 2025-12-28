@@ -967,7 +967,7 @@ const ProgramasVisitaManager = ({ onBack }) => {
 
         <button
           onClick={() => (showForm ? resetForm() : setShowForm(true))}
-          className="inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold shadow-sm transition-all duration-200"
+          className="inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold shadow-sm transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
           style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
@@ -1323,8 +1323,8 @@ const ProgramasVisitaManager = ({ onBack }) => {
                       disabled={saving}
                       className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                       style={{ backgroundColor: '#025a27' }}
-                      onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#014a1f')}
-                      onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#025a27')}
+                      onMouseEnter={(e) => !saving && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                      onMouseLeave={(e) => !saving && (e.currentTarget.style.backgroundColor = '#025a27')}
                     >
                       {saving ? (
                         <div className="flex items-center justify-center">

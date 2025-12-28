@@ -396,6 +396,8 @@ const Profile = ({ usuario, onBack }) => {
                             onClick={() => setIsEditing(true)}
                             className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base bg-green-800 hover:bg-green-900"
                             style={{ backgroundColor: '#025a27' }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#014a1f')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#025a27')}
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M4 20h4l10.5-10.5a2.5 2.5 0 10-3.536-3.536L4 16v4z" />
@@ -410,6 +412,8 @@ const Profile = ({ usuario, onBack }) => {
                             }}
                             className="inline-flex items-center text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base bg-red-600 hover:bg-red-700"
                             style={{ backgroundColor: '#dc2626' }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -771,8 +775,8 @@ const Profile = ({ usuario, onBack }) => {
                                         disabled={saving}
                                         className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                                         style={{ backgroundColor: '#025a27' }}
-                                        onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#014a1f')}
-                                        onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#025a27')}
+                                        onMouseEnter={(e) => !saving && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                                        onMouseLeave={(e) => !saving && (e.currentTarget.style.backgroundColor = '#025a27')}
                                     >
                                         {saving ? (
                                             <div className="flex items-center justify-center">

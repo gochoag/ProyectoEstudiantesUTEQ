@@ -15,7 +15,7 @@ const ActividadesManager = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [tematicaFilter, setTematicaFilter] = useState('');
   const [deleting, setDeleting] = useState(false);
-  
+
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -243,6 +243,8 @@ const ActividadesManager = ({ onBack }) => {
             : 'bg-green-800 hover:bg-green-900'
             }`}
           style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
         >
           {showForm ? (
             <>
@@ -358,8 +360,8 @@ const ActividadesManager = ({ onBack }) => {
                   disabled={loading}
                   className="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 text-sm sm:text-base"
                   style={{ backgroundColor: '#025a27' }}
-                  onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#014a1f')}
-                  onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#025a27')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#014a1f')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#025a27')}
                 >
                   {loading ? (
                     <div className="flex items-center justify-center">

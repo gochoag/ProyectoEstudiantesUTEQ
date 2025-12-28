@@ -72,12 +72,12 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
           setLoading(false);
           return;
         }
-        
+
         // Paso 1: Enviar correo de recuperación
         const response = await api.post('/auth/recover-password', {
           cedula: cedula
         });
-        
+
         setSuccess('Se ha enviado un código de verificación a tu correo electrónico.');
         setEmailSent(true);
         localStorage.setItem('recovery_code_sent', 'true');
@@ -90,22 +90,22 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
           const response = await api.post('/auth/verify-code', {
             codigo: codigo
           });
-          
+
           if (response.data.estado === 'verificado') {
-            
+
             // Guardar datos en estado
             setUsuarioId(response.data.usuario_id);
             setCodigoId(response.data.codigo_id);
             setCodeVerified(true);
-            
+
             // Guardar en localStorage
             localStorage.setItem('recovery_code_verified', 'true');
             localStorage.setItem('recovery_user_id', response.data.usuario_id.toString());
             localStorage.setItem('recovery_codigo_id', response.data.codigo_id.toString());
-            
+
             // Mostrar mensaje de éxito
             setSuccess('Código verificado correctamente. Ahora puedes establecer tu nueva contraseña.');
-            
+
             // Avanzar al paso de contraseña
             setStep('password');
           } else if (response.data.estado === 'caducado') {
@@ -123,62 +123,62 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
       }
       else if (step === 'password') {
         // Paso 3: Cambiar contraseña
-        
+
         const passwordsMatch = newPass.length > 0 && newPass === confirmPass;
         if (!passwordsMatch) {
           setError('Las contraseñas no coinciden o están vacías');
           setLoading(false);
           return;
         }
-        
+
         // Usar datos del localStorage como respaldo si no están en el estado
         const finalUsuarioId = usuarioId || parseInt(localStorage.getItem('recovery_user_id'), 10);
         const finalCodigoId = codigoId || parseInt(localStorage.getItem('recovery_codigo_id'), 10);
-        
+
         if (!finalUsuarioId || !finalCodigoId) {
           setError('Error: Faltan datos de verificación. Por favor, inicia el proceso nuevamente.');
           setLoading(false);
           return;
         }
-        
+
         if (newPass.length < 6) {
           setError('La contraseña debe tener al menos 6 caracteres');
           setLoading(false);
           return;
         }
-        
+
         await api.post('/auth/reset-password', {
           codigo_id: finalCodigoId,
           usuario_id: finalUsuarioId,
           clave: newPass
         });
-          
-          setSuccess('¡Contraseña actualizada exitosamente!');
-          
-          // Limpiar localStorage después de completar el proceso
-          localStorage.removeItem('recovery_code_sent');
-          localStorage.removeItem('recovery_code_verified');
-          localStorage.removeItem('recovery_cedula');
-          localStorage.removeItem('recovery_user_id');
-          localStorage.removeItem('recovery_codigo_id');
-          
-          // Llamar al callback del padre si existe
-          if (onSubmit) {
-            onSubmit(cedula, codigo, newPass);
-          }
-          
-          // Cerrar el modal después de un breve delay
-          setTimeout(() => {
-            onClose();
-          }, 2000);
+
+        setSuccess('¡Contraseña actualizada exitosamente!');
+
+        // Limpiar localStorage después de completar el proceso
+        localStorage.removeItem('recovery_code_sent');
+        localStorage.removeItem('recovery_code_verified');
+        localStorage.removeItem('recovery_cedula');
+        localStorage.removeItem('recovery_user_id');
+        localStorage.removeItem('recovery_codigo_id');
+
+        // Llamar al callback del padre si existe
+        if (onSubmit) {
+          onSubmit(cedula, codigo, newPass);
         }
+
+        // Cerrar el modal después de un breve delay
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      }
     } catch (err) {
-      
+
       // Verificar si el error es "codigo ya enviado" y estamos en el paso de cédula
-      if (step === 'cedula' && 
-          (err.response?.data?.error?.includes('codigo ya enviado') || 
-           err.response?.data?.message?.includes('codigo ya enviado'))) {
-        
+      if (step === 'cedula' &&
+        (err.response?.data?.error?.includes('codigo ya enviado') ||
+          err.response?.data?.message?.includes('codigo ya enviado'))) {
+
         // En lugar de mostrar error, avanzar automáticamente al paso de código
         setSuccess('Se ha enviado un código de verificación a tu correo electrónico.');
         setEmailSent(true);
@@ -188,7 +188,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
         setLoading(false);
         return;
       }
-      
+
       // Para otros errores, mostrar el error normalmente
       if (err.response?.data?.error) {
         setError(err.response.data.error);
@@ -212,7 +212,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
     requestAnimationFrame(() => {
       try {
         el.setSelectionRange(pos, pos);
-      } catch {}
+      } catch { }
       el.focus();
     });
   };
@@ -246,7 +246,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
         // No hay proceso previo, empezar desde cédula
         setStep('cedula');
       }
-      
+
       setInitializing(false);
     };
 
@@ -334,37 +334,34 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
         </div>
 
         <p className="-mt-2 mb-4 text-xs text-gray-500">Sigue los pasos para restablecer tu acceso.</p>
-        
+
         {/* Indicador de progreso */}
         <div className="mb-4 flex items-center justify-center space-x-4">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step === 'cedula' ? 'bg-green-600 text-white' : emailSent ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${step === 'cedula' ? 'bg-green-600 text-white' : emailSent ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'
+              }`}>
               1
             </div>
             <span className="ml-2 text-xs text-gray-600">Cédula</span>
           </div>
           <div className={`flex-1 h-0.5 ${emailSent ? 'bg-green-600' : 'bg-gray-200'}`}></div>
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step === 'codigo' ? 'bg-green-600 text-white' : codeVerified ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${step === 'codigo' ? 'bg-green-600 text-white' : codeVerified ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'
+              }`}>
               2
             </div>
             <span className="ml-2 text-xs text-gray-600">Código</span>
           </div>
           <div className={`flex-1 h-0.5 ${codeVerified ? 'bg-green-600' : 'bg-gray-200'}`}></div>
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-              step === 'password' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${step === 'password' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'
+              }`}>
               3
             </div>
             <span className="ml-2 text-xs text-gray-600">Nueva contraseña</span>
           </div>
         </div>
-        
+
         {/* Mensajes de error y éxito */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -376,7 +373,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
             </div>
           </div>
         )}
-        
+
         {success && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
@@ -387,7 +384,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
             </div>
           </div>
         )}
-        
+
         {/* Body */}
         <form onSubmit={handleSubmit}>
           {step === 'cedula' && (
@@ -420,11 +417,10 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                   }
                 }}
                 placeholder="Ingrese su cédula (10 dígitos)"
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors shadow-sm ${
-                  cedula.length > 0 && cedula.length !== 10
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors shadow-sm ${cedula.length > 0 && cedula.length !== 10
                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                }`}
+                  }`}
               />
               <p className="mt-2 text-xs text-gray-500">
                 Debe contener exactamente 10 dígitos numéricos.
@@ -441,8 +437,8 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                   type="submit"
                   className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
                   style={{ backgroundColor: '#025a27' }}
-                  onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#014d22')}
-                  onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#025a27')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#014d22')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#025a27')}
                   disabled={cedula.length !== 10 || loading}
                 >
                   {loading ? (
@@ -450,9 +446,9 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                   ) : (
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
+                    </svg>
                   )}
                   {loading ? 'Enviando...' : 'Enviar'}
                 </button>
@@ -469,75 +465,73 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                   {cedula && <span className="block mt-1 text-green-600">Cédula: {cedula}</span>}
                 </p>
               </div>
-              
+
               <div className="relative">
-              <input
-                type="text"
-                inputMode="numeric"
-                name="codigo"
-                id="codigo"
-                ref={codeInputRef}
-                value={formatCodigoValue(codigo)}
-                onChange={(e) => {
-                  // Permite pegar códigos: extrae y limita a 6 dígitos
-                  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
-                  setCodigo(digits);
-                }}
-                onKeyDown={(e) => {
-                  const { key } = e;
-                  if (/^[0-9]$/.test(key)) {
-                    if (codigo.length < 6) {
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  name="codigo"
+                  id="codigo"
+                  ref={codeInputRef}
+                  value={formatCodigoValue(codigo)}
+                  onChange={(e) => {
+                    // Permite pegar códigos: extrae y limita a 6 dígitos
+                    const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
+                    setCodigo(digits);
+                  }}
+                  onKeyDown={(e) => {
+                    const { key } = e;
+                    if (/^[0-9]$/.test(key)) {
+                      if (codigo.length < 6) {
+                        e.preventDefault();
+                        setCodigo(codigo + key);
+                      } else {
+                        e.preventDefault();
+                      }
+                    } else if (key === 'Backspace') {
+                      if (codigo.length > 0) {
+                        e.preventDefault();
+                        setCodigo(codigo.slice(0, -1));
+                      } else {
+                        e.preventDefault();
+                      }
+                    } else if (key === 'Delete') {
                       e.preventDefault();
-                      setCodigo(codigo + key);
-                    } else {
+                    } else if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') {
+                      // Fijar el caret al siguiente slot disponible
                       e.preventDefault();
+                      setCaretToNext();
                     }
-                  } else if (key === 'Backspace') {
-                    if (codigo.length > 0) {
-                      e.preventDefault();
-                      setCodigo(codigo.slice(0, -1));
-                    } else {
-                      e.preventDefault();
-                    }
-                  } else if (key === 'Delete') {
-                    e.preventDefault();
-                  } else if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') {
-                    // Fijar el caret al siguiente slot disponible
+                  }}
+                  onFocus={setCaretToNext}
+                  onClick={(e) => {
+                    // Siempre posicionar el caret en el siguiente slot
                     e.preventDefault();
                     setCaretToNext();
-                  }
-                }}
-                onFocus={setCaretToNext}
-                onClick={(e) => {
-                  // Siempre posicionar el caret en el siguiente slot
-                  e.preventDefault();
-                  setCaretToNext();
-                }}
-                placeholder="_ _ _ - _ _ _"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-200 text-center font-mono text-lg tracking-widest ${
-                    codigo.length === 6 
-                      ? 'border-green-500 bg-green-50 text-green-700' 
-                      : codigo.length > 0 
-                        ? 'border-blue-400 bg-blue-50 text-blue-700' 
+                  }}
+                  placeholder="_ _ _ - _ _ _"
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-200 text-center font-mono text-lg tracking-widest ${codigo.length === 6
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : codigo.length > 0
+                        ? 'border-blue-400 bg-blue-50 text-blue-700'
                         : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                autoFocus
-              />
-                
+                    }`}
+                  autoFocus
+                />
+
                 {/* Indicador de progreso */}
                 <div className="mt-3 flex justify-center">
                   <div className="flex space-x-1">
                     {Array.from({ length: 6 }, (_, i) => (
                       <div
                         key={i}
-                        className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                          i < codigo.length ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
+                        className={`w-2 h-2 rounded-full transition-colors duration-200 ${i < codigo.length ? 'bg-green-500' : 'bg-gray-300'
+                          }`}
                       />
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Contador de dígitos */}
                 <p className="mt-2 text-center text-xs">
                   <span className={codigo.length === 6 ? 'text-green-600 font-semibold' : 'text-gray-500'}>
@@ -572,7 +566,7 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                     Volver
                   </button>
                 )}
-                
+
                 {/* Botón para reenviar código si es necesario */}
                 {emailSent && error && (
                   <button
@@ -591,8 +585,8 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                   type="submit"
                   className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
                   style={{ backgroundColor: '#025a27' }}
-                  onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#014d22')}
-                  onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#025a27')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#014d22')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#025a27')}
                   disabled={codigo.length !== 6 || loading}
                 >
                   {loading ? (
@@ -616,16 +610,16 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                 <div>
                   <p className="text-gray-700 mb-2">Nueva contraseña</p>
                   <div className="relative">
-                  <input
+                    <input
                       type={showNewPass ? "text" : "password"}
-                    name="nueva_contrasena"
-                    id="nueva_contrasena"
-                    value={newPass}
-                    onChange={(e) => setNewPass(e.target.value)}
-                    placeholder="Ingrese su nueva contraseña"
+                      name="nueva_contrasena"
+                      id="nueva_contrasena"
+                      value={newPass}
+                      onChange={(e) => setNewPass(e.target.value)}
+                      placeholder="Ingrese su nueva contraseña"
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    autoFocus
-                  />
+                      autoFocus
+                    />
                     <button
                       type="button"
                       onClick={() => setShowNewPass(!showNewPass)}
@@ -649,13 +643,13 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                 <div>
                   <p className="text-gray-700 mb-2">Repetir nueva contraseña</p>
                   <div className="relative">
-                  <input
+                    <input
                       type={showConfirmPass ? "text" : "password"}
-                    name="repetir_contrasena"
-                    id="repetir_contrasena"
-                    value={confirmPass}
-                    onChange={(e) => setConfirmPass(e.target.value)}
-                    placeholder="Repita su nueva contraseña"
+                      name="repetir_contrasena"
+                      id="repetir_contrasena"
+                      value={confirmPass}
+                      onChange={(e) => setConfirmPass(e.target.value)}
+                      placeholder="Repita su nueva contraseña"
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                     />
                     <button
@@ -705,8 +699,8 @@ const RecuperarContrasena = ({ onClose, onSubmit }) => {
                   type="submit"
                   className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
                   style={{ backgroundColor: '#025a27' }}
-                  onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#014d22')}
-                  onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#025a27')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#014d22')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#025a27')}
                   disabled={!(newPass.length > 0 && newPass === confirmPass) || loading || !usuarioId || !codigoId}
                 >
                   {loading ? (

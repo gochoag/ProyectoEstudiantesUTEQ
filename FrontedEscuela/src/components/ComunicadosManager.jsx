@@ -265,30 +265,30 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   // Función para validar y formatear números de teléfono ecuatorianos
   const validarTelefonoEC = (telefono) => {
     if (!telefono) return null;
-    
+
     // Eliminar espacios y caracteres no numéricos
     let numero = telefono.toString().replace(/[^0-9]/g, '');
-    
+
     // Si empieza con 0, quitar el 0 y agregar 593
     if (numero.startsWith('0')) {
       numero = '593' + numero.substring(1);
     }
-    
+
     // Si no empieza con 593, agregarlo
     if (!numero.startsWith('593')) {
       numero = '593' + numero;
     }
-    
+
     // Validar longitud (593 + 9 dígitos = 12 dígitos)
     if (numero.length !== 12) {
       return null;
     }
-    
+
     // Validar que el 4to dígito sea 9 (números celulares Ecuador)
     if (numero.charAt(3) !== '9') {
       return null;
     }
-    
+
     return numero;
   };
 
@@ -328,7 +328,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         try {
           const statusResponse = await api.get('/api/whatsapp/status');
           const wsStatus = statusResponse.data?.status;
-          
+
           if (wsStatus === 'disconnected') {
             setError('WhatsApp no está conectado. Por favor, ve a Configuración del Sistema para vincular WhatsApp escaneando el código QR.');
             setSending(false);
@@ -359,10 +359,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
 
         // Obtener teléfonos según el tipo de destinatario
         if (formData.tipoDestinatario === 'todos' || formData.tipoDestinatario === 'estudiantes') {
-          const estudiantesTarget = formData.tipoDestinatario === 'todos' 
-            ? estudiantes 
+          const estudiantesTarget = formData.tipoDestinatario === 'todos'
+            ? estudiantes
             : estudiantes.filter(e => formData.estudiantesSeleccionados.includes(e.ID));
-          
+
           estudiantesTarget.forEach(est => {
             const telefono = est.persona?.telefono || est.persona?.celular;
             const telefonoValido = validarTelefonoEC(telefono);
@@ -692,6 +692,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
             : 'bg-green-800 hover:bg-green-900'
             }`}
           style={{ backgroundColor: showForm ? '#dc2626' : '#025a27' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#b91c1c' : '#014a1f')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = showForm ? '#dc2626' : '#025a27')}
         >
           {showForm ? (
             <>
@@ -747,11 +749,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                   Enviar comunicado vía:
                 </label>
                 <div className="flex items-center space-x-6">
-                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${
-                    canalEnvio === 'correo' 
-                      ? 'border-green-600 bg-green-50' 
+                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${canalEnvio === 'correo'
+                      ? 'border-green-600 bg-green-50'
                       : 'border-gray-300 hover:border-gray-400'
-                  }`}>
+                    }`}>
                     <input
                       type="radio"
                       name="canalEnvio"
@@ -770,11 +771,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                       Correo
                     </span>
                   </label>
-                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${
-                    canalEnvio === 'whatsapp' 
-                      ? 'border-green-600 bg-green-50' 
+                  <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${canalEnvio === 'whatsapp'
+                      ? 'border-green-600 bg-green-50'
                       : 'border-gray-300 hover:border-gray-400'
-                  }`}>
+                    }`}>
                     <input
                       type="radio"
                       name="canalEnvio"
@@ -787,7 +787,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                       className="hidden"
                     />
                     <svg className={`w-5 h-5 mr-2 ${canalEnvio === 'whatsapp' ? 'text-green-600' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                     </svg>
                     <span className={`font-medium ${canalEnvio === 'whatsapp' ? 'text-green-700' : 'text-gray-600'}`}>
                       WhatsApp
@@ -919,8 +919,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     </div>
                     <input
                       type="text"
-                      placeholder={canalEnvio === 'whatsapp' 
-                        ? "Buscar por nombre, cédula o teléfono..." 
+                      placeholder={canalEnvio === 'whatsapp'
+                        ? "Buscar por nombre, cédula o teléfono..."
                         : "Buscar por nombre, cédula o correo..."}
                       value={busquedaEstudiante}
                       onChange={(e) => setBusquedaEstudiante(e.target.value)}
@@ -943,29 +943,30 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                       .map(est => {
                         const telefono = est.persona?.telefono || est.persona?.celular;
                         return (
-                        <label key={est.ID} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.estudiantesSeleccionados.includes(est.ID)}
-                            onChange={() => handleEstudianteChange(est.ID)}
-                            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                          />
-                          <span className="ml-2 text-sm text-gray-700">
-                            {est.persona?.nombre || 'Sin nombre'} - {est.persona?.cedula || 'Sin cédula'}
-                          </span>
-                          {canalEnvio === 'whatsapp' ? (
-                            telefono ? (
-                              <span className="ml-2 text-xs text-green-600">({telefono})</span>
+                          <label key={est.ID} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.estudiantesSeleccionados.includes(est.ID)}
+                              onChange={() => handleEstudianteChange(est.ID)}
+                              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">
+                              {est.persona?.nombre || 'Sin nombre'} - {est.persona?.cedula || 'Sin cédula'}
+                            </span>
+                            {canalEnvio === 'whatsapp' ? (
+                              telefono ? (
+                                <span className="ml-2 text-xs text-green-600">({telefono})</span>
+                              ) : (
+                                <span className="ml-2 text-xs text-red-500">(Sin teléfono)</span>
+                              )
                             ) : (
-                              <span className="ml-2 text-xs text-red-500">(Sin teléfono)</span>
-                            )
-                          ) : (
-                            est.persona?.correo && (
-                              <span className="ml-2 text-xs text-gray-500">({est.persona.correo})</span>
-                            )
-                          )}
-                        </label>
-                      )})}
+                              est.persona?.correo && (
+                                <span className="ml-2 text-xs text-gray-500">({est.persona.correo})</span>
+                              )
+                            )}
+                          </label>
+                        )
+                      })}
                     {estudiantes.filter(est => {
                       if (!busquedaEstudiante.trim()) return true;
                       const search = busquedaEstudiante.toLowerCase();
@@ -1009,8 +1010,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Archivos Adjuntos <span className="text-gray-400">
-                    {canalEnvio === 'whatsapp' 
-                      ? '(Opcional - Solo imágenes, máx. 1MB c/u)' 
+                    {canalEnvio === 'whatsapp'
+                      ? '(Opcional - Solo imágenes, máx. 1MB c/u)'
                       : '(Opcional - PDF e imágenes, máx. 5MB c/u)'}
                   </span>
                 </label>
@@ -1275,7 +1276,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                             {comunicado.canal === 'whatsapp' ? (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                                 </svg>
                                 WhatsApp
                               </span>
@@ -1380,7 +1381,7 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                             {comunicado.canal === 'whatsapp' ? (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                                 </svg>
                                 WhatsApp
                               </span>
@@ -1626,26 +1627,27 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                           {estudiantesSeleccionados.map(est => {
                             const telefono = est.persona?.telefono || est.persona?.celular;
                             return (
-                            <li key={est.ID} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                              <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 mr-3">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900">{est.persona?.nombre || 'Sin nombre'}</p>
-                                {comunicadoDestinatarios.canal === 'whatsapp' ? (
-                                  telefono ? (
-                                    <p className="text-xs text-green-600">{telefono}</p>
+                              <li key={est.ID} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 mr-3">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900">{est.persona?.nombre || 'Sin nombre'}</p>
+                                  {comunicadoDestinatarios.canal === 'whatsapp' ? (
+                                    telefono ? (
+                                      <p className="text-xs text-green-600">{telefono}</p>
+                                    ) : (
+                                      <p className="text-xs text-red-500">Sin teléfono</p>
+                                    )
                                   ) : (
-                                    <p className="text-xs text-red-500">Sin teléfono</p>
-                                  )
-                                ) : (
-                                  est.persona?.correo && <p className="text-xs text-gray-500">{est.persona.correo}</p>
-                                )}
-                              </div>
-                            </li>
-                          )})}
+                                    est.persona?.correo && <p className="text-xs text-gray-500">{est.persona.correo}</p>
+                                  )}
+                                </div>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </div>
                     );
@@ -1682,10 +1684,10 @@ const ComunicadosManager = ({ onBack, usuario }) => {
         message={`¿Está seguro de que desea enviar este comunicado vía ${canalEnvio === 'whatsapp' ? 'WhatsApp' : 'Correo Electrónico'}? 
         
 Asunto: "${formData.asunto}"
-Destinatarios: ${formData.tipoDestinatario === 'todos' ? 'Todos los estudiantes' : 
-  formData.tipoDestinatario === 'todas_instituciones' ? 'Todas las instituciones' :
-  formData.tipoDestinatario === 'instituciones' ? `${formData.institucionesSeleccionadas.length} institución(es)` :
-  formData.tipoDestinatario === 'estudiantes' ? `${formData.estudiantesSeleccionados.length} estudiante(s)` : 'Sin destinatarios'}
+Destinatarios: ${formData.tipoDestinatario === 'todos' ? 'Todos los estudiantes' :
+            formData.tipoDestinatario === 'todas_instituciones' ? 'Todas las instituciones' :
+              formData.tipoDestinatario === 'instituciones' ? `${formData.institucionesSeleccionadas.length} institución(es)` :
+                formData.tipoDestinatario === 'estudiantes' ? `${formData.estudiantesSeleccionados.length} estudiante(s)` : 'Sin destinatarios'}
 ${adjuntos.length > 0 ? `\nAdjuntos: ${adjuntos.length} archivo(s)` : ''}`}
         confirmText="Enviar"
         cancelText="Cancelar"
