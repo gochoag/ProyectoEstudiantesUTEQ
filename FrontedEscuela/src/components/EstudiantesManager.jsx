@@ -262,6 +262,11 @@ const EstudiantesManager = ({ onBack }) => {
       }
     }
 
+    // Validación: al menos uno de los campos (correo o teléfono) debe estar relleno
+    if (!formData.correo?.trim() && !formData.telefono?.trim()) {
+      errors.push('Debe proporcionar al menos un teléfono o un correo electrónico');
+    }
+
     if (formData.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
       errors.push('El formato del correo no es válido');
     }

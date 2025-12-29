@@ -750,8 +750,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                 </label>
                 <div className="flex items-center space-x-6">
                   <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${canalEnvio === 'correo'
-                      ? 'border-green-600 bg-green-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-green-600 bg-green-50'
+                    : 'border-gray-300 hover:border-gray-400'
                     }`}>
                     <input
                       type="radio"
@@ -772,8 +772,8 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                     </span>
                   </label>
                   <label className={`flex items-center cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${canalEnvio === 'whatsapp'
-                      ? 'border-green-600 bg-green-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-green-600 bg-green-50'
+                    : 'border-gray-300 hover:border-gray-400'
                     }`}>
                     <input
                       type="radio"
@@ -930,6 +930,21 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                   <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
                     {estudiantes
                       .filter(est => {
+                        // Filtrar por canal de envío
+                        if (canalEnvio === 'correo') {
+                          // Solo mostrar estudiantes con correo para envío por correo
+                          if (!est.persona?.correo || est.persona.correo.trim() === '') {
+                            return false;
+                          }
+                        } else if (canalEnvio === 'whatsapp') {
+                          // Solo mostrar estudiantes con teléfono para envío por WhatsApp
+                          const telefono = est.persona?.telefono || est.persona?.celular;
+                          if (!telefono || telefono.toString().trim() === '') {
+                            return false;
+                          }
+                        }
+
+                        // Filtrar por búsqueda
                         if (!busquedaEstudiante.trim()) return true;
                         const search = busquedaEstudiante.toLowerCase();
                         const telefono = est.persona?.telefono || est.persona?.celular || '';
@@ -968,6 +983,19 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                         )
                       })}
                     {estudiantes.filter(est => {
+                      // Filtrar por canal de envío
+                      if (canalEnvio === 'correo') {
+                        if (!est.persona?.correo || est.persona.correo.trim() === '') {
+                          return false;
+                        }
+                      } else if (canalEnvio === 'whatsapp') {
+                        const telefono = est.persona?.telefono || est.persona?.celular;
+                        if (!telefono || telefono.toString().trim() === '') {
+                          return false;
+                        }
+                      }
+
+                      // Filtrar por búsqueda
                       if (!busquedaEstudiante.trim()) return true;
                       const search = busquedaEstudiante.toLowerCase();
                       const telefono = est.persona?.telefono || est.persona?.celular || '';
@@ -978,7 +1006,11 @@ const ComunicadosManager = ({ onBack, usuario }) => {
                         telefono.toString().toLowerCase().includes(search)
                       );
                     }).length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-2">No se encontraron estudiantes</p>
+                        <p className="text-sm text-gray-500 text-center py-2">
+                          {canalEnvio === 'correo'
+                            ? 'No se encontraron estudiantes con correo electrónico'
+                            : 'No se encontraron estudiantes con teléfono'}
+                        </p>
                       )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">

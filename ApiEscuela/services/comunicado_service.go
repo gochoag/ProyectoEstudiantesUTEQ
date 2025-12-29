@@ -62,8 +62,8 @@ func (s *ComunicadoService) GetCorreosDestinatarios(destinatario DestinatarioInf
 			return nil, fmt.Errorf("error al obtener los estudiantes: %v", err)
 		}
 		for _, est := range estudiantes {
-			if est.Persona.Correo != "" {
-				correosDestinatarios = append(correosDestinatarios, est.Persona.Correo)
+			if est.Persona.Correo != nil && *est.Persona.Correo != "" {
+				correosDestinatarios = append(correosDestinatarios, *est.Persona.Correo)
 			}
 		}
 
@@ -80,8 +80,8 @@ func (s *ComunicadoService) GetCorreosDestinatarios(destinatario DestinatarioInf
 		// Estudiantes específicos
 		for _, id := range destinatario.IDs {
 			estudiante, err := s.estudianteRepo.GetEstudianteByID(id)
-			if err == nil && estudiante.Persona.Correo != "" {
-				correosDestinatarios = append(correosDestinatarios, estudiante.Persona.Correo)
+			if err == nil && estudiante.Persona.Correo != nil && *estudiante.Persona.Correo != "" {
+				correosDestinatarios = append(correosDestinatarios, *estudiante.Persona.Correo)
 			}
 		}
 

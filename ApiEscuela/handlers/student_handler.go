@@ -461,11 +461,23 @@ func (h *EstudianteHandler) CreateEstudiantesBulk(c *fiber.Ctx) error {
 		}
 
 		// 1. Crear Persona
+		correoTrimmed := strings.TrimSpace(est.Correo)
+		var correoPtr *string
+		if correoTrimmed != "" {
+			correoPtr = &correoTrimmed
+		}
+
+		telefonoTrimmed := strings.TrimSpace(est.Telefono)
+		var telefonoPtr *string
+		if telefonoTrimmed != "" {
+			telefonoPtr = &telefonoTrimmed
+		}
+
 		persona := &models.Persona{
 			Nombre:          strings.TrimSpace(est.Nombre),
 			Cedula:          cedula,
-			Correo:          strings.TrimSpace(est.Correo),
-			Telefono:        strings.TrimSpace(est.Telefono),
+			Correo:          correoPtr,
+			Telefono:        telefonoPtr,
 			FechaNacimiento: fechaNacimiento,
 		}
 

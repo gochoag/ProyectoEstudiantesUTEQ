@@ -3,8 +3,6 @@ import imgNata from '../assets/fotos_desarrolladores/Nata.jpg';
 import imgOchoa from '../assets/fotos_desarrolladores/Ochoa.jpg';
 import imgGualpa from '../assets/fotos_desarrolladores/Gualpa.jpg';
 import imgChica from '../assets/fotos_desarrolladores/Chica.jpg';
-import imgCedeno from '../assets/fotos_desarrolladores/Cedeno.jpg';
-import imgTenecela from '../assets/fotos_desarrolladores/Tenecela.jpg';
 
 const DeveloperCard = ({ photo, name, role, email }) => {
   return (
@@ -76,18 +74,6 @@ const AcercaDe = ({ onClose }) => {
               name="VALESKA SOFIA CHICA VALFRE"
               role="Desarrolladora Frontend"
               email="valeskasofiachica02@gmail.com"
-            />
-            <DeveloperCard 
-              photo={imgCedeno}
-              name="ORLANDO JESUS CEDEÑO SALVATIERRA"
-              role="Desarrollador Aplicación Móvil"
-              email="or2003land@gmail.com"
-            />
-            <DeveloperCard 
-              photo={imgTenecela}
-              name="ANGELICA MICHELLE TENECELA INTRIAGO"
-              role="Desarrolladora Aplicación Móvil"
-              email="angela.amti20@gmail.com"
             />
           </div>
         </div>

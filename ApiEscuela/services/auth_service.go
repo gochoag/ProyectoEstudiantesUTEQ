@@ -230,7 +230,7 @@ func (s *AuthService) RecoverPassword(cedula string) error {
 	if err != nil || persona == nil {
 		return ErrPersonaNoEncontrada
 	}
-	if strings.TrimSpace(persona.Correo) == "" {
+	if persona.Correo == nil || strings.TrimSpace(*persona.Correo) == "" {
 		return errors.New("la persona no tiene un correo registrado")
 	}
 
@@ -291,7 +291,7 @@ func (s *AuthService) RecoverPassword(cedula string) error {
 		persona.Nombre, otp, strings.Join(usernames, ", "),
 	)
 
-	return s.sendEmail(persona.Correo, subject, body)
+	return s.sendEmail(*persona.Correo, subject, body)
 }
 
 // sendEmail envía un correo usando SMTP con contenido HTML básico

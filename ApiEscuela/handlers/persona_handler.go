@@ -41,8 +41,25 @@ func (h *PersonaHandler) CreatePersona(c *fiber.Ctx) error {
 	// Limpiar datos
 	persona.Nombre = strings.TrimSpace(persona.Nombre)
 	persona.Cedula = strings.TrimSpace(persona.Cedula)
-	persona.Correo = strings.TrimSpace(persona.Correo)
-	persona.Telefono = strings.TrimSpace(persona.Telefono)
+
+	// Convertir cadenas vacías a nil para campos opcionales
+	if persona.Correo != nil {
+		correoTrimmed := strings.TrimSpace(*persona.Correo)
+		if correoTrimmed == "" {
+			persona.Correo = nil
+		} else {
+			persona.Correo = &correoTrimmed
+		}
+	}
+
+	if persona.Telefono != nil {
+		telefonoTrimmed := strings.TrimSpace(*persona.Telefono)
+		if telefonoTrimmed == "" {
+			persona.Telefono = nil
+		} else {
+			persona.Telefono = &telefonoTrimmed
+		}
+	}
 
 	// Verificar si ya existe una persona con la misma cédula
 	if existingPersona, err := h.personaRepo.GetPersonaByCedula(persona.Cedula); err == nil && existingPersona != nil {
@@ -50,8 +67,8 @@ func (h *PersonaHandler) CreatePersona(c *fiber.Ctx) error {
 	}
 
 	// Verificar si ya existe una persona con el mismo correo (si se proporciona)
-	if persona.Correo != "" {
-		if existingPersonas, err := h.personaRepo.GetPersonasByCorreo(persona.Correo); err == nil && len(existingPersonas) > 0 {
+	if persona.Correo != nil && *persona.Correo != "" {
+		if existingPersonas, err := h.personaRepo.GetPersonasByCorreo(*persona.Correo); err == nil && len(existingPersonas) > 0 {
 			return SendError(c, 409, "duplicate_email", "Ya existe una persona con este correo electrónico", "El correo debe ser único")
 		}
 	}
@@ -128,6 +145,11 @@ func (h *PersonaHandler) UpdatePersona(c *fiber.Ctx) error {
 		return SendError(c, 400, "invalid_json", "No se puede procesar el JSON. Verifique el formato de los datos", err.Error())
 	}
 
+	// Validar campos requeridos
+	if validationErrors := h.validatePersonaRequiredFields(&updateData); len(validationErrors) > 0 {
+		return SendValidationError(c, "Faltan campos requeridos", validationErrors)
+	}
+
 	// Validar datos de actualización
 	if validationErrors := h.validatePersona(&updateData, true); len(validationErrors) > 0 {
 		return SendValidationError(c, "Los datos proporcionados no son válidos", validationErrors)
@@ -137,9 +159,30 @@ func (h *PersonaHandler) UpdatePersona(c *fiber.Ctx) error {
 	persona := *existingPersona
 	persona.Nombre = strings.TrimSpace(updateData.Nombre)
 	persona.Cedula = strings.TrimSpace(updateData.Cedula)
-	persona.Correo = strings.TrimSpace(updateData.Correo)
-	persona.Telefono = strings.TrimSpace(updateData.Telefono)
 	persona.FechaNacimiento = updateData.FechaNacimiento
+
+	// Convertir cadenas vacías a nil para campos opcionales
+	if updateData.Correo != nil {
+		correoTrimmed := strings.TrimSpace(*updateData.Correo)
+		if correoTrimmed == "" {
+			persona.Correo = nil
+		} else {
+			persona.Correo = &correoTrimmed
+		}
+	} else {
+		persona.Correo = nil
+	}
+
+	if updateData.Telefono != nil {
+		telefonoTrimmed := strings.TrimSpace(*updateData.Telefono)
+		if telefonoTrimmed == "" {
+			persona.Telefono = nil
+		} else {
+			persona.Telefono = &telefonoTrimmed
+		}
+	} else {
+		persona.Telefono = nil
+	}
 
 	// Verificar si la nueva cédula ya existe en otra persona
 	if persona.Cedula != existingPersona.Cedula {
@@ -149,12 +192,15 @@ func (h *PersonaHandler) UpdatePersona(c *fiber.Ctx) error {
 	}
 
 	// Verificar si el nuevo correo ya existe en otra persona (si se proporciona)
-	if persona.Correo != "" && persona.Correo != existingPersona.Correo {
-		if existingPersonas, _ := h.personaRepo.GetPersonasByCorreo(persona.Correo); len(existingPersonas) > 0 {
-			// Verificar que no sea la misma persona
-			for _, p := range existingPersonas {
-				if p.ID != persona.ID {
-					return SendError(c, 409, "duplicate_email", "Ya existe otra persona con este correo electrónico", "El correo debe ser único")
+	if persona.Correo != nil && *persona.Correo != "" {
+		existingCorreoIsDifferent := existingPersona.Correo == nil || *existingPersona.Correo != *persona.Correo
+		if existingCorreoIsDifferent {
+			if existingPersonas, _ := h.personaRepo.GetPersonasByCorreo(*persona.Correo); len(existingPersonas) > 0 {
+				// Verificar que no sea la misma persona
+				for _, p := range existingPersonas {
+					if p.ID != persona.ID {
+						return SendError(c, 409, "duplicate_email", "Ya existe otra persona con este correo electrónico", "El correo debe ser único")
+					}
 				}
 			}
 		}
@@ -300,40 +346,44 @@ func (h *PersonaHandler) validatePersona(persona *models.Persona, isUpdate bool)
 	}
 
 	// Validar correo (opcional pero si se proporciona debe ser válido)
-	correo := strings.TrimSpace(persona.Correo)
-	if correo != "" {
-		emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-		if !emailRegex.MatchString(correo) {
-			errors = append(errors, ValidationError{
-				Field:   "correo",
-				Message: "El formato del correo electrónico no es válido",
-				Value:   persona.Correo,
-			})
-		} else if len(correo) > 255 {
-			errors = append(errors, ValidationError{
-				Field:   "correo",
-				Message: "El correo no puede exceder 255 caracteres",
-				Value:   persona.Correo,
-			})
+	if persona.Correo != nil {
+		correo := strings.TrimSpace(*persona.Correo)
+		if correo != "" {
+			emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+			if !emailRegex.MatchString(correo) {
+				errors = append(errors, ValidationError{
+					Field:   "correo",
+					Message: "El formato del correo electrónico no es válido",
+					Value:   correo,
+				})
+			} else if len(correo) > 255 {
+				errors = append(errors, ValidationError{
+					Field:   "correo",
+					Message: "El correo no puede exceder 255 caracteres",
+					Value:   correo,
+				})
+			}
 		}
 	}
 
 	// Validar teléfono (opcional pero si se proporciona debe ser válido)
-	telefono := strings.TrimSpace(persona.Telefono)
-	if telefono != "" {
-		// Verificar que tenga al menos 7 dígitos
-		digitCount := 0
-		for _, char := range telefono {
-			if char >= '0' && char <= '9' {
-				digitCount++
+	if persona.Telefono != nil {
+		telefono := strings.TrimSpace(*persona.Telefono)
+		if telefono != "" {
+			// Verificar que tenga al menos 7 dígitos
+			digitCount := 0
+			for _, char := range telefono {
+				if char >= '0' && char <= '9' {
+					digitCount++
+				}
 			}
-		}
-		if digitCount < 7 {
-			errors = append(errors, ValidationError{
-				Field:   "telefono",
-				Message: "El teléfono debe contener al menos 7 dígitos",
-				Value:   persona.Telefono,
-			})
+			if digitCount < 7 {
+				errors = append(errors, ValidationError{
+					Field:   "telefono",
+					Message: "El teléfono debe contener al menos 7 dígitos",
+					Value:   telefono,
+				})
+			}
 		}
 	}
 
@@ -368,6 +418,24 @@ func (h *PersonaHandler) validatePersonaRequiredFields(persona *models.Persona) 
 		errors = append(errors, ValidationError{
 			Field:   "cedula",
 			Message: "El campo cédula es requerido",
+		})
+	}
+
+	// Validar que al menos uno de los campos de contacto (correo o teléfono) esté presente
+	correo := ""
+	if persona.Correo != nil {
+		correo = strings.TrimSpace(*persona.Correo)
+	}
+
+	telefono := ""
+	if persona.Telefono != nil {
+		telefono = strings.TrimSpace(*persona.Telefono)
+	}
+
+	if correo == "" && telefono == "" {
+		errors = append(errors, ValidationError{
+			Field:   "contacto",
+			Message: "Debe proporcionar al menos un teléfono o un correo electrónico",
 		})
 	}
 
