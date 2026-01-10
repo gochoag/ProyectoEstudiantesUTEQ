@@ -54,6 +54,18 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   // Estado para modal de confirmación de envío
   const [showConfirmEnvio, setShowConfirmEnvio] = useState(false);
 
+  // Estados para progreso de cola de WhatsApp
+  const [whatsappProgress, setWhatsappProgress] = useState({
+    isActive: false,
+    batchId: null,
+    sent: 0,
+    total: 0,
+    failed: 0,
+    percentComplete: 0,
+    estimatedTime: '',
+    currentPhone: ''
+  });
+
   // Estados para filtros de búsqueda en selección de destinatarios
   const [busquedaInstitucion, setBusquedaInstitucion] = useState('');
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
@@ -82,6 +94,82 @@ const ComunicadosManager = ({ onBack, usuario }) => {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Polling para progreso de cola de WhatsApp (cada 2 segundos cuando está activo)
+  useEffect(() => {
+    let pollInterval = null;
+
+    const pollQueueStatus = async () => {
+      try {
+        const response = await api.get('/api/whatsapp/queue/status');
+        const data = response.data;
+
+        if (data.success && data.queue) {
+          const { pending, processing, currentBatchSent, currentBatchTotal, percentComplete } = data.queue;
+
+          // Si hay mensajes en proceso o pendientes
+          if (processing || pending > 0) {
+            setWhatsappProgress(prev => ({
+              ...prev,
+              isActive: true,
+              sent: currentBatchSent || 0,
+              total: currentBatchTotal || 0,
+              percentComplete: percentComplete || 0,
+              failed: data.queue.stats?.totalFailed || 0
+            }));
+          } else if (whatsappProgress.isActive && currentBatchTotal > 0 && currentBatchSent >= currentBatchTotal) {
+            // Cola terminada
+            setWhatsappProgress(prev => ({
+              ...prev,
+              isActive: false,
+              percentComplete: 100
+            }));
+
+            setSuccess(`✅ Comunicado completado: ${currentBatchSent} mensajes enviados`);
+            setSending(false);
+
+            // Recargar comunicados
+            loadInitialData();
+
+            // Limpiar progreso después de 5 segundos
+            setTimeout(() => {
+              setWhatsappProgress({
+                isActive: false,
+                batchId: null,
+                sent: 0,
+                total: 0,
+                failed: 0,
+                percentComplete: 0,
+                estimatedTime: '',
+                currentPhone: ''
+              });
+            }, 5000);
+
+            // Detener polling
+            if (pollInterval) {
+              clearInterval(pollInterval);
+              pollInterval = null;
+            }
+          }
+        }
+      } catch (err) {
+        // Silenciosamente ignorar errores de polling (el servicio puede no estar disponible)
+        console.debug('Polling queue status:', err.message);
+      }
+    };
+
+    // Solo iniciar polling si hay un envío activo
+    if (whatsappProgress.isActive) {
+      pollInterval = setInterval(pollQueueStatus, 2000); // Cada 2 segundos
+      pollQueueStatus(); // Primera consulta inmediata
+    }
+
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [whatsappProgress.isActive]);
 
   // Limpiar mensajes después de 5 segundos
   useEffect(() => {
@@ -352,10 +440,9 @@ const ComunicadosManager = ({ onBack, usuario }) => {
           return;
         }
 
-        // Envío por WhatsApp
+        // Envío por WhatsApp usando sistema de cola
         let telefonosValidos = [];
         let telefonosInvalidos = 0;
-
 
         // Obtener teléfonos según el tipo de destinatario
         if (formData.tipoDestinatario === 'todos' || formData.tipoDestinatario === 'estudiantes') {
@@ -394,110 +481,118 @@ const ComunicadosManager = ({ onBack, usuario }) => {
 
         const mensajeWhatsApp = `*${formData.asunto}*\n\n${mensajeLimpio}`;
 
-        // Convertir imágenes a base64 para WhatsApp
-        const imagenesBase64 = [];
-        for (const file of adjuntos) {
+        // Convertir imágenes a base64 para WhatsApp (si hay)
+        let primeraImagenBase64 = null;
+        if (adjuntos.length > 0) {
           const base64 = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => {
-              // Extraer solo la parte base64 (sin el prefijo data:...)
               const base64Data = reader.result.split(',')[1];
               resolve({
                 data: base64Data,
-                mimeType: file.type,
-                filename: file.name
+                mimeType: adjuntos[0].type,
+                filename: adjuntos[0].name
               });
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(adjuntos[0]);
           });
-          imagenesBase64.push(base64);
+          primeraImagenBase64 = base64;
         }
 
-        // Enviar mensajes de WhatsApp
-        let enviados = 0;
-        let erroresEnvio = [];
-
-        for (const dest of telefonosValidos) {
-          try {
-            if (imagenesBase64.length > 0) {
-              // Si hay imágenes, enviar la primera con el mensaje como caption
-              await api.post('/api/whatsapp/send-media', {
-                phone: dest.telefono,
-                message: mensajeWhatsApp, // El mensaje va como caption de la imagen
-                mediaBase64: imagenesBase64[0].data,
-                mimeType: imagenesBase64[0].mimeType,
-                filename: imagenesBase64[0].filename
-              });
-
-              // Enviar las demás imágenes sin caption
-              for (let i = 1; i < imagenesBase64.length; i++) {
-                try {
-                  await api.post('/api/whatsapp/send-media', {
-                    phone: dest.telefono,
-                    message: '',
-                    mediaBase64: imagenesBase64[i].data,
-                    mimeType: imagenesBase64[i].mimeType,
-                    filename: imagenesBase64[i].filename
-                  });
-                } catch (imgErr) {
-                  console.error(`Error enviando imagen adicional a ${dest.telefono}:`, imgErr);
-                }
-              }
-            } else {
-              // Si no hay imágenes, solo enviar mensaje de texto
-              await api.post('/api/whatsapp/send-message', {
-                phone: dest.telefono,
-                message: mensajeWhatsApp
-              });
-            }
-
-            enviados++;
-          } catch (err) {
-            console.error(`Error enviando a ${dest.telefono}:`, err);
-            erroresEnvio.push(`${dest.nombre}: ${err.response?.data?.error || err.message}`);
+        // Preparar array de mensajes para envío masivo
+        const mensajesParaEnviar = telefonosValidos.map(dest => {
+          const msgBase = {
+            phone: dest.telefono,
+            message: mensajeWhatsApp
+          };
+          
+          // Si hay imagen, incluirla
+          if (primeraImagenBase64) {
+            return {
+              ...msgBase,
+              mediaBase64: primeraImagenBase64.data,
+              mimeType: primeraImagenBase64.mimeType,
+              filename: primeraImagenBase64.filename
+            };
           }
-        }
+          
+          return msgBase;
+        });
 
-
-        // Guardar comunicado en BD con adjuntos
-        const formDataToSend = new FormData();
-        formDataToSend.append('asunto', formData.asunto);
-        formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
-        formDataToSend.append('mensaje', formData.mensaje);
-        formDataToSend.append('usuario_id', usuario?.ID || usuario?.id);
-        formDataToSend.append('canal', 'whatsapp');
-        formDataToSend.append('enviado_a', enviados.toString());
-
-        // Incluir adjuntos para guardarlos en el servidor
-        adjuntos.forEach(file => {
-          formDataToSend.append('adjuntos', file);
+        // Inicializar estado de progreso
+        setWhatsappProgress({
+          isActive: true,
+          batchId: null,
+          sent: 0,
+          total: telefonosValidos.length,
+          failed: 0,
+          percentComplete: 0,
+          estimatedTime: 'Calculando...',
+          currentPhone: ''
         });
 
         try {
-          await api.post('/api/comunicados', formDataToSend, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+          // Llamar al nuevo endpoint de envío masivo
+          const bulkResponse = await api.post('/api/whatsapp/send-bulk', {
+            messages: mensajesParaEnviar
           });
-        } catch (saveErr) {
-          console.warn('Error guardando comunicado en BD:', saveErr);
-        }
 
-        if (enviados > 0) {
-          setSuccess(`Mensajes de WhatsApp enviados: ${enviados}/${telefonosValidos.length}. ${telefonosInvalidos > 0 ? `${telefonosInvalidos} número(s) inválido(s) omitido(s).` : ''}`);
-          if (erroresEnvio.length > 0) {
-            console.warn('Algunos envíos fallaron:', erroresEnvio);
+          const { batchId, estimatedTimeFormatted, totalMessages } = bulkResponse.data;
+
+          // Actualizar progreso con información del batch
+          setWhatsappProgress(prev => ({
+            ...prev,
+            batchId,
+            estimatedTime: estimatedTimeFormatted,
+            total: totalMessages
+          }));
+
+          // Mostrar mensaje informativo (el progreso se actualiza por WebSocket)
+          setSuccess(`📤 Envio de mensajes masivos iniciada: ${totalMessages} mensajes en cola. Tiempo estimado: ${estimatedTimeFormatted}. Puedes continuar trabajando mientras se envían.`);
+
+          // Guardar comunicado en BD AHORA (antes de que termine el envío)
+          const formDataToSend = new FormData();
+          formDataToSend.append('asunto', formData.asunto);
+          formDataToSend.append('destinatarios', JSON.stringify(destinatarios));
+          formDataToSend.append('mensaje', formData.mensaje);
+          formDataToSend.append('usuario_id', usuario?.ID || usuario?.id);
+          formDataToSend.append('canal', 'whatsapp');
+          formDataToSend.append('enviado_a', totalMessages.toString());
+          formDataToSend.append('batch_id', batchId);
+
+          adjuntos.forEach(file => {
+            formDataToSend.append('adjuntos', file);
+          });
+
+          try {
+            await api.post('/api/comunicados', formDataToSend, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            });
+          } catch (saveErr) {
+            console.warn('Error guardando comunicado en BD:', saveErr);
           }
-        } else {
-          // Mostrar errores específicos si los hay
-          if (erroresEnvio.length > 0) {
-            const primerError = erroresEnvio[0];
-            if (primerError.includes('no está listo') || primerError.includes('not ready')) {
-              setError('No se pudo enviar: WhatsApp perdió la conexión durante el envío. Por favor, verifica el estado en Configuración del Sistema.');
-            } else {
-              setError(`No se pudo enviar ningún mensaje de WhatsApp. Error: ${primerError}`);
-            }
-          } else {
-            setError('No se pudo enviar ningún mensaje de WhatsApp. Verifica la conexión en Configuración del Sistema.');
-          }
+
+          // Limpiar formulario (el envío continúa en segundo plano)
+          setFormData({
+            asunto: '',
+            tipoDestinatario: '',
+            institucionesSeleccionadas: [],
+            estudiantesSeleccionados: [],
+            mensaje: ''
+          });
+          setCanalEnvio('correo');
+          setAdjuntos([]);
+          setShowForm(false);
+
+          // NO llamar a setSending(false) aquí - el WebSocket lo hará cuando termine
+          return; // Salir temprano, el resto lo maneja el WebSocket
+
+        } catch (bulkError) {
+          console.error('Error al encolar mensajes:', bulkError);
+          setError('Error al iniciar el envío masivo: ' + (bulkError.response?.data?.error || bulkError.message));
+          setWhatsappProgress(prev => ({ ...prev, isActive: false }));
+          setSending(false);
+          return;
         }
 
 
@@ -724,6 +819,71 @@ const ComunicadosManager = ({ onBack, usuario }) => {
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
           {success}
+        </div>
+      )}
+
+      {/* Barra de progreso de WhatsApp */}
+      {whatsappProgress.isActive && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-xl p-4 mb-4 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-green-600 mr-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              <div>
+                <h4 className="font-semibold text-green-800">Enviando mensajes de WhatsApp...</h4>
+                <p className="text-sm text-green-600">
+                  {whatsappProgress.sent} de {whatsappProgress.total} enviados
+                  {whatsappProgress.failed > 0 && <span className="text-red-500 ml-2">({whatsappProgress.failed} fallidos)</span>}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-green-700">{whatsappProgress.percentComplete}%</span>
+              {whatsappProgress.estimatedTime && (
+                <p className="text-xs text-green-600">Est: {whatsappProgress.estimatedTime}</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Barra de progreso */}
+          <div className="w-full bg-green-200 rounded-full h-4 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-green-500 to-emerald-500 h-4 rounded-full transition-all duration-500 ease-out flex items-center justify-center"
+              style={{ width: `${whatsappProgress.percentComplete}%` }}
+            >
+              {whatsappProgress.percentComplete > 10 && (
+                <span className="text-xs text-white font-medium">{whatsappProgress.percentComplete}%</span>
+              )}
+            </div>
+          </div>
+          
+          {/* Número actual siendo enviado */}
+          {whatsappProgress.currentPhone && (
+            <p className="text-xs text-green-600 mt-2 text-center">
+              Último enviado: {whatsappProgress.currentPhone.replace(/(\d{3})(\d{2})(\d{3})(\d{4})/, '$1-$2-$3-$4')}
+            </p>
+          )}
+          
+          {/* Botón cancelar */}
+          <div className="flex justify-center mt-3">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await api.post('/api/whatsapp/queue/cancel');
+                  setWhatsappProgress(prev => ({ ...prev, isActive: false }));
+                  setError('Envío cancelado por el usuario');
+                  setSending(false);
+                } catch (err) {
+                  console.error('Error cancelando cola:', err);
+                }
+              }}
+              className="text-sm text-red-600 hover:text-red-800 hover:bg-red-100 px-4 py-1 rounded-lg transition-colors"
+            >
+              ✕ Cancelar envío
+            </button>
+          </div>
         </div>
       )}
 

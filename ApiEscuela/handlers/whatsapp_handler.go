@@ -280,3 +280,139 @@ func (h *WhatsAppHandler) SendMedia(c *fiber.Ctx) error {
 
 	return c.JSON(sendResp)
 }
+
+// SendBulkRequest representa la solicitud para envío masivo
+type SendBulkRequest struct {
+	Messages []BulkMessage `json:"messages"`
+}
+
+// BulkMessage representa un mensaje individual en el envío masivo
+type BulkMessage struct {
+	Phone       string `json:"phone"`
+	Message     string `json:"message"`
+	MediaURL    string `json:"mediaUrl,omitempty"`
+	MediaBase64 string `json:"mediaBase64,omitempty"`
+	MimeType    string `json:"mimeType,omitempty"`
+	Filename    string `json:"filename,omitempty"`
+}
+
+// SendBulk envía mensajes de WhatsApp en cola
+func (h *WhatsAppHandler) SendBulk(c *fiber.Ctx) error {
+	var req SendBulkRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Datos inválidos",
+		})
+	}
+
+	if len(req.Messages) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Se requiere al menos un mensaje",
+		})
+	}
+
+	// Preparar request para Node.js
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error preparando datos",
+		})
+	}
+
+	resp, err := h.httpClient.Post(
+		h.serviceURL+"/send-bulk",
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		log.Printf("Error conectando con servicio WhatsApp: %v", err)
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error":   "Servicio de WhatsApp no disponible",
+			"details": err.Error(),
+		})
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error leyendo respuesta",
+		})
+	}
+
+	var bulkResp map[string]interface{}
+	if err := json.Unmarshal(body, &bulkResp); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error parseando respuesta",
+		})
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return c.Status(resp.StatusCode).JSON(bulkResp)
+	}
+
+	return c.JSON(bulkResp)
+}
+
+// GetQueueStatus obtiene el estado de la cola de mensajes
+func (h *WhatsAppHandler) GetQueueStatus(c *fiber.Ctx) error {
+	resp, err := h.httpClient.Get(h.serviceURL + "/queue/status")
+	if err != nil {
+		log.Printf("Error conectando con servicio WhatsApp: %v", err)
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error":   "Servicio de WhatsApp no disponible",
+			"details": err.Error(),
+		})
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error leyendo respuesta",
+		})
+	}
+
+	var queueStatus map[string]interface{}
+	if err := json.Unmarshal(body, &queueStatus); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error parseando respuesta",
+		})
+	}
+
+	return c.JSON(queueStatus)
+}
+
+// CancelQueue cancela todos los mensajes en cola
+func (h *WhatsAppHandler) CancelQueue(c *fiber.Ctx) error {
+	resp, err := h.httpClient.Post(h.serviceURL+"/queue/cancel", "application/json", nil)
+	if err != nil {
+		log.Printf("Error conectando con servicio WhatsApp: %v", err)
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error":   "Servicio de WhatsApp no disponible",
+			"details": err.Error(),
+		})
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error leyendo respuesta",
+		})
+	}
+
+	var cancelResp map[string]interface{}
+	if err := json.Unmarshal(body, &cancelResp); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error parseando respuesta",
+		})
+	}
+
+	return c.JSON(cancelResp)
+}
+
+// GetServiceURL retorna la URL del servicio para uso en el proxy WebSocket
+func (h *WhatsAppHandler) GetServiceURL() string {
+	return h.serviceURL
+}

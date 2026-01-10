@@ -821,7 +821,7 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
           </div>
         </div>
 
-        {/* Acciones moderaci�n */}
+        {/* Acciones moderacion */}
         {canModerate && !duda.respuesta && (
           <div className="flex items-center gap-2">
             <button
@@ -870,7 +870,6 @@ function DudaCard({ duda, isAutoridad, autoridadId, onUpdated }) {
                 </span>
                 {responderName && (
                   <>
-                    <span>•</span>
                     <span className="inline-flex items-center gap-1">
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                       {responderName}
